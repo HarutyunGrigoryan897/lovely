@@ -1,113 +1,88 @@
-(function() {
-  // Mapping of nav items to paths
-  const navMap = {
-    'Home': '/',
-    'Catalog': '/catalog/',
-    'Cart': '/cart/',
-    'Account': '/account/'
-  };
+// script.js
 
-  // Set up navigation click events
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('button').forEach(btn => {
-      const span = btn.querySelector('span.text-xs');
-      if (span) {
-        const dest = navMap[span.textContent.trim()];
-        if (dest) {
-          btn.addEventListener('click', () => {
-            window.location.href = dest;
-          });
-        }
-      }
-    });
-
-    // Initialize cart UI and events
-    updateCartUI(loadCart());
-    initAddToCart();
-  });
-
-  // Generic toggle elements using data-toggle-target
-  document.addEventListener('click', (event) => {
-    const toggleEl = event.target.closest('[data-toggle-target]');
-    if (toggleEl) {
-      const selector = toggleEl.getAttribute('data-toggle-target');
-      const target = document.querySelector(selector);
-      if (target) {
-        target.classList.toggle('hidden');
-      }
+// -------------------- NAVIGATION --------------------
+document.querySelectorAll("nav a").forEach(link => {
+  link.addEventListener("click", e => {
+    e.preventDefault();
+    const href = link.getAttribute("href");
+    if (href) {
+      window.location.href = href; // navigate to correct page
     }
   });
+});
 
-  // Load cart from localStorage
-  function loadCart() {
-    try {
-      return JSON.parse(localStorage.getItem('cartItems')) || [];
-    } catch (e) {
-      return [];
-    }
-  }
+// -------------------- MOBILE MENU TOGGLE --------------------
+const menuBtn = document.querySelector(".menu-toggle");
+const navMenu = document.querySelector("nav ul");
 
-  // Save cart to localStorage and update UI
-  function saveCart(items) {
-    localStorage.setItem('cartItems', JSON.stringify(items));
-    updateCartUI(items);
-  }
+if (menuBtn && navMenu) {
+  menuBtn.addEventListener("click", () => {
+    navMenu.classList.toggle("open"); // toggle menu open/close
+  });
+}
 
-  // Add item to cart
-  function addToCart(item) {
-    const items = loadCart();
-    const existing = items.find(it => it.id === item.id);
+// -------------------- CART LOGIC --------------------
+let cart = [];
+
+// Add to cart buttons
+document.querySelectorAll(".add-to-cart").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const productId = btn.dataset.id;
+    const productName = btn.dataset.name;
+    const productPrice = parseFloat(btn.dataset.price);
+
+    const existing = cart.find(item => item.id === productId);
     if (existing) {
       existing.qty += 1;
     } else {
-      items.push({ id: item.id, name: item.name, price: item.price, qty: 1 });
+      cart.push({ id: productId, name: productName, price: productPrice, qty: 1 });
     }
-    saveCart(items);
-  }
+    updateCartUI();
+  });
+});
 
-  // Update cart UI by modifying cart text
-  function updateCartUI(items) {
-    const count = items.reduce((sum, it) => sum + it.qty, 0);
-    document.querySelectorAll('span.text-xs').forEach(span => {
-      if (span.textContent.trim().startsWith('Cart')) {
-        span.textContent = 'Cart' + (count > 0 ? ' (' + count + ')' : '');
-      }
-    });
-  }
+// Cart UI update
+function updateCartUI() {
+  const cartContainer = document.querySelector(".cart-items");
+  const totalEl = document.querySelector(".cart-total");
 
-  // Initialize add-to-cart event listeners
-  function initAddToCart() {
-    // Buttons with data-add-to-cart attribute
-    document.querySelectorAll('[data-add-to-cart]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const parent = btn.closest('[data-product-id]');
-        if (parent) {
-          const item = {
-            id: parent.dataset.productId,
-            name: parent.dataset.productName || parent.querySelector('[data-product-name]')?.textContent || 'Unknown',
-            price: parseFloat(parent.dataset.productPrice) || 0
-          };
-          addToCart(item);
-        }
-      });
+  if (!cartContainer || !totalEl) return;
+
+  cartContainer.innerHTML = "";
+  let total = 0;
+
+  cart.forEach(item => {
+    const row = document.createElement("div");
+    row.classList.add("cart-item");
+    row.innerHTML = `
+      <span>${item.name} x ${item.qty}</span>
+      <span>$${(item.price * item.qty).toFixed(2)}</span>
+      <button class="remove" data-id="${item.id}">Remove</button>
+    `;
+    cartContainer.appendChild(row);
+
+    total += item.price * item.qty;
+  });
+
+  totalEl.textContent = `$${total.toFixed(2)}`;
+
+  // Remove item handler
+  document.querySelectorAll(".cart-item .remove").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      cart = cart.filter(item => item.id !== id);
+      updateCartUI();
     });
-    // Fallback: buttons with text 'Add to cart'
-    document.querySelectorAll('button').forEach(btn => {
-      if (/add to cart/i.test(btn.textContent)) {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          const parent = btn.closest('[data-product-id]');
-          if (parent) {
-            const item = {
-              id: parent.dataset.productId,
-              name: parent.dataset.productName || parent.querySelector('[data-product-name]')?.textContent || 'Unknown',
-              price: parseFloat(parent.dataset.productPrice) || 0
-            };
-            addToCart(item);
-          }
-        });
-      }
-    });
-  }
-})();
+  });
+}
+
+// -------------------- TOGGLE PANELS --------------------
+document.querySelectorAll("[data-toggle]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const targetId = btn.dataset.toggle;
+    const target = document.getElementById(targetId);
+    if (target) {
+      target.classList.toggle("open");
+    }
+  });
+});
