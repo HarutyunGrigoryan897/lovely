@@ -14,709 +14,10 @@
     <meta content="summary_large_image" name="twitter:card">
     <meta content="@lovable_dev" name="twitter:site">
     <meta content="https://lovable.dev/opengraph-image-p98pqg.png" name="twitter:image">
-    <script type="text/javascript">
-      window["__REACT_QUERY_STATE__"] = {
-        "mutations": [],
-        "queries": []
-      };
-    </script>
-    <script type="module" src="./assets/index-BoPzykpR.js"></script>
-    <script type="module" src="./script.js"></script>
+  <script type="text/javascript" src="./assets/script.js"></script>
 
-    <link href="./assets/index-B7K668bC.css" rel="stylesheet">
-    <link href="./assets/sonner-toaster.css" rel="stylesheet">
-    <style type="text/css">
-      :where([data-sonner-toaster][dir=ltr]),
-      :where(html[dir=ltr]) {
-        --toast-icon-margin-start: -3px;
-        --toast-icon-margin-end: 4px;
-        --toast-svg-margin-start: -1px;
-        --toast-svg-margin-end: 0px;
-        --toast-button-margin-start: auto;
-        --toast-button-margin-end: 0;
-        --toast-close-button-start: 0;
-        --toast-close-button-end: unset;
-        --toast-close-button-transform: translate(-35%, -35%)
-      }
-
-      :where([data-sonner-toaster][dir=rtl]),
-      :where(html[dir=rtl]) {
-        --toast-icon-margin-start: 4px;
-        --toast-icon-margin-end: -3px;
-        --toast-svg-margin-start: 0px;
-        --toast-svg-margin-end: -1px;
-        --toast-button-margin-start: 0;
-        --toast-button-margin-end: auto;
-        --toast-close-button-start: unset;
-        --toast-close-button-end: 0;
-        --toast-close-button-transform: translate(35%, -35%)
-      }
-
-      :where([data-sonner-toaster]) {
-        position: fixed;
-        width: var(--width);
-        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
-        --gray1: hsl(0, 0%, 99%);
-        --gray2: hsl(0, 0%, 97.3%);
-        --gray3: hsl(0, 0%, 95.1%);
-        --gray4: hsl(0, 0%, 93%);
-        --gray5: hsl(0, 0%, 90.9%);
-        --gray6: hsl(0, 0%, 88.7%);
-        --gray7: hsl(0, 0%, 85.8%);
-        --gray8: hsl(0, 0%, 78%);
-        --gray9: hsl(0, 0%, 56.1%);
-        --gray10: hsl(0, 0%, 52.3%);
-        --gray11: hsl(0, 0%, 43.5%);
-        --gray12: hsl(0, 0%, 9%);
-        --border-radius: 8px;
-        box-sizing: border-box;
-        padding: 0;
-        margin: 0;
-        list-style: none;
-        outline: 0;
-        z-index: 999999999;
-        transition: transform .4s ease
-      }
-
-      :where([data-sonner-toaster][data-lifted=true]) {
-        transform: translateY(-10px)
-      }
-
-      @media (hover:none) and (pointer:coarse) {
-        :where([data-sonner-toaster][data-lifted=true]) {
-          transform: none
-        }
-      }
-
-      :where([data-sonner-toaster][data-x-position=right]) {
-        right: var(--offset-right)
-      }
-
-      :where([data-sonner-toaster][data-x-position=left]) {
-        left: var(--offset-left)
-      }
-
-      :where([data-sonner-toaster][data-x-position=center]) {
-        left: 50%;
-        transform: translate(-50%)
-      }
-
-      :where([data-sonner-toaster][data-y-position=top]) {
-        top: var(--offset-top)
-      }
-
-      :where([data-sonner-toaster][data-y-position=bottom]) {
-        bottom: var(--offset-bottom)
-      }
-
-      :where([data-sonner-toast]) {
-        --y: translateY(100%);
-        --lift-amount: calc(var(--lift) * var(--gap));
-        z-index: var(--z-index);
-        position: absolute;
-        opacity: 0;
-        transform: var(--y);
-        filter: blur(0);
-        touch-action: none;
-        transition: transform .4s, opacity .4s, height .4s, box-shadow .2s;
-        box-sizing: border-box;
-        outline: 0;
-        overflow-wrap: anywhere
-      }
-
-      :where([data-sonner-toast][data-styled=true]) {
-        padding: 16px;
-        background: var(--normal-bg);
-        border: 1px solid var(--normal-border);
-        color: var(--normal-text);
-        border-radius: var(--border-radius);
-        box-shadow: 0 4px 12px #0000001a;
-        width: var(--width);
-        font-size: 13px;
-        display: flex;
-        align-items: center;
-        gap: 6px
-      }
-
-      :where([data-sonner-toast]:focus-visible) {
-        box-shadow: 0 4px 12px #0000001a, 0 0 0 2px #0003
-      }
-
-      :where([data-sonner-toast][data-y-position=top]) {
-        top: 0;
-        --y: translateY(-100%);
-        --lift: 1;
-        --lift-amount: calc(1 * var(--gap))
-      }
-
-      :where([data-sonner-toast][data-y-position=bottom]) {
-        bottom: 0;
-        --y: translateY(100%);
-        --lift: -1;
-        --lift-amount: calc(var(--lift) * var(--gap))
-      }
-
-      :where([data-sonner-toast]) :where([data-description]) {
-        font-weight: 400;
-        line-height: 1.4;
-        color: inherit
-      }
-
-      :where([data-sonner-toast]) :where([data-title]) {
-        font-weight: 500;
-        line-height: 1.5;
-        color: inherit
-      }
-
-      :where([data-sonner-toast]) :where([data-icon]) {
-        display: flex;
-        height: 16px;
-        width: 16px;
-        position: relative;
-        justify-content: flex-start;
-        align-items: center;
-        flex-shrink: 0;
-        margin-left: var(--toast-icon-margin-start);
-        margin-right: var(--toast-icon-margin-end)
-      }
-
-      :where([data-sonner-toast][data-promise=true]) :where([data-icon])>svg {
-        opacity: 0;
-        transform: scale(.8);
-        transform-origin: center;
-        animation: sonner-fade-in .3s ease forwards
-      }
-
-      :where([data-sonner-toast]) :where([data-icon])>* {
-        flex-shrink: 0
-      }
-
-      :where([data-sonner-toast]) :where([data-icon]) svg {
-        margin-left: var(--toast-svg-margin-start);
-        margin-right: var(--toast-svg-margin-end)
-      }
-
-      :where([data-sonner-toast]) :where([data-content]) {
-        display: flex;
-        flex-direction: column;
-        gap: 2px
-      }
-
-      [data-sonner-toast][data-styled=true] [data-button] {
-        border-radius: 4px;
-        padding-left: 8px;
-        padding-right: 8px;
-        height: 24px;
-        font-size: 12px;
-        color: var(--normal-bg);
-        background: var(--normal-text);
-        margin-left: var(--toast-button-margin-start);
-        margin-right: var(--toast-button-margin-end);
-        border: none;
-        cursor: pointer;
-        outline: 0;
-        display: flex;
-        align-items: center;
-        flex-shrink: 0;
-        transition: opacity .4s, box-shadow .2s
-      }
-
-      :where([data-sonner-toast]) :where([data-button]):focus-visible {
-        box-shadow: 0 0 0 2px #0006
-      }
-
-      :where([data-sonner-toast]) :where([data-button]):first-of-type {
-        margin-left: var(--toast-button-margin-start);
-        margin-right: var(--toast-button-margin-end)
-      }
-
-      :where([data-sonner-toast]) :where([data-cancel]) {
-        color: var(--normal-text);
-        background: rgba(0, 0, 0, .08)
-      }
-
-      :where([data-sonner-toast][data-theme=dark]) :where([data-cancel]) {
-        background: rgba(255, 255, 255, .3)
-      }
-
-      :where([data-sonner-toast]) :where([data-close-button]) {
-        position: absolute;
-        left: var(--toast-close-button-start);
-        right: var(--toast-close-button-end);
-        top: 0;
-        height: 20px;
-        width: 20px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 0;
-        color: var(--gray12);
-        border: 1px solid var(--gray4);
-        transform: var(--toast-close-button-transform);
-        border-radius: 50%;
-        cursor: pointer;
-        z-index: 1;
-        transition: opacity .1s, background .2s, border-color .2s
-      }
-
-      [data-sonner-toast] [data-close-button] {
-        background: var(--gray1)
-      }
-
-      :where([data-sonner-toast]) :where([data-close-button]):focus-visible {
-        box-shadow: 0 4px 12px #0000001a, 0 0 0 2px #0003
-      }
-
-      :where([data-sonner-toast]) :where([data-disabled=true]) {
-        cursor: not-allowed
-      }
-
-      :where([data-sonner-toast]):hover :where([data-close-button]):hover {
-        background: var(--gray2);
-        border-color: var(--gray5)
-      }
-
-      :where([data-sonner-toast][data-swiping=true]):before {
-        content: "";
-        position: absolute;
-        left: -50%;
-        right: -50%;
-        height: 100%;
-        z-index: -1
-      }
-
-      :where([data-sonner-toast][data-y-position=top][data-swiping=true]):before {
-        bottom: 50%;
-        transform: scaleY(3) translateY(50%)
-      }
-
-      :where([data-sonner-toast][data-y-position=bottom][data-swiping=true]):before {
-        top: 50%;
-        transform: scaleY(3) translateY(-50%)
-      }
-
-      :where([data-sonner-toast][data-swiping=false][data-removed=true]):before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        transform: scaleY(2)
-      }
-
-      :where([data-sonner-toast]):after {
-        content: "";
-        position: absolute;
-        left: 0;
-        height: calc(var(--gap) + 1px);
-        bottom: 100%;
-        width: 100%
-      }
-
-      :where([data-sonner-toast][data-mounted=true]) {
-        --y: translateY(0);
-        opacity: 1
-      }
-
-      :where([data-sonner-toast][data-expanded=false][data-front=false]) {
-        --scale: var(--toasts-before) * .05 + 1;
-        --y: translateY(calc(var(--lift-amount) * var(--toasts-before))) scale(calc(-1 * var(--scale)));
-        height: var(--front-toast-height)
-      }
-
-      :where([data-sonner-toast])>* {
-        transition: opacity .4s
-      }
-
-      :where([data-sonner-toast][data-expanded=false][data-front=false][data-styled=true])>* {
-        opacity: 0
-      }
-
-      :where([data-sonner-toast][data-visible=false]) {
-        opacity: 0;
-        pointer-events: none
-      }
-
-      :where([data-sonner-toast][data-mounted=true][data-expanded=true]) {
-        --y: translateY(calc(var(--lift) * var(--offset)));
-        height: var(--initial-height)
-      }
-
-      :where([data-sonner-toast][data-removed=true][data-front=true][data-swipe-out=false]) {
-        --y: translateY(calc(var(--lift) * -100%));
-        opacity: 0
-      }
-
-      :where([data-sonner-toast][data-removed=true][data-front=false][data-swipe-out=false][data-expanded=true]) {
-        --y: translateY(calc(var(--lift) * var(--offset) + var(--lift) * -100%));
-        opacity: 0
-      }
-
-      :where([data-sonner-toast][data-removed=true][data-front=false][data-swipe-out=false][data-expanded=false]) {
-        --y: translateY(40%);
-        opacity: 0;
-        transition: transform .5s, opacity .2s
-      }
-
-      :where([data-sonner-toast][data-removed=true][data-front=false]):before {
-        height: calc(var(--initial-height) + 20%)
-      }
-
-      [data-sonner-toast][data-swiping=true] {
-        transform: var(--y) translateY(var(--swipe-amount-y, 0)) translate(var(--swipe-amount-x, 0));
-        transition: none
-      }
-
-      [data-sonner-toast][data-swiped=true] {
-        user-select: none
-      }
-
-      [data-sonner-toast][data-swipe-out=true][data-y-position=bottom],
-      [data-sonner-toast][data-swipe-out=true][data-y-position=top] {
-        animation-duration: .2s;
-        animation-timing-function: ease-out;
-        animation-fill-mode: forwards
-      }
-
-      [data-sonner-toast][data-swipe-out=true][data-swipe-direction=left] {
-        animation-name: swipe-out-left
-      }
-
-      [data-sonner-toast][data-swipe-out=true][data-swipe-direction=right] {
-        animation-name: swipe-out-right
-      }
-
-      [data-sonner-toast][data-swipe-out=true][data-swipe-direction=up] {
-        animation-name: swipe-out-up
-      }
-
-      [data-sonner-toast][data-swipe-out=true][data-swipe-direction=down] {
-        animation-name: swipe-out-down
-      }
-
-      @keyframes swipe-out-left {
-        0% {
-          transform: var(--y) translate(var(--swipe-amount-x));
-          opacity: 1
-        }
-
-        to {
-          transform: var(--y) translate(calc(var(--swipe-amount-x) - 100%));
-          opacity: 0
-        }
-      }
-
-      @keyframes swipe-out-right {
-        0% {
-          transform: var(--y) translate(var(--swipe-amount-x));
-          opacity: 1
-        }
-
-        to {
-          transform: var(--y) translate(calc(var(--swipe-amount-x) + 100%));
-          opacity: 0
-        }
-      }
-
-      @keyframes swipe-out-up {
-        0% {
-          transform: var(--y) translateY(var(--swipe-amount-y));
-          opacity: 1
-        }
-
-        to {
-          transform: var(--y) translateY(calc(var(--swipe-amount-y) - 100%));
-          opacity: 0
-        }
-      }
-
-      @keyframes swipe-out-down {
-        0% {
-          transform: var(--y) translateY(var(--swipe-amount-y));
-          opacity: 1
-        }
-
-        to {
-          transform: var(--y) translateY(calc(var(--swipe-amount-y) + 100%));
-          opacity: 0
-        }
-      }
-
-      @media (max-width:600px) {
-        [data-sonner-toaster] {
-          position: fixed;
-          right: var(--mobile-offset-right);
-          left: var(--mobile-offset-left);
-          width: 100%
-        }
-
-        [data-sonner-toaster][dir=rtl] {
-          left: calc(var(--mobile-offset-left) * -1)
-        }
-
-        [data-sonner-toaster] [data-sonner-toast] {
-          left: 0;
-          right: 0;
-          width: calc(100% - var(--mobile-offset-left) * 2)
-        }
-
-        [data-sonner-toaster][data-x-position=left] {
-          left: var(--mobile-offset-left)
-        }
-
-        [data-sonner-toaster][data-y-position=bottom] {
-          bottom: var(--mobile-offset-bottom)
-        }
-
-        [data-sonner-toaster][data-y-position=top] {
-          top: var(--mobile-offset-top)
-        }
-
-        [data-sonner-toaster][data-x-position=center] {
-          left: var(--mobile-offset-left);
-          right: var(--mobile-offset-right);
-          transform: none
-        }
-      }
-
-      [data-sonner-toaster][data-theme=light] {
-        --normal-bg: #fff;
-        --normal-border: var(--gray4);
-        --normal-text: var(--gray12);
-        --success-bg: hsl(143, 85%, 96%);
-        --success-border: hsl(145, 92%, 91%);
-        --success-text: hsl(140, 100%, 27%);
-        --info-bg: hsl(208, 100%, 97%);
-        --info-border: hsl(221, 91%, 91%);
-        --info-text: hsl(210, 92%, 45%);
-        --warning-bg: hsl(49, 100%, 97%);
-        --warning-border: hsl(49, 91%, 91%);
-        --warning-text: hsl(31, 92%, 45%);
-        --error-bg: hsl(359, 100%, 97%);
-        --error-border: hsl(359, 100%, 94%);
-        --error-text: hsl(360, 100%, 45%)
-      }
-
-      [data-sonner-toaster][data-theme=light] [data-sonner-toast][data-invert=true] {
-        --normal-bg: #000;
-        --normal-border: hsl(0, 0%, 20%);
-        --normal-text: var(--gray1)
-      }
-
-      [data-sonner-toaster][data-theme=dark] [data-sonner-toast][data-invert=true] {
-        --normal-bg: #fff;
-        --normal-border: var(--gray3);
-        --normal-text: var(--gray12)
-      }
-
-      [data-sonner-toaster][data-theme=dark] {
-        --normal-bg: #000;
-        --normal-bg-hover: hsl(0, 0%, 12%);
-        --normal-border: hsl(0, 0%, 20%);
-        --normal-border-hover: hsl(0, 0%, 25%);
-        --normal-text: var(--gray1);
-        --success-bg: hsl(150, 100%, 6%);
-        --success-border: hsl(147, 100%, 12%);
-        --success-text: hsl(150, 86%, 65%);
-        --info-bg: hsl(215, 100%, 6%);
-        --info-border: hsl(223, 100%, 12%);
-        --info-text: hsl(216, 87%, 65%);
-        --warning-bg: hsl(64, 100%, 6%);
-        --warning-border: hsl(60, 100%, 12%);
-        --warning-text: hsl(46, 87%, 65%);
-        --error-bg: hsl(358, 76%, 10%);
-        --error-border: hsl(357, 89%, 16%);
-        --error-text: hsl(358, 100%, 81%)
-      }
-
-      [data-sonner-toaster][data-theme=dark] [data-sonner-toast] [data-close-button] {
-        background: var(--normal-bg);
-        border-color: var(--normal-border);
-        color: var(--normal-text)
-      }
-
-      [data-sonner-toaster][data-theme=dark] [data-sonner-toast] [data-close-button]:hover {
-        background: var(--normal-bg-hover);
-        border-color: var(--normal-border-hover)
-      }
-
-      [data-rich-colors=true][data-sonner-toast][data-type=success],
-      [data-rich-colors=true][data-sonner-toast][data-type=success] [data-close-button] {
-        background: var(--success-bg);
-        border-color: var(--success-border);
-        color: var(--success-text)
-      }
-
-      [data-rich-colors=true][data-sonner-toast][data-type=info],
-      [data-rich-colors=true][data-sonner-toast][data-type=info] [data-close-button] {
-        background: var(--info-bg);
-        border-color: var(--info-border);
-        color: var(--info-text)
-      }
-
-      [data-rich-colors=true][data-sonner-toast][data-type=warning],
-      [data-rich-colors=true][data-sonner-toast][data-type=warning] [data-close-button] {
-        background: var(--warning-bg);
-        border-color: var(--warning-border);
-        color: var(--warning-text)
-      }
-
-      [data-rich-colors=true][data-sonner-toast][data-type=error],
-      [data-rich-colors=true][data-sonner-toast][data-type=error] [data-close-button] {
-        background: var(--error-bg);
-        border-color: var(--error-border);
-        color: var(--error-text)
-      }
-
-      .sonner-loading-wrapper {
-        --size: 16px;
-        height: var(--size);
-        width: var(--size);
-        position: absolute;
-        inset: 0;
-        z-index: 10
-      }
-
-      .sonner-loading-wrapper[data-visible=false] {
-        transform-origin: center;
-        animation: sonner-fade-out .2s ease forwards
-      }
-
-      .sonner-spinner {
-        position: relative;
-        top: 50%;
-        left: 50%;
-        height: var(--size);
-        width: var(--size)
-      }
-
-      .sonner-loading-bar {
-        animation: sonner-spin 1.2s linear infinite;
-        background: var(--gray11);
-        border-radius: 6px;
-        height: 8%;
-        left: -10%;
-        position: absolute;
-        top: -3.9%;
-        width: 24%
-      }
-
-      .sonner-loading-bar:nth-child(1) {
-        animation-delay: -1.2s;
-        transform: rotate(.0001deg) translate(146%)
-      }
-
-      .sonner-loading-bar:nth-child(2) {
-        animation-delay: -1.1s;
-        transform: rotate(30deg) translate(146%)
-      }
-
-      .sonner-loading-bar:nth-child(3) {
-        animation-delay: -1s;
-        transform: rotate(60deg) translate(146%)
-      }
-
-      .sonner-loading-bar:nth-child(4) {
-        animation-delay: -.9s;
-        transform: rotate(90deg) translate(146%)
-      }
-
-      .sonner-loading-bar:nth-child(5) {
-        animation-delay: -.8s;
-        transform: rotate(120deg) translate(146%)
-      }
-
-      .sonner-loading-bar:nth-child(6) {
-        animation-delay: -.7s;
-        transform: rotate(150deg) translate(146%)
-      }
-
-      .sonner-loading-bar:nth-child(7) {
-        animation-delay: -.6s;
-        transform: rotate(180deg) translate(146%)
-      }
-
-      .sonner-loading-bar:nth-child(8) {
-        animation-delay: -.5s;
-        transform: rotate(210deg) translate(146%)
-      }
-
-      .sonner-loading-bar:nth-child(9) {
-        animation-delay: -.4s;
-        transform: rotate(240deg) translate(146%)
-      }
-
-      .sonner-loading-bar:nth-child(10) {
-        animation-delay: -.3s;
-        transform: rotate(270deg) translate(146%)
-      }
-
-      .sonner-loading-bar:nth-child(11) {
-        animation-delay: -.2s;
-        transform: rotate(300deg) translate(146%)
-      }
-
-      .sonner-loading-bar:nth-child(12) {
-        animation-delay: -.1s;
-        transform: rotate(330deg) translate(146%)
-      }
-
-      @keyframes sonner-fade-in {
-        0% {
-          opacity: 0;
-          transform: scale(.8)
-        }
-
-        to {
-          opacity: 1;
-          transform: scale(1)
-        }
-      }
-
-      @keyframes sonner-fade-out {
-        0% {
-          opacity: 1;
-          transform: scale(1)
-        }
-
-        to {
-          opacity: 0;
-          transform: scale(.8)
-        }
-      }
-
-      @keyframes sonner-spin {
-        0% {
-          opacity: 1
-        }
-
-        to {
-          opacity: .15
-        }
-      }
-
-      @media (prefers-reduced-motion) {
-
-        .sonner-loading-bar,
-        [data-sonner-toast],
-        [data-sonner-toast]>* {
-          transition: none !important;
-          animation: none !important
-        }
-      }
-
-      .sonner-loader {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        transform-origin: center;
-        transition: opacity .2s, transform .2s
-      }
-
-      .sonner-loader[data-visible=false] {
-        opacity: 0;
-        transform: scale(.8) translate(-50%, -50%)
-      }
-    </style>
+  <link href="./assets/index.css" rel="stylesheet">
+  <link href="./assets/sonner-toaster.css" rel="stylesheet">
   </head>
   <body>
     <div id="root">
@@ -726,276 +27,82 @@
       <section aria-atomic="false" aria-label="Notifications alt+T" aria-live="polite" aria-relevant="additions text" tabindex="-1"></section>
       <div class="min-h-screen bg-background font-luxury">
         <main class="pb-16">
-          <div class="p-4 space-y-6">
-            <div class="space-y-4">
-              <h1 class="text-3xl font-bold text-luxury-black">Watch Collection</h1>
-              <div class="relative">
-                <svg class="lucide lucide-search absolute left-3 top-1/2 transform -translate-y-1/2 text-luxury-gray-dark" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.3-4.3"></path>
-                </svg>
-                <input class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-10 border-luxury-gray focus:border-luxury-gold focus:ring-luxury-gold" placeholder="Search watches..." value="">
+          <div class="px-4 py-6 max-w-7xl mx-auto">
+            <div class="space-y-6">
+              <div class="space-y-4">
+                <h1 class="text-3xl font-bold text-luxury-black">Watch Collection</h1>
+                <div class="relative">
+                  <svg class="lucide lucide-search absolute left-3 top-1/2 transform -translate-y-1/2 text-luxury-gray-dark" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                  </svg>
+                  <input id="search-input" class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-10 border-luxury-gray focus:border-luxury-gold focus:ring-luxury-gold" placeholder="Search watches..." value="">
+                </div>
               </div>
-              <div class="flex gap-3 overflow-x-auto pb-2">
-                <button class="flex h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-40 border-luxury-gray" aria-autocomplete="none" aria-controls="radix-:r0:" aria-expanded="false" data-state="closed" dir="ltr" role="combobox" type="button">
-                  <svg class="lucide lucide-filter mr-2" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
-                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                  </svg>
-                  <span style="pointer-events:none">All Brands</span>
-                  <svg class="lucide lucide-chevron-down h-4 w-4 opacity-50" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="m6 9 6 6 6-6"></path>
-                  </svg>
-                </button>
-                <button class="flex h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-40 border-luxury-gray" aria-autocomplete="none" aria-controls="radix-:r1:" aria-expanded="false" data-state="closed" dir="ltr" role="combobox" type="button">
-                  <span style="pointer-events:none">Featured</span>
-                  <svg class="lucide lucide-chevron-down h-4 w-4 opacity-50" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="m6 9 6 6 6-6"></path>
-                  </svg>
-                </button>
+              
+              <!-- Filter Section -->
+              <div class="flex flex-wrap gap-3 mb-6">
+                <div class="relative">
+                  <button id="brand-filter" class="flex h-10 items-center justify-between rounded-md border bg-luxury-white hover:bg-luxury-gray-light px-4 py-2 text-sm font-medium border-luxury-gray transition-colors duration-200 min-w-[140px]">
+                    <div class="flex items-center">
+                      <svg class="lucide lucide-filter mr-2" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                      </svg>
+                      <span id="brand-filter-text">All Brands</span>
+                    </div>
+                    <svg class="lucide lucide-chevron-down h-4 w-4 opacity-50 transition-transform duration-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="m6 9 6 6 6-6"></path>
+                    </svg>
+                  </button>
+                  <div id="brand-dropdown" class="hidden absolute top-full left-0 z-50 min-w-[180px] rounded-lg border bg-luxury-white shadow-xl mt-2 overflow-hidden">
+                    <div class="py-1">
+                      <div class="brand-option px-4 py-2 hover:bg-luxury-gray text-sm font-medium cursor-pointer transition-colors duration-150" data-brand="all">All Brands</div>
+                      <div class="brand-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-brand="Rolex">Rolex</div>
+                      <div class="brand-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-brand="Omega">Omega</div>
+                      <div class="brand-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-brand="Patek Philippe">Patek Philippe</div>
+                      <div class="brand-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-brand="Audemars Piguet">Audemars Piguet</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="relative">
+                  <button id="price-filter" class="flex h-10 items-center justify-between rounded-md border bg-luxury-white hover:bg-luxury-gray-light px-4 py-2 text-sm font-medium border-luxury-gray transition-colors duration-200 min-w-[140px]">
+                    <div class="flex items-center">
+                      <svg class="lucide lucide-dollar-sign mr-2" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="12" x2="12" y1="2" y2="22"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                      </svg>
+                      <span id="price-filter-text">All Prices</span>
+                    </div>
+                    <svg class="lucide lucide-chevron-down h-4 w-4 opacity-50 transition-transform duration-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="m6 9 6 6 6-6"></path>
+                    </svg>
+                  </button>
+                  <div id="price-dropdown" class="hidden absolute top-full left-0 z-50 min-w-[200px] rounded-lg border bg-luxury-white shadow-xl mt-2 overflow-hidden">
+                    <div class="py-1">
+                      <div class="price-option px-4 py-2 hover:bg-luxury-gray text-sm font-medium cursor-pointer transition-colors duration-150" data-price="all">All Prices</div>
+                      <div class="price-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-price="0-10000">Under $10,000</div>
+                      <div class="price-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-price="10000-25000">$10,000 - $25,000</div>
+                      <div class="price-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-price="25000-50000">$25,000 - $50,000</div>
+                      <div class="price-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-price="50000+">$50,000+</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <p class="text-luxury-gray-dark">6 watches found</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="rounded-lg border bg-card text-card-foreground shadow-sm group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-card hover:-translate-y-1">
-                <a href="./watch.html">
-                  <div class="relative">
-                    <img alt="Royal Oak Gold" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="./assets/watch-1-L_BZsghZ.jpg">
-                    <button class="absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 bg-luxury-white/90 text-luxury-gray-dark hover:text-luxury-gold">
-                      <svg class="lucide lucide-heart" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </a>
-                <div class="p-4">
-                  <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm text-luxury-gold font-medium">Audemars Piguet</span>
-                    <div class="flex items-center">
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                    </div>
-                  </div>
-                  <h3 class="font-semibold text-luxury-black mb-2 group-hover:text-luxury-gold transition-colors duration-200">Royal Oak Gold</h3>
-                  <div class="flex items-center justify-between">
-                    <p class="text-xl font-bold text-luxury-black">$45,000</p>
-                    <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-9 rounded-md px-3 bg-luxury-black hover:bg-luxury-gold hover:text-luxury-black text-luxury-white transition-all duration-200">Add to Cart</button>
-                  </div>
-                </div>
-              </div>
-              <div class="rounded-lg border bg-card text-card-foreground shadow-sm group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-card hover:-translate-y-1">
-                <a href="./watch.html">
-                  <div class="relative">
-                    <img alt="Royal Oak Gold" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="./assets/watch-1-L_BZsghZ.jpg">
-                    <button class="absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 bg-luxury-white/90 text-luxury-gray-dark hover:text-luxury-gold">
-                      <svg class="lucide lucide-heart" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </a>
-                <div class="p-4">
-                  <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm text-luxury-gold font-medium">Rolex</span>
-                    <div class="flex items-center">
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                    </div>
-                  </div>
-                  <h3 class="font-semibold text-luxury-black mb-2 group-hover:text-luxury-gold transition-colors duration-200">Submariner</h3>
-                  <div class="flex items-center justify-between">
-                    <p class="text-xl font-bold text-luxury-black">$12,500</p>
-                    <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-9 rounded-md px-3 bg-luxury-black hover:bg-luxury-gold hover:text-luxury-black text-luxury-white transition-all duration-200">Add to Cart</button>
-                  </div>
-                </div>
-              </div>
-              <div class="rounded-lg border bg-card text-card-foreground shadow-sm group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-card hover:-translate-y-1">
-                <a href="./watch.html">
-                  <div class="relative">
-                    <img alt="Royal Oak Gold" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="./assets/watch-1-L_BZsghZ.jpg">
-                    <button class="absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 bg-luxury-white/90 text-luxury-gray-dark hover:text-luxury-gold">
-                      <svg class="lucide lucide-heart" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </a>
-                <div class="p-4">
-                  <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm text-luxury-gold font-medium">Omega</span>
-                    <div class="flex items-center">
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                    </div>
-                  </div>
-                  <h3 class="font-semibold text-luxury-black mb-2 group-hover:text-luxury-gold transition-colors duration-200">Speedmaster</h3>
-                  <div class="flex items-center justify-between">
-                    <p class="text-xl font-bold text-luxury-black">$8,900</p>
-                    <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-9 rounded-md px-3 bg-luxury-black hover:bg-luxury-gold hover:text-luxury-black text-luxury-white transition-all duration-200">Add to Cart</button>
-                  </div>
-                </div>
-              </div>
-              <div class="rounded-lg border bg-card text-card-foreground shadow-sm group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-card hover:-translate-y-1">
-                <a href="./watch.html">
-                  <div class="relative">
-                    <img alt="Royal Oak Gold" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="./assets/watch-1-L_BZsghZ.jpg">
-                    <button class="absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 bg-luxury-white/90 text-luxury-gray-dark hover:text-luxury-gold">
-                      <svg class="lucide lucide-heart" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </a>
-                <div class="p-4">
-                  <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm text-luxury-gold font-medium">Patek Philippe</span>
-                    <div class="flex items-center">
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                    </div>
-                  </div>
-                  <h3 class="font-semibold text-luxury-black mb-2 group-hover:text-luxury-gold transition-colors duration-200">Nautilus</h3>
-                  <div class="flex items-center justify-between">
-                    <p class="text-xl font-bold text-luxury-black">$75,000</p>
-                    <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-9 rounded-md px-3 bg-luxury-black hover:bg-luxury-gold hover:text-luxury-black text-luxury-white transition-all duration-200">Add to Cart</button>
-                  </div>
-                </div>
-              </div>
-              <div class="rounded-lg border bg-card text-card-foreground shadow-sm group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-card hover:-translate-y-1">
-                <a href="./watch.html">
-                  <div class="relative">
-                    <img alt="Royal Oak Gold" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="./assets/watch-1-L_BZsghZ.jpg">
-                    <button class="absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 bg-luxury-white/90 text-luxury-gray-dark hover:text-luxury-gold">
-                      <svg class="lucide lucide-heart" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </a>
-                <div class="p-4">
-                  <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm text-luxury-gold font-medium">Rolex</span>
-                    <div class="flex items-center">
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                    </div>
-                  </div>
-                  <h3 class="font-semibold text-luxury-black mb-2 group-hover:text-luxury-gold transition-colors duration-200">Daytona</h3>
-                  <div class="flex items-center justify-between">
-                    <p class="text-xl font-bold text-luxury-black">$35,000</p>
-                    <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-9 rounded-md px-3 bg-luxury-black hover:bg-luxury-gold hover:text-luxury-black text-luxury-white transition-all duration-200">Add to Cart</button>
-                  </div>
-                </div>
-              </div>
-              <div class="rounded-lg border bg-card text-card-foreground shadow-sm group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-card hover:-translate-y-1">
-                <a href="./watch.html">
-                  <div class="relative">
-                    <img alt="Royal Oak Gold" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="./assets/watch-1-L_BZsghZ.jpg">
-                    <button class="absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 bg-luxury-white/90 text-luxury-gray-dark hover:text-luxury-gold">
-                      <svg class="lucide lucide-heart" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </a>
-                <div class="p-4">
-                  <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm text-luxury-gold font-medium">Omega</span>
-                    <div class="flex items-center">
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                      <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
-                      </svg>
-                    </div>
-                  </div>
-                  <h3 class="font-semibold text-luxury-black mb-2 group-hover:text-luxury-gold transition-colors duration-200">Seamaster</h3>
-                  <div class="flex items-center justify-between">
-                    <p class="text-xl font-bold text-luxury-black">$6,500</p>
-                    <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-9 rounded-md px-3 bg-luxury-black hover:bg-luxury-gold hover:text-luxury-black text-luxury-white transition-all duration-200">Add to Cart</button>
-                  </div>
-                </div>
-              </div>
+            
+            <p id="results-count" class="text-luxury-gray-dark mb-4">6 watches found</p>
+            <div id="watches-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Watch cards will be dynamically generated by JavaScript -->
             </div>
           </div>
         </main>
         <div class="fixed bottom-0 left-0 right-0 z-50 bg-luxury-white border-t border-luxury-gray shadow-luxury">
           <div class="grid grid-cols-4 h-16">
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gold bg-luxury-gold/5">
+            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
               <a href="./index.html">
                 <div class="relative">
-                  <svg class="lucide lucide-house transition-transform duration-200 scale-110" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
+                  <svg class="lucide lucide-house transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
                     <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
                     <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                   </svg>
@@ -1003,7 +110,7 @@
                 <span class="text-xs font-medium">Home</span>
               </a>
             </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
+            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative">
               <a href="./catalog.html">
               <div class="relative">
                 <svg class="lucide lucide-search transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
@@ -1022,6 +129,7 @@
                     <path d="M3 6h18"></path>
                     <path d="M16 10a4 4 0 0 1-8 0"></path>
                   </svg>
+                  <span class="cart-item-count absolute -top-2 -right-2 bg-luxury-gold text-luxury-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center z-10 min-w-5">0</span>
                 </div>
                 <span class="text-xs font-medium">Cart</span>
               </a>
@@ -1040,6 +148,305 @@
           </div>
         </div>
       </div>
-    </div>
+      
+      <script>
+        // Direct filter implementation with comprehensive functionality
+        document.addEventListener('DOMContentLoaded', () => {
+          console.log('Initializing catalog filters...');
+          
+          // Wait for all elements to be fully loaded
+          setTimeout(() => {
+            const searchInput = document.getElementById('search-input');
+            const brandFilter = document.getElementById('brand-filter');
+            const priceFilter = document.getElementById('price-filter');
+            const brandDropdown = document.getElementById('brand-dropdown');
+            const priceDropdown = document.getElementById('price-dropdown');
+            const watchesGrid = document.getElementById('watches-grid');
+            const resultsCount = document.getElementById('results-count');
+            
+            console.log('Elements found:', {
+              searchInput: !!searchInput,
+              brandFilter: !!brandFilter,
+              priceFilter: !!priceFilter,
+              brandDropdown: !!brandDropdown,
+              priceDropdown: !!priceDropdown,
+              watchesGrid: !!watchesGrid,
+              resultsCount: !!resultsCount
+            });
+            
+            // Ensure dropdowns start hidden
+            if (brandDropdown) {
+              brandDropdown.classList.add('hide');
+              brandDropdown.classList.remove('show');
+            }
+            if (priceDropdown) {
+              priceDropdown.classList.add('hide');
+              priceDropdown.classList.remove('show');
+            }
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', (e) => {
+              if (!brandFilter.contains(e.target) && !brandDropdown.contains(e.target)) {
+                brandDropdown.classList.remove('show');
+                brandDropdown.classList.add('hide');
+              }
+              if (!priceFilter.contains(e.target) && !priceDropdown.contains(e.target)) {
+                priceDropdown.classList.remove('show');
+                priceDropdown.classList.add('hide');
+              }
+            });
+            
+            if (!brandFilter || !priceFilter || !watchesGrid) {
+              console.error('Required elements not found');
+              return;
+            }
+            
+            let currentFilters = {
+              search: '',
+              brand: 'all',
+              price: 'all'
+            };
+            
+            // Search functionality
+            if (searchInput) {
+              searchInput.addEventListener('input', (e) => {
+                currentFilters.search = e.target.value.toLowerCase();
+                applyFilters();
+              });
+            }
+            
+            // Brand filter functionality
+            if (brandFilter && brandDropdown) {
+              console.log('Setting up brand filter...');
+              console.log('Brand filter element:', brandFilter);
+              console.log('Brand dropdown element:', brandDropdown);
+              
+              brandFilter.addEventListener('click', (e) => {
+                console.log('Brand filter clicked!');
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Simple toggle - if it has 'show' class, hide it, otherwise show it
+                if (brandDropdown.classList.contains('show')) {
+                  brandDropdown.classList.remove('show');
+                  brandDropdown.classList.add('hide');
+                  console.log('Hiding brand dropdown');
+                } else {
+                  brandDropdown.classList.remove('hide', 'hidden');
+                  brandDropdown.classList.add('show');
+                  brandDropdown.style.display = 'block';
+                  console.log('Showing brand dropdown');
+                }
+                
+                // Hide price dropdown if it's open
+                if (priceDropdown) {
+                  priceDropdown.classList.remove('show');
+                  priceDropdown.classList.add('hide');
+                }
+              });
+              
+              const brandOptions = brandDropdown.querySelectorAll('.brand-option');
+              console.log('Found brand options:', brandOptions.length);
+              brandOptions.forEach((option, index) => {
+                console.log(`Brand option ${index}:`, option.textContent, option.dataset.brand);
+                option.addEventListener('click', (e) => {
+                  console.log('Brand option clicked:', option.dataset.brand);
+                  e.preventDefault();
+                  e.stopPropagation();
+                  currentFilters.brand = option.dataset.brand;
+                  
+                  const spanElement = brandFilter.querySelector('span');
+                  if (spanElement) {
+                    spanElement.textContent = option.textContent;
+                    console.log('Updated brand filter text to:', option.textContent);
+                  }
+                  
+                  brandDropdown.classList.add('hidden');
+                  brandDropdown.style.display = 'none';
+                  applyFilters();
+                });
+              });
+            } else {
+              console.error('Brand filter elements not found:', {
+                brandFilter: !!brandFilter,
+                brandDropdown: !!brandDropdown
+              });
+            }
+            
+            // Price filter functionality
+            if (priceFilter && priceDropdown) {
+              console.log('Setting up price filter...');
+              console.log('Price filter element:', priceFilter);
+              console.log('Price dropdown element:', priceDropdown);
+              
+              priceFilter.addEventListener('click', (e) => {
+                console.log('Price filter clicked!');
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Simple toggle - if it has 'show' class, hide it, otherwise show it
+                if (priceDropdown.classList.contains('show')) {
+                  priceDropdown.classList.remove('show');
+                  priceDropdown.classList.add('hide');
+                  console.log('Hiding price dropdown');
+                } else {
+                  priceDropdown.classList.remove('hide', 'hidden');
+                  priceDropdown.classList.add('show');
+                  priceDropdown.style.display = 'block';
+                  console.log('Showing price dropdown');
+                }
+                
+                // Hide brand dropdown if it's open
+                if (brandDropdown) {
+                  brandDropdown.classList.remove('show');
+                  brandDropdown.classList.add('hide');
+                }
+                
+                // Hide brand dropdown
+                if (brandDropdown) {
+                  brandDropdown.style.display = 'none';
+                  brandDropdown.classList.add('hidden');
+                }
+              });
+              
+              const priceOptions = priceDropdown.querySelectorAll('.price-option');
+              console.log('Found price options:', priceOptions.length);
+              priceOptions.forEach((option, index) => {
+                console.log(`Price option ${index}:`, option.textContent, option.dataset.price);
+                option.addEventListener('click', (e) => {
+                  console.log('Price option clicked:', option.dataset.price);
+                  e.preventDefault();
+                  e.stopPropagation();
+                  currentFilters.price = option.dataset.price;
+                  
+                  const spanElement = priceFilter.querySelector('span');
+                  if (spanElement) {
+                    spanElement.textContent = option.textContent;
+                    console.log('Updated price filter text to:', option.textContent);
+                  }
+                  
+                  priceDropdown.classList.add('hidden');
+                  priceDropdown.style.display = 'none';
+                  applyFilters();
+                });
+              });
+            } else {
+              console.error('Price filter elements not found:', {
+                priceFilter: !!priceFilter,
+                priceDropdown: !!priceDropdown
+              });
+            }
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', (e) => {
+              if (!brandFilter?.contains(e.target)) {
+                brandDropdown?.classList.add('hidden');
+                if (brandDropdown) brandDropdown.style.display = 'none';
+              }
+              if (!priceFilter?.contains(e.target)) {
+                priceDropdown?.classList.add('hidden');
+                if (priceDropdown) priceDropdown.style.display = 'none';
+              }
+            });
+            
+            // Filter application function
+            function applyFilters() {
+              if (typeof watchData === 'undefined') {
+                console.error('watchData not available');
+                return;
+              }
+              
+              let filteredWatches = Object.values(watchData);
+              
+              // Apply search filter
+              if (currentFilters.search) {
+                filteredWatches = filteredWatches.filter(watch => 
+                  watch.name.toLowerCase().includes(currentFilters.search) ||
+                  watch.brand.toLowerCase().includes(currentFilters.search) ||
+                  watch.description.toLowerCase().includes(currentFilters.search)
+                );
+              }
+              
+              // Apply brand filter
+              if (currentFilters.brand !== 'all') {
+                filteredWatches = filteredWatches.filter(watch => 
+                  watch.brand === currentFilters.brand
+                );
+              }
+              
+              // Apply price filter
+              if (currentFilters.price !== 'all') {
+                filteredWatches = filteredWatches.filter(watch => {
+                  const price = watch.price;
+                  switch (currentFilters.price) {
+                    case '0-10000':
+                      return price < 10000;
+                    case '10000-25000':
+                      return price >= 10000 && price <= 25000;
+                    case '25000-50000':
+                      return price >= 25000 && price <= 50000;
+                    case '50000+':
+                      return price > 50000;
+                    default:
+                      return true;
+                  }
+                });
+              }
+              
+              // Update results count
+              if (resultsCount) {
+                resultsCount.textContent = `${filteredWatches.length} watch${filteredWatches.length !== 1 ? 'es' : ''} found`;
+              }
+              
+              // Render filtered watches
+              renderFilteredWatches(filteredWatches);
+            }
+            
+            // Render watches function
+            function renderFilteredWatches(watches) {
+              if (!watchesGrid) return;
+              
+              watchesGrid.innerHTML = watches.map(watch => `
+                <div class="rounded-lg border bg-card text-card-foreground shadow-sm group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-card hover:-translate-y-1" data-id="${watch.id}">
+                  <a href="./watch.html?id=${watch.id}">
+                    <div class="relative">
+                      <img alt="${watch.name}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="${watch.image}">
+                      <button class="absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 bg-luxury-white/90 text-luxury-gray-dark hover:text-luxury-gold favorite-button" data-id="${watch.id}" data-name="${watch.name}" data-price="${watch.price}" data-image="${watch.image}" data-brand="${watch.brand}" onclick="event.preventDefault(); event.stopPropagation();">
+                        <svg class="lucide lucide-heart" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </a>
+                  <div class="p-4">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-sm text-luxury-gold font-medium">${watch.brand}</span>
+                      <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-green-100 text-green-800 hover:bg-green-100">${watch.stock}</div>
+                    </div>
+                    <h3 class="font-semibold text-luxury-black mb-2">${watch.name}</h3>
+                    <p class="text-2xl font-bold text-luxury-black mb-3">$${watch.price.toLocaleString()}</p>
+                    <button class="w-full bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold py-2 px-4 rounded-md transition-colors duration-200 add-to-cart-btn" data-id="${watch.id}" data-name="${watch.name}" data-price="${watch.price}" data-image="${watch.image}" data-brand="${watch.brand}">
+                      Add to Cart
+                    </button>
+                  </div>
+                </div>
+              `).join('');
+              
+              // Re-attach event listeners for favorites and cart
+              if (typeof FavoritesManager !== 'undefined') {
+                FavoritesManager.attachFavoriteListeners();
+              }
+              if (typeof CartManager !== 'undefined') {
+                CartManager.attachCartListeners();
+              }
+            }
+            
+            // Initial render
+            applyFilters();
+            console.log('Filter system initialized successfully');
+            
+          }, 100);
+        });
+      </script>
   </body>
 </html>

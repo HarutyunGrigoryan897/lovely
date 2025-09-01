@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
+    <meta char              <button class="w-full bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold py-3 px-6 rounded-md transition-colors duration-200" onclick="window.location.href='./orders.html'">
+                View My Orders
+              </button>
+              <button class="w-full border border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-luxury-black font-semibold py-3 px-6 rounded-md transition-colors duration-200" onclick="window.location.href='./catalog.html'">"UTF-8">
     <meta content="width=device-width,initial-scale=1" name="viewport">
-    <title>Teluxe - Luxury Watch Collection | Premium Timepieces</title>
-    <meta content="Discover the finest luxury timepieces from Rolex, Omega, Patek Philippe & more. Premium watches with authenticated quality and exclusive designs." name="description">
-    <meta content="luxury watches, premium timepieces, Rolex, Omega, Patek Philippe, Audemars Piguet, luxury accessories" name="keywords">
+    <title>Order Confirmation - Teluxe | Luxury Watch Collection</title>
+    <meta content="Order confirmation for your luxury watch purchase from Teluxe." name="description">
+    <meta content="luxury watches, order confirmation, premium timepieces" name="keywords">
     <meta content="Teluxe" name="author">
-    <meta content="Teluxe - Luxury Watch Collection" property="og:title">
-    <meta content="Discover the finest luxury timepieces from the world's most prestigious brands" property="og:description">
+    <meta content="Order Confirmation - Teluxe" property="og:title">
+    <meta content="Your luxury watch order has been confirmed" property="og:description">
     <meta content="website" property="og:type">
     <meta content="https://lovable.dev/opengraph-image-p98pqg.png" property="og:image">
     <meta content="summary_large_image" name="twitter:card">
     <meta content="@lovable_dev" name="twitter:site">
     <meta content="https://lovable.dev/opengraph-image-p98pqg.png" name="twitter:image">
-  <script type="text/javascript" src="./assets/script.js"></script>
+    <script type="text/javascript" src="./assets/script.js"></script>
 
-  <link href="./assets/index.css" rel="stylesheet">
-  <link href="./assets/sonner-toaster.css" rel="stylesheet">
+    <link href="./assets/index.css" rel="stylesheet">
+    <link href="./assets/sonner-toaster.css" rel="stylesheet">
   </head>
   <body>
     <div id="root">
@@ -27,35 +30,48 @@
       <section aria-atomic="false" aria-label="Notifications alt+T" aria-live="polite" aria-relevant="additions text" tabindex="-1"></section>
       <div class="min-h-screen bg-background font-luxury">
         <main class="pb-16">
-          <div class="p-4">
-            <h1 class="text-3xl font-bold text-luxury-black mb-8">Shopping Cart</h1>
-            <div class="cart-container">
-              <div class="cart-items-display space-y-4 mb-6">
-                <!-- Cart items will be rendered here by JavaScript -->
-                <div class="cart-items"></div>
+          <div class="p-4 space-y-8">
+            <!-- Success Icon and Message -->
+            <div class="text-center py-8">
+              <div class="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
               </div>
-              <div class="cart-summary bg-luxury-white p-4 rounded-lg shadow-sm">
-                <div class="flex justify-between items-center text-xl font-bold text-luxury-black mb-4">
-                  <span>Total:</span> <span class="cart-total">$0.00</span>
-                </div>
-                <button class="clear-cart-button w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-4 py-2 bg-luxury-gray-light hover:bg-luxury-gray text-luxury-black font-semibold mb-2">
-                  Clear Cart
-                </button>
-                <a href="./checkout.html" class="w-full">
-                  <button class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-4 py-2 bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold">
-                    Proceed to Checkout
-                  </button>
-                </a>
+              <h1 class="text-3xl font-bold text-luxury-black mb-2">Order Confirmed!</h1>
+              <p class="text-luxury-gray-dark mb-6">Thank you for your purchase. Your order has been successfully placed.</p>
+              
+              <!-- Order Details -->
+              <div class="bg-luxury-gray/10 rounded-lg p-6 text-left" id="order-confirmation-details">
+                <!-- Order details will be populated here -->
               </div>
+            </div>
+
+            <!-- Order Status Timeline -->
+            <div class="space-y-4">
+              <h2 class="text-xl font-bold text-luxury-black">Order Status</h2>
+              <div class="space-y-4" id="order-status-timeline">
+                <!-- Status timeline will be populated here -->
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-3">
+              <button class="w-full bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold py-3 px-6 rounded transition-colors duration-200" onclick="window.location.href='./orders.html'">
+                View All Orders
+              </button>
+              <button class="w-full border border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-luxury-black font-semibold py-3 px-6 rounded transition-colors duration-200" onclick="window.location.href='./catalog.html'">
+                Continue Shopping
+              </button>
             </div>
           </div>
         </main>
         <div class="fixed bottom-0 left-0 right-0 z-50 bg-luxury-white border-t border-luxury-gray shadow-luxury">
           <div class="grid grid-cols-4 h-16">
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative">
+            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
               <a href="./index.html">
                 <div class="relative">
-                  <svg class="lucide lucide-house transition-transform duration-200 scale-110" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
+                  <svg class="lucide lucide-house transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
                     <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
                     <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                   </svg>

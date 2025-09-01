@@ -14,16 +14,9 @@
     <meta content="summary_large_image" name="twitter:card">
     <meta content="@lovable_dev" name="twitter:site">
     <meta content="https://lovable.dev/opengraph-image-p98pqg.png" name="twitter:image">
-    <script type="text/javascript">
-      window["__REACT_QUERY_STATE__"] = {
-        "mutations": [],
-        "queries": []
-      };
-    </script>
-    <script type="module" src="./assets/index-BoPzykpR.js"></script>
-    <script type="module" src="./script.js"></script>
+    <script type="text/javascript" src="./assets/script.js"></script>
 
-    <link href="./assets/index-B7K668bC.css" rel="stylesheet">
+    <link href="./assets/index.css" rel="stylesheet">
     <link href="./assets/sonner-toaster.css" rel="stylesheet">
   </head>
   <body>
@@ -91,17 +84,33 @@
                     </div>
                   </div>
                 </div>
-                <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-11 rounded-md px-8 w-full bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold py-3">Continue to Payment</button>
+                <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+                  <div class="flex items-center gap-3 mb-4">
+                    <svg class="lucide lucide-shopping-cart text-luxury-gold" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="21" r="1"></circle>
+                      <circle cx="19" cy="21" r="1"></circle>
+                      <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+                    </svg>
+                    <h3 class="font-semibold text-luxury-black">Order Summary</h3>
+                  </div>
+                  <div class="order-summary-items space-y-2 mb-4">
+                    <!-- Cart items will be rendered here by JavaScript -->
+                  </div>
+                  <div class="flex justify-between items-center text-lg font-bold text-luxury-black">
+                    <span>Total:</span> <span class="order-summary-total">$0.00</span>
+                  </div>
+                </div>
+                <button class="place-order-button inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-11 rounded-md px-8 w-full bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold py-3">Place Order</button>
               </div>
             </div>
           </div>
         </main>
         <div class="fixed bottom-0 left-0 right-0 z-50 bg-luxury-white border-t border-luxury-gray shadow-luxury">
           <div class="grid grid-cols-4 h-16">
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gold bg-luxury-gold/5">
+            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative">
               <a href="./index.html">
                 <div class="relative">
-                  <svg class="lucide lucide-house transition-transform duration-200 scale-110" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
+                  <svg class="lucide lucide-house transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
                     <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
                     <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                   </svg>
@@ -128,6 +137,7 @@
                     <path d="M3 6h18"></path>
                     <path d="M16 10a4 4 0 0 1-8 0"></path>
                   </svg>
+                  <span class="cart-item-count absolute -top-2 -right-2 bg-luxury-gold text-luxury-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center z-10 min-w-5">0</span>
                 </div>
                 <span class="text-xs font-medium">Cart</span>
               </a>
