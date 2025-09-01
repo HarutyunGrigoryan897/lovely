@@ -1,10 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta char              <button class="w-full bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold py-3 px-6 rounded-md transition-colors duration-200" onclick="window.location.href='./orders.html'">
-                View My Orders
-              </button>
-              <button class="w-full border border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-luxury-black font-semibold py-3 px-6 rounded-md transition-colors duration-200" onclick="window.location.href='./catalog.html'">"UTF-8">
+    <meta charset="UTF-8">
     <meta content="width=device-width,initial-scale=1" name="viewport">
     <title>Order Confirmation - Teluxe | Luxury Watch Collection</title>
     <meta content="Order confirmation for your luxury watch purchase from Teluxe." name="description">
@@ -18,7 +15,6 @@
     <meta content="@lovable_dev" name="twitter:site">
     <meta content="https://lovable.dev/opengraph-image-p98pqg.png" name="twitter:image">
     <script type="text/javascript" src="./assets/script.js"></script>
-
     <link href="./assets/index.css" rel="stylesheet">
     <link href="./assets/sonner-toaster.css" rel="stylesheet">
   </head>
@@ -29,49 +25,130 @@
       </div>
       <section aria-atomic="false" aria-label="Notifications alt+T" aria-live="polite" aria-relevant="additions text" tabindex="-1"></section>
       <div class="min-h-screen bg-background font-luxury">
+        <!-- Header Section -->
+        <header class="bg-luxury-white border-b border-luxury-gray shadow-sm">
+          <div class="px-4 py-4">
+            <div class="flex items-center justify-between">
+              <button onclick="window.history.back()" class="p-2 hover:bg-luxury-gray/10 rounded-full transition-colors duration-200">
+                <svg class="w-6 h-6 text-luxury-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+              </button>
+              <h1 class="text-xl font-bold text-luxury-black">Order Confirmation</h1>
+              <div class="w-10 h-10"></div> <!-- Spacer for centering -->
+            </div>
+          </div>
+        </header>
+
         <main class="pb-16">
-          <div class="p-4 space-y-8">
+          <div class="p-6 space-y-8">
             <!-- Success Icon and Message -->
             <div class="text-center py-8">
-              <div class="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
+              <div class="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6 shadow-lg">
                 <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
               </div>
-              <h1 class="text-3xl font-bold text-luxury-black mb-2">Order Confirmed!</h1>
-              <p class="text-luxury-gray-dark mb-6">Thank you for your purchase. Your order has been successfully placed.</p>
+              <h2 class="text-3xl font-bold text-luxury-black mb-4">Order Confirmed!</h2>
+              <p class="text-luxury-gray-dark text-lg mb-8">Thank you for your purchase. Your luxury timepiece order has been successfully placed.</p>
               
-              <!-- Order Details -->
-              <div class="bg-luxury-gray/10 rounded-lg p-6 text-left" id="order-confirmation-details">
+              <!-- Order Details Card -->
+              <div class="bg-luxury-white rounded-lg border border-luxury-gray p-6 text-left shadow-lg" id="order-confirmation-details">
                 <!-- Order details will be populated here -->
+                <div class="space-y-4">
+                  <div class="flex justify-between items-center pb-4 border-b border-luxury-gray">
+                    <span class="text-luxury-gray-dark">Order Number:</span>
+                    <span class="font-semibold text-luxury-black" id="order-number">#ORD-2024-001</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-luxury-gray-dark">Order Date:</span>
+                    <span class="font-semibold text-luxury-black" id="order-date">September 2, 2025</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-luxury-gray-dark">Estimated Delivery:</span>
+                    <span class="font-semibold text-luxury-black" id="delivery-date">September 9, 2025</span>
+                  </div>
+                </div>
               </div>
             </div>
 
             <!-- Order Status Timeline -->
-            <div class="space-y-4">
-              <h2 class="text-xl font-bold text-luxury-black">Order Status</h2>
-              <div class="space-y-4" id="order-status-timeline">
-                <!-- Status timeline will be populated here -->
+            <div class="space-y-6">
+              <h3 class="text-xl font-bold text-luxury-black">Order Status</h3>
+              <div class="bg-luxury-white rounded-lg border border-luxury-gray p-6 shadow-lg">
+                <div class="space-y-6" id="order-status-timeline">
+                  <!-- Status 1: Order Confirmed -->
+                  <div class="flex items-center space-x-4">
+                    <div class="w-8 h-8 bg-luxury-gold rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg class="w-4 h-4 text-luxury-black" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                      </svg>
+                    </div>
+                    <div class="flex-1">
+                      <h4 class="font-semibold text-luxury-black">Order Confirmed</h4>
+                      <p class="text-sm text-luxury-gray-dark">Your order has been received and confirmed</p>
+                    </div>
+                    <span class="text-sm text-luxury-gray-dark">Just now</span>
+                  </div>
+                  
+                  <!-- Status 2: Processing -->
+                  <div class="flex items-center space-x-4">
+                    <div class="w-8 h-8 bg-luxury-gray rounded-full flex items-center justify-center flex-shrink-0">
+                      <div class="w-2 h-2 bg-luxury-white rounded-full"></div>
+                    </div>
+                    <div class="flex-1">
+                      <h4 class="font-semibold text-luxury-gray-dark">Processing</h4>
+                      <p class="text-sm text-luxury-gray-dark">We're preparing your order</p>
+                    </div>
+                    <span class="text-sm text-luxury-gray-dark">1-2 days</span>
+                  </div>
+                  
+                  <!-- Status 3: Shipped -->
+                  <div class="flex items-center space-x-4">
+                    <div class="w-8 h-8 bg-luxury-gray rounded-full flex items-center justify-center flex-shrink-0">
+                      <div class="w-2 h-2 bg-luxury-white rounded-full"></div>
+                    </div>
+                    <div class="flex-1">
+                      <h4 class="font-semibold text-luxury-gray-dark">Shipped</h4>
+                      <p class="text-sm text-luxury-gray-dark">Your order is on its way</p>
+                    </div>
+                    <span class="text-sm text-luxury-gray-dark">3-5 days</span>
+                  </div>
+                  
+                  <!-- Status 4: Delivered -->
+                  <div class="flex items-center space-x-4">
+                    <div class="w-8 h-8 bg-luxury-gray rounded-full flex items-center justify-center flex-shrink-0">
+                      <div class="w-2 h-2 bg-luxury-white rounded-full"></div>
+                    </div>
+                    <div class="flex-1">
+                      <h4 class="font-semibold text-luxury-gray-dark">Delivered</h4>
+                      <p class="text-sm text-luxury-gray-dark">Your luxury timepiece has arrived</p>
+                    </div>
+                    <span class="text-sm text-luxury-gray-dark">5-7 days</span>
+                  </div>
+                </div>
               </div>
             </div>
 
             <!-- Action Buttons -->
-            <div class="space-y-3">
-              <button class="w-full bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold py-3 px-6 rounded transition-colors duration-200" onclick="window.location.href='./orders.html'">
+            <div class="space-y-4">
+              <button class="w-full bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold py-4 px-6 rounded-lg transition-all duration-200 hover:scale-105 shadow-lg" onclick="window.location.href='./orders.html'">
                 View All Orders
               </button>
-              <button class="w-full border border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-luxury-black font-semibold py-3 px-6 rounded transition-colors duration-200" onclick="window.location.href='./catalog.html'">
+              <button class="w-full border-2 border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-luxury-black font-semibold py-4 px-6 rounded-lg transition-all duration-200 hover:scale-105" onclick="window.location.href='./catalog.html'">
                 Continue Shopping
               </button>
             </div>
           </div>
         </main>
+        
+        <!-- Bottom Navigation -->
         <div class="fixed bottom-0 left-0 right-0 z-50 bg-luxury-white border-t border-luxury-gray shadow-luxury">
           <div class="grid grid-cols-4 h-16">
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="./index.html">
+            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 text-luxury-gray-dark hover:text-luxury-gold">
+              <a href="./index.html" class="flex flex-col items-center space-y-1">
                 <div class="relative">
-                  <svg class="lucide lucide-house transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
                     <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
                     <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                   </svg>
@@ -79,39 +156,39 @@
                 <span class="text-xs font-medium">Home</span>
               </a>
             </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="./catalog.html">
-              <div class="relative">
-                <svg class="lucide lucide-search transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.3-4.3"></path>
-                </svg>
-              </div>
-              <span class="text-xs font-medium">Catalog</span>
-            </a>
-            </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="./cart.html">
+            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 text-luxury-gray-dark hover:text-luxury-gold">
+              <a href="./catalog.html" class="flex flex-col items-center space-y-1">
                 <div class="relative">
-                  <svg class="lucide lucide-shopping-bag transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                  </svg>
+                </div>
+                <span class="text-xs font-medium">Catalog</span>
+              </a>
+            </button>
+            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 text-luxury-gray-dark hover:text-luxury-gold">
+              <a href="./cart.html" class="flex flex-col items-center space-y-1">
+                <div class="relative">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
                     <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
                     <path d="M3 6h18"></path>
                     <path d="M16 10a4 4 0 0 1-8 0"></path>
                   </svg>
-                  <span class="cart-item-count absolute -top-2 -right-2 bg-luxury-gold text-luxury-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center z-10 min-w-5">0</span>
+                  <span class="cart-item-count absolute -top-2 -right-2 bg-luxury-gold text-luxury-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center min-w-5">0</span>
                 </div>
                 <span class="text-xs font-medium">Cart</span>
               </a>
             </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="./account.html">
-              <div class="relative">
-                <svg class="lucide lucide-user transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="50" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-              </div>
-              <span class="text-xs font-medium">Account</span>
+            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 text-luxury-gold">
+              <a href="./account.html" class="flex flex-col items-center space-y-1">
+                <div class="relative">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </div>
+                <span class="text-xs font-medium">Account</span>
               </a>
             </button>
           </div>
