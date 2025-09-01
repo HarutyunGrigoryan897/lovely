@@ -1641,6 +1641,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize quantity controls if on watch page
   initializeQuantityControls();
   
+  // Initialize customization controls if on watch page
+  initializeCustomizationControls();
+  
   // Attach favorite listeners after a brief delay to ensure all elements are loaded
   setTimeout(() => {
     FavoritesManager.attachFavoriteListeners();
@@ -1692,6 +1695,20 @@ function initializeQuantityControls() {
   
   // Update Add to Cart button price
   function updateAddToCartPrice() {
+    // Check if customization is initialized and use the customization price update instead
+    const addToCartTextElement = document.getElementById('add-to-cart-text');
+    if (addToCartTextElement) {
+      // Call the customization price update function if it exists
+      const customizationControlsExist = document.getElementById('gold-carat');
+      if (customizationControlsExist) {
+        // Trigger customization price update which will handle quantity
+        const event = new Event('change');
+        document.getElementById('gold-carat').dispatchEvent(event);
+        return;
+      }
+    }
+    
+    // Fallback for non-customizable products
     const addToCartBtn = document.querySelector('.add-to-cart.product-detail-add-to-cart');
     if (addToCartBtn) {
       const price = parseInt(addToCartBtn.getAttribute('data-price'));
@@ -1732,6 +1749,125 @@ function initializeQuantityControls() {
       }
     });
   }
+}
+
+// Initialize customization controls
+function initializeCustomizationControls() {
+  if (!window.location.pathname.endsWith('watch.html')) return;
+  
+  const goldCaratSelect = document.getElementById('gold-carat');
+  const diamondTypeSelect = document.getElementById('diamond-type');
+  const diamondCaratSelect = document.getElementById('diamond-carat');
+  const diamondCaratSection = document.getElementById('diamond-carat-section');
+  const customizationPriceElement = document.getElementById('customization-price');
+  const totalPriceElement = document.getElementById('total-price');
+  const addToCartTextElement = document.getElementById('add-to-cart-text');
+  
+  if (!goldCaratSelect || !diamondTypeSelect || !diamondCaratSelect || !diamondCaratSection) return;
+  
+  const basePrice = 45000; // Base price of the watch
+  
+  // Pricing for customizations
+  const goldCaratPrices = {
+    '14k': 0,
+    '18k': 2500,
+    '22k': 5000,
+    '24k': 7500
+  };
+  
+  const diamondTypePrices = {
+    'none': 0,
+    'artificial': 1500,
+    'real': 8000
+  };
+  
+  const diamondCaratPrices = {
+    '0.25': 0,
+    '0.50': 3000,
+    '0.75': 6000,
+    '1.0': 12000,
+    '1.5': 20000,
+    '2.0': 35000
+  };
+  
+  // Calculate total customization price
+  function calculateCustomizationPrice() {
+    const goldCarat = goldCaratSelect.value;
+    const diamondType = diamondTypeSelect.value;
+    const diamondCarat = diamondCaratSelect.value;
+    
+    let customizationPrice = 0;
+    customizationPrice += goldCaratPrices[goldCarat] || 0;
+    customizationPrice += diamondTypePrices[diamondType] || 0;
+    
+    // Only add diamond carat price if real diamonds are selected
+    if (diamondType === 'real') {
+      customizationPrice += diamondCaratPrices[diamondCarat] || 0;
+    }
+    
+    return customizationPrice;
+  }
+  
+  // Update price display
+  function updatePriceDisplay() {
+    const customizationPrice = calculateCustomizationPrice();
+    const totalPrice = basePrice + customizationPrice;
+    const quantityElement = document.getElementById('quantity-display');
+    const quantity = quantityElement ? parseInt(quantityElement.textContent || '1') : 1;
+    const finalTotal = totalPrice * quantity;
+    
+    // Update customization price display
+    if (customizationPriceElement) {
+      customizationPriceElement.textContent = `+$${customizationPrice.toLocaleString()}`;
+    }
+    
+    // Update total price display
+    if (totalPriceElement) {
+      totalPriceElement.textContent = `$${totalPrice.toLocaleString()}`;
+    }
+    
+    // Update add to cart button text
+    if (addToCartTextElement) {
+      addToCartTextElement.textContent = `Add to Cart - $${finalTotal.toLocaleString()}`;
+    }
+    
+    // Update the data-price attribute for cart functionality
+    const addToCartBtn = document.querySelector('.add-to-cart.product-detail-add-to-cart');
+    if (addToCartBtn) {
+      addToCartBtn.setAttribute('data-price', totalPrice.toString());
+    }
+  }
+  
+  // Show/hide diamond carat section based on diamond type
+  function toggleDiamondCaratSection() {
+    const diamondType = diamondTypeSelect.value;
+    if (diamondCaratSection) {
+      if (diamondType === 'real') {
+        diamondCaratSection.style.display = 'block';
+      } else {
+        diamondCaratSection.style.display = 'none';
+      }
+    }
+  }
+  
+  // Event listeners
+  goldCaratSelect.addEventListener('change', updatePriceDisplay);
+  diamondTypeSelect.addEventListener('change', () => {
+    toggleDiamondCaratSection();
+    updatePriceDisplay();
+  });
+  diamondCaratSelect.addEventListener('change', updatePriceDisplay);
+  
+  // Listen for quantity changes
+  const quantityDisplay = document.getElementById('quantity-display');
+  if (quantityDisplay) {
+    const observer = new MutationObserver(updatePriceDisplay);
+    observer.observe(quantityDisplay, { childList: true, characterData: true, subtree: true });
+  }
+  
+  // Initialize display
+  toggleDiamondCaratSection();
+  updatePriceDisplay();
 }
 
 // Load watch details based on URL parameter

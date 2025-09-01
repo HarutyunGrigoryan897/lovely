@@ -108,6 +108,85 @@
                   </div>
                 </div>
 
+                <!-- Customization Options -->
+                <div>
+                  <h3 class="font-semibold text-luxury-black mb-4">Customization</h3>
+                  <div class="space-y-4">
+                    
+                    <!-- Gold Carat Selection -->
+                    <div>
+                      <label class="block text-sm font-medium text-luxury-black mb-2">Gold Carat</label>
+                      <div class="relative">
+                        <select id="gold-carat" class="w-full appearance-none bg-luxury-white border border-luxury-gray rounded-lg px-4 py-3 pr-10 text-luxury-black focus:outline-none focus:ring-2 focus:ring-luxury-gold focus:border-luxury-gold transition-colors duration-200">
+                          <option value="14k">14k Gold (+$0)</option>
+                          <option value="18k" selected>18k Gold (+$2,500)</option>
+                          <option value="22k">22k Gold (+$5,000)</option>
+                          <option value="24k">24k Gold (+$7,500)</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                          <svg class="w-4 h-4 text-luxury-gray-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Diamond Type Selection -->
+                    <div>
+                      <label class="block text-sm font-medium text-luxury-black mb-2">Diamond Type</label>
+                      <div class="relative">
+                        <select id="diamond-type" class="w-full appearance-none bg-luxury-white border border-luxury-gray rounded-lg px-4 py-3 pr-10 text-luxury-black focus:outline-none focus:ring-2 focus:ring-luxury-gold focus:border-luxury-gold transition-colors duration-200">
+                          <option value="none">No Diamonds</option>
+                          <option value="artificial">Artificial Diamonds (+$1,500)</option>
+                          <option value="real" selected>Real Diamonds (+$8,000)</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                          <svg class="w-4 h-4 text-luxury-gray-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Diamond Carat Selection (only shown when real diamonds selected) -->
+                    <div id="diamond-carat-section">
+                      <label class="block text-sm font-medium text-luxury-black mb-2">Diamond Carat (Real Diamonds)</label>
+                      <div class="relative">
+                        <select id="diamond-carat" class="w-full appearance-none bg-luxury-white border border-luxury-gray rounded-lg px-4 py-3 pr-10 text-luxury-black focus:outline-none focus:ring-2 focus:ring-luxury-gold focus:border-luxury-gold transition-colors duration-200">
+                          <option value="0.25">0.25 ct (+$0)</option>
+                          <option value="0.50" selected>0.50 ct (+$3,000)</option>
+                          <option value="0.75">0.75 ct (+$6,000)</option>
+                          <option value="1.0">1.0 ct (+$12,000)</option>
+                          <option value="1.5">1.5 ct (+$20,000)</option>
+                          <option value="2.0">2.0 ct (+$35,000)</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                          <svg class="w-4 h-4 text-luxury-gray-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Price Update Display -->
+                    <div class="bg-luxury-gray/10 rounded-lg p-4 border border-luxury-gray">
+                      <div class="flex justify-between items-center">
+                        <span class="text-luxury-gray-dark">Base Price:</span>
+                        <span class="font-semibold text-luxury-black">$45,000</span>
+                      </div>
+                      <div class="flex justify-between items-center mt-2">
+                        <span class="text-luxury-gray-dark">Customization:</span>
+                        <span class="font-semibold text-luxury-black" id="customization-price">+$13,500</span>
+                      </div>
+                      <hr class="my-2 border-luxury-gray">
+                      <div class="flex justify-between items-center">
+                        <span class="text-lg font-bold text-luxury-black">Total Price:</span>
+                        <span class="text-xl font-bold text-luxury-gold" id="total-price">$58,500</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Quantity and Add to Cart -->
                 <div>
                   <h3 class="font-semibold text-luxury-black mb-3">Quantity</h3>
@@ -136,7 +215,7 @@
                     <circle cx="19" cy="21" r="1"></circle>
                     <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57L20.99 7H5.12"></path>
                   </svg>
-                  Add to Cart - $45,000
+                  <span id="add-to-cart-text">Add to Cart - $58,500</span>
                 </button>
               </div>
             </div>
