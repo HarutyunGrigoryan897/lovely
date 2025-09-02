@@ -1,10 +1,10 @@
 from loader import dp, bot
-from aiogram import types
+from aiogram import types, F
 from aiogram.types import Message, CallbackQuery
 from inline_keyboards import profile_about_kb, home_kb, full_kb
-from utils import get_user_info
+from utils import get_user_info, update_user_status
 
-
+# -------------------- USER FLOW --------------------
 @dp.callback_query(lambda c: c.data == "about")
 async def about_callback(query: CallbackQuery):
     text = (
@@ -14,6 +14,7 @@ async def about_callback(query: CallbackQuery):
     )
     await query.message.answer(text, reply_markup=home_kb)
     await query.answer()
+
 
 @dp.callback_query(lambda c: c.data == "profile")
 async def profile_callback(query: CallbackQuery):
@@ -68,3 +69,36 @@ async def home_callback(query: CallbackQuery):
         await query.message.answer("❌ Could not fetch profile. Try again later.", reply_markup=home_kb)
 
     await query.answer()
+
+# -------------------- ADMIN FLOW --------------------
+@dp.callback_query(F.data.startswith("approve:"))
+async def approve_user_callback(callback: CallbackQuery):
+    telegram_id = int(callback.data.split(":")[1])
+    success = await update_user_status(telegram_id, approve=True)
+
+    if success:
+        await callback.message.delete()
+        await callback.message.answer("✅ User approved successfully.")
+        await callback.bot.send_message(
+            chat_id=telegram_id,
+            text="🎉 Your profile has been approved! You can start shopping now.",
+            reply_markup=full_kb
+        )
+    else:
+        await callback.message.answer("❌ Failed to approve user.")
+
+
+@dp.callback_query(F.data.startswith("reject:"))
+async def reject_user_callback(callback: CallbackQuery):
+    telegram_id = int(callback.data.split(":")[1])
+    success = await update_user_status(telegram_id, approve=False)
+
+    if success:
+        await callback.message.delete()
+        await callback.message.answer("❌ User rejected.")
+        await callback.bot.send_message(
+            chat_id=telegram_id,
+            text="⚠️ Your registration request was rejected by the admin."
+        )
+    else:
+        await callback.message.answer("❌ Failed to reject user.")
