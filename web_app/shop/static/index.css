@@ -73,3 +73,60 @@
 .price-option:last-child {
   border-bottom: none !important;
 }
+
+/* Enhanced Customization Dropdown Styles */
+.enhanced-dropdown {
+  position: relative;
+}
+
+.enhanced-dropdown::after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #64748b;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.enhanced-dropdown:focus::after {
+  border-top-color: #d4af37;
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* Custom select option styling */
+.enhanced-dropdown option {
+  padding: 8px 12px;
+  background-color: white;
+  color: #2d3748;
+  font-weight: 500;
+}
+
+.enhanced-dropdown option:hover,
+.enhanced-dropdown option:focus {
+  background-color: #f7fafc !important;
+  color: #d4af37 !important;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .enhanced-dropdown {
+    font-size: 14px;
+    padding: 10px 35px 10px 14px;
+  }
+  
+  .enhanced-dropdown::after {
+    right: 10px;
+    border-width: 5px 5px 0 5px;
+  }
+}
+
+/* Animation for dropdown arrow on interaction */
+.enhanced-dropdown:active::after {
+  transform: translateY(-50%) rotate(180deg) scale(0.9);
+}

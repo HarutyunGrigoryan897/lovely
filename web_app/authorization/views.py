@@ -4,15 +4,19 @@ from rest_framework.response import Response
 
 from authorization.models import CustomUser
 from authorization.serializers import CustomUserSerializer, CustomUserInfoSerializer
+from authorization.bot_authentication import BotAuthentication
+
 
 class CustomUserCreateView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
+    authentication_classes = [BotAuthentication]
 
 
 class CustomUserRetrieveView(generics.GenericAPIView):
     serializer_class = CustomUserInfoSerializer
     queryset = CustomUser.objects.all()
+    authentication_classes = [BotAuthentication]
 
     def get(self, request, *args, **kwargs):
         telegram_id = request.query_params.get("telegram_id")
@@ -28,8 +32,10 @@ class CustomUserRetrieveView(generics.GenericAPIView):
         except Exception:
             return Response({"detail": "Something went wrong."}, status=500)
         
+        
 class CheckAdminView(generics.GenericAPIView):
     queryset = CustomUser.objects.all()
+    authentication_classes = [BotAuthentication]
 
     def get(self, request, *args, **kwargs):
         telegram_id = request.query_params.get("telegram_id")
@@ -44,13 +50,18 @@ class CheckAdminView(generics.GenericAPIView):
         except Exception:
             return Response({"detail": "Something went wrong."}, status=500)
 
+
 class AdminListView(APIView):
+    authentication_classes = [BotAuthentication]
 
     def get(self, request):
         admins = CustomUser.objects.filter(is_superuser=True).values("telegram_id", "username", "first_name", "last_name")
         return Response(list(admins))
+
     
 class ApproveUserView(APIView):
+    authentication_classes = [BotAuthentication]
+    
     def post(self, request, telegram_id):
         try:
             user = CustomUser.objects.get(telegram_id=telegram_id)
@@ -62,6 +73,8 @@ class ApproveUserView(APIView):
 
 
 class RejectUserView(APIView):
+    authentication_classes = [BotAuthentication]
+    
     def post(self, request, telegram_id):
         try:
             user = CustomUser.objects.get(telegram_id=telegram_id)

@@ -1,110 +1,301 @@
 // script.js
 
-// -------------------- WATCH DATA --------------------
-// const watchData = {
-//   "audemars-piguet-royal-oak-gold": {
-//     id: "audemars-piguet-royal-oak-gold",
-//     name: "Royal Oak Gold",
-//     brand: "Audemars Piguet",
-//     price: 45000,
-//     image: "./assets/watch-1-L_BZsghZ.jpg",
-//     description: "The Royal Oak Gold represents the pinnacle of luxury watchmaking. Crafted with 18k yellow gold case and bracelet, this timepiece features the iconic octagonal bezel and 'Tapisserie' dial pattern that has defined Audemars Piguet since 1972.",
-//     specifications: {
-//       "Case Material": "18k Yellow Gold",
-//       "Case Size": "41mm",
-//       "Movement": "Calibre 3120 Automatic",
-//       "Water Resistance": "50 meters",
-//       "Power Reserve": "60 hours",
-//       "Crystal": "Sapphire"
-//     },
-//     stock: "In Stock"
-//   },
-//   "rolex-submariner": {
-//     id: "rolex-submariner",
-//     name: "Submariner",
-//     brand: "Rolex",
-//     price: 12500,
-//     image: "./assets/watch-1-L_BZsghZ.jpg",
-//     description: "The Rolex Submariner is a legendary dive watch that has become an icon of luxury and precision. With its robust construction and timeless design, it's equally at home beneath the waves or in the boardroom.",
-//     specifications: {
-//       "Case Material": "904L Stainless Steel",
-//       "Case Size": "40mm",
-//       "Movement": "Calibre 3230 Automatic",
-//       "Water Resistance": "300 meters",
-//       "Power Reserve": "70 hours",
-//       "Crystal": "Sapphire"
-//     },
-//     stock: "In Stock"
-//   },
-//   "omega-speedmaster": {
-//     id: "omega-speedmaster",
-//     name: "Speedmaster",
-//     brand: "Omega",
-//     price: 8900,
-//     image: "./assets/watch-1-L_BZsghZ.jpg",
-//     description: "The Omega Speedmaster Professional is the legendary 'Moonwatch' that accompanied astronauts to the lunar surface. This manually-wound chronograph represents precision, heritage, and adventure.",
-//     specifications: {
-//       "Case Material": "Stainless Steel",
-//       "Case Size": "42mm",
-//       "Movement": "Calibre 1863 Manual",
-//       "Water Resistance": "50 meters",
-//       "Power Reserve": "48 hours",
-//       "Crystal": "Hesalite"
-//     },
-//     stock: "In Stock"
-//   },
-//   "patek-philippe-nautilus": {
-//     id: "patek-philippe-nautilus",
-//     name: "Nautilus",
-//     brand: "Patek Philippe",
-//     price: 75000,
-//     image: "./assets/watch-1-L_BZsghZ.jpg",
-//     description: "The Patek Philippe Nautilus represents the ultimate expression of luxury sports watchmaking. With its distinctive porthole-inspired design and impeccable finishing, it's one of the most coveted watches in the world.",
-//     specifications: {
-//       "Case Material": "Stainless Steel",
-//       "Case Size": "40mm", 
-//       "Movement": "Calibre 26-330 S C Automatic",
-//       "Water Resistance": "120 meters",
-//       "Power Reserve": "45 hours",
-//       "Crystal": "Sapphire"
-//     },
-//     stock: "In Stock"
-//   },
-//   "rolex-daytona": {
-//     id: "rolex-daytona",
-//     name: "Daytona",
-//     brand: "Rolex",
-//     price: 35000,
-//     image: "./assets/watch-1-L_BZsghZ.jpg",
-//     description: "The Rolex Daytona is the ultimate racing chronograph, designed for professional drivers and racing enthusiasts. Its precision and reliability have made it a legend on and off the track.",
-//     specifications: {
-//       "Case Material": "904L Stainless Steel",
-//       "Case Size": "40mm",
-//       "Movement": "Calibre 4130 Automatic",
-//       "Water Resistance": "100 meters",
-//       "Power Reserve": "72 hours",
-//       "Crystal": "Sapphire"
-//     },
-//     stock: "In Stock"
-//   },
-//   "omega-seamaster": {
-//     id: "omega-seamaster",
-//     name: "Seamaster",
-//     brand: "Omega",
-//     price: 6500,
-//     image: "./assets/watch-1-L_BZsghZ.jpg",
-//     description: "The Omega Seamaster Planet Ocean is a professional dive watch that combines cutting-edge technology with striking design. Built to withstand the depths of the ocean while maintaining elegance.",
-//     specifications: {
-//       "Case Material": "Stainless Steel",
-//       "Case Size": "43.5mm",
-//       "Movement": "Calibre 8900 Automatic",
-//       "Water Resistance": "600 meters",
-//       "Power Reserve": "60 hours",
-//       "Crystal": "Sapphire"
-//     },
-//     stock: "In Stock"
-//   }
-// };
+// -------------------- TELEGRAM WEB APP AUTHENTICATION --------------------
+class TelegramAuth {
+    constructor() {
+        this.user = null;
+        this.isAuthenticated = false;
+        this.isTelegramUser = false;
+        this.authenticationAttempted = false;
+        this.init();
+    }
+
+    async init() {
+        console.log('TelegramAuth initializing...');
+        console.log('Telegram WebApp available:', !!window.Telegram?.WebApp);
+        
+        // Check if we have a stored authentication state
+        const storedAuth = this.getStoredAuth();
+        if (storedAuth && this.isValidStoredAuth(storedAuth)) {
+            console.log('Using stored authentication');
+            this.user = storedAuth.user;
+            this.isAuthenticated = true;
+            this.isTelegramUser = true;
+            this.authenticationAttempted = true;
+            console.log('Authentication successful from storage!');
+            return;
+        }
+        
+        // First check if running in Telegram Web App
+        if (!window.Telegram || !window.Telegram.WebApp) {
+            console.log('Not running in Telegram Web App');
+            this.showAccessDenied('Not running in Telegram Web App');
+            return;
+        }
+
+        const tg = window.Telegram.WebApp;
+        console.log('Telegram WebApp object:', tg);
+        console.log('InitData available:', !!tg.initData);
+        console.log('InitData length:', tg.initData?.length || 0);
+        
+        // Expand the web app to full height
+        tg.expand();
+        
+        // Set theme
+        tg.setHeaderColor('#000000');
+        
+        // Check if we have init data (user is authenticated via Telegram)
+        if (tg.initData && tg.initData.trim() !== '') {
+            console.log('Attempting Telegram authentication...');
+            await this.authenticateWithTelegram(tg.initData);
+        } else {
+            console.log('No init data available');
+            this.showAccessDenied('No Telegram authentication data available');
+            return;
+        }
+        
+        // If authentication failed, block access
+        if (!this.isAuthenticated) {
+            console.log('Authentication failed');
+            this.showAccessDenied('Authentication failed');
+        } else {
+            console.log('Authentication successful!');
+            // Store successful authentication
+            this.storeAuth();
+        }
+    }
+    
+    storeAuth() {
+        const authData = {
+            user: this.user,
+            isAuthenticated: this.isAuthenticated,
+            isTelegramUser: this.isTelegramUser,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('telegramAuth', JSON.stringify(authData));
+    }
+    
+    getStoredAuth() {
+        try {
+            const stored = localStorage.getItem('telegramAuth');
+            return stored ? JSON.parse(stored) : null;
+        } catch (e) {
+            console.error('Error parsing stored auth:', e);
+            return null;
+        }
+    }
+    
+    isValidStoredAuth(authData) {
+        if (!authData || !authData.user || !authData.isAuthenticated) {
+            return false;
+        }
+        
+        // Check if stored auth is less than 24 hours old
+        const maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+        const age = Date.now() - authData.timestamp;
+        
+        if (age > maxAge) {
+            console.log('Stored auth expired');
+            localStorage.removeItem('telegramAuth');
+            return false;
+        }
+        
+        return true;
+    }
+
+    showAccessDenied(reason) {
+        // Hide main content
+        const mainContent = document.querySelector('main');
+        if (mainContent) {
+            mainContent.style.display = 'none';
+        }
+        
+        // Show welcome message with Telegram bot button
+        const body = document.body;
+        const welcomeDiv = document.createElement('div');
+        welcomeDiv.innerHTML = `
+            <div style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                padding: 20px;
+                box-sizing: border-box;
+            ">
+                <div style="
+                    background: white;
+                    padding: 40px;
+                    border-radius: 20px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                    text-align: center;
+                    max-width: 500px;
+                    width: 100%;
+                ">
+                    <div style="
+                        width: 100px;
+                        height: 100px;
+                        background: linear-gradient(45deg, #FFD700, #FFA500);
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin: 0 auto 30px;
+                        color: white;
+                        font-size: 50px;
+                        box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+                    ">⌚</div>
+                    <h1 style="color: #333; margin-bottom: 15px; font-size: 32px; font-weight: 700;">Gold Shop</h1>
+                    <p style="color: #666; font-size: 18px; margin-bottom: 20px; font-weight: 300;">Luxury Timepiece Collection</p>
+                    <p style="color: #777; line-height: 1.6; margin-bottom: 30px; font-size: 16px;">
+                        Experience our exclusive watch collection through our secure Telegram platform.
+                    </p>
+                    
+                    <a href="https://t.me/gold_shop_development_bot" style="
+                        display: inline-block;
+                        background: linear-gradient(45deg, #0088cc, #0099dd);
+                        color: white;
+                        padding: 18px 40px;
+                        border-radius: 50px;
+                        text-decoration: none;
+                        font-weight: 600;
+                        font-size: 18px;
+                        margin: 20px 0;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 8px 20px rgba(0, 136, 204, 0.3);
+                        position: relative;
+                        overflow: hidden;
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(0, 136, 204, 0.4)'" 
+                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(0, 136, 204, 0.3)'">
+                        📱 Open Gold Shop Bot
+                    </a>
+                    
+                    <div style="
+                        margin: 30px 0;
+                        text-align: left;
+                        background: #f8f9fa;
+                        padding: 25px;
+                        border-radius: 15px;
+                    ">
+                        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                            <div style="width: 24px; height: 24px; background: #4CAF50; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: white; font-size: 14px; font-weight: bold;">🔒</div>
+                            <div style="color: #555; font-weight: 500;">Secure Telegram authentication</div>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                            <div style="width: 24px; height: 24px; background: #4CAF50; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: white; font-size: 14px; font-weight: bold;">✨</div>
+                            <div style="color: #555; font-weight: 500;">Personalized shopping experience</div>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                            <div style="width: 24px; height: 24px; background: #4CAF50; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: white; font-size: 14px; font-weight: bold;">🔔</div>
+                            <div style="color: #555; font-weight: 500;">Instant notifications and updates</div>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 24px; height: 24px; background: #4CAF50; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: white; font-size: 14px; font-weight: bold;">💎</div>
+                            <div style="color: #555; font-weight: 500;">Exclusive luxury timepiece collection</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                        <p style="font-size: 14px; color: #999; margin: 0;">
+                            Don't have Telegram? <a href="https://telegram.org/" target="_blank" style="color: #0088cc; text-decoration: none; font-weight: 500;">Download it here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        `;
+        body.appendChild(welcomeDiv);
+    }
+
+    async authenticateWithTelegram(initData) {
+        try {
+            this.authenticationAttempted = true;
+            
+            const response = await fetch('/api/auth/telegram-auth/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    initData: initData
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                this.user = data.user;
+                this.isAuthenticated = true;
+                this.isTelegramUser = true;
+                console.log('Telegram authentication successful:', this.user);
+                this.updateUI();
+            } else {
+                console.error('Telegram authentication failed:', data.error);
+                this.showAccessDenied(`Authentication failed: ${data.error}`);
+                return;
+            }
+        } catch (error) {
+            console.error('Error during Telegram authentication:', error);
+            this.showAccessDenied(`Network error: ${error.message}`);
+            return;
+        }
+    }
+
+    updateUI() {
+        // Only update UI if user is authenticated via Telegram
+        if (!this.isAuthenticated || !this.isTelegramUser) {
+            return;
+        }
+
+        // Update account page link or any user-specific UI
+        const accountLinks = document.querySelectorAll('a[href*="account"]');
+        accountLinks.forEach(link => {
+            link.style.display = 'block';
+        });
+
+        // Update any user greeting or display elements
+        const userElements = document.querySelectorAll('.user-greeting');
+        userElements.forEach(element => {
+            if (this.isAuthenticated && this.user) {
+                element.textContent = `Hello, ${this.user.first_name || this.user.username}!`;
+                element.style.display = 'block';
+            }
+        });
+
+        // Fire custom event for other parts of the app
+        window.dispatchEvent(new CustomEvent('authStatusChanged', {
+            detail: {
+                isAuthenticated: this.isAuthenticated,
+                user: this.user,
+                isTelegramUser: this.isTelegramUser
+            }
+        }));
+    }
+
+    async getUserInfo() {
+        if (!this.isAuthenticated) return null;
+        
+        try {
+            const response = await fetch('/api/auth/user-profile/');
+            const data = await response.json();
+            return data.user;
+        } catch (error) {
+            console.error('Error getting user info:', error);
+            return null;
+        }
+    }
+}
+
+// Initialize authentication when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.telegramAuth = new TelegramAuth();
+});
+
 
 // -------------------- NAVIGATION --------------------
 const navButtons = document.querySelectorAll(".fixed.bottom-0.left-0.right-0.z-50.bg-luxury-white.border-t.border-luxury-gray.shadow-luxury .grid.grid-cols-4.h-16 button");
@@ -1757,72 +1948,96 @@ function initializeQuantityControls() {
 
 // Initialize customization controls
 function initializeCustomizationControls() {
-  if (!window.location.pathname.endsWith('watch.html')) return;
+  // Check for customization dropdowns on any product page
+  const customizationSelects = document.querySelectorAll('select[data-customization-type]');
+  if (customizationSelects.length === 0) return;
   
-  const goldCaratSelect = document.getElementById('gold-carat');
-  const diamondTypeSelect = document.getElementById('diamond-type');
-  const diamondCaratSelect = document.getElementById('diamond-carat');
-  const diamondCaratSection = document.getElementById('diamond-carat-section');
   const customizationPriceElement = document.getElementById('customization-price');
   const totalPriceElement = document.getElementById('total-price');
   const addToCartTextElement = document.getElementById('add-to-cart-text');
+  const basePriceElement = document.getElementById('base-price');
+  const productTitleElement = document.querySelector('h2');
   
-  if (!goldCaratSelect || !diamondTypeSelect || !diamondCaratSelect || !diamondCaratSection) return;
+  // Get base price from the page
+  let basePrice = 0;
+  if (basePriceElement) {
+    const basePriceText = basePriceElement.textContent.replace(/[^0-9]/g, '');
+    basePrice = parseInt(basePriceText) || 0;
+  }
   
-  const basePrice = 45000; // Base price of the watch
-  
-  // Pricing for customizations
-  const goldCaratPrices = {
-    '14k': 0,
-    '18k': 2500,
-    '22k': 5000,
-    '24k': 7500
-  };
-  
-  const diamondTypePrices = {
-    'none': 0,
-    'artificial': 1500,
-    'real': 8000
-  };
-  
-  const diamondCaratPrices = {
-    '0.25': 0,
-    '0.50': 3000,
-    '0.75': 6000,
-    '1.0': 12000,
-    '1.5': 20000,
-    '2.0': 35000
-  };
+  // Store original product name
+  const originalProductName = productTitleElement ? productTitleElement.textContent : '';
   
   // Calculate total customization price
   function calculateCustomizationPrice() {
-    const goldCarat = goldCaratSelect.value;
-    const diamondType = diamondTypeSelect.value;
-    const diamondCarat = diamondCaratSelect.value;
-    
     let customizationPrice = 0;
-    customizationPrice += goldCaratPrices[goldCarat] || 0;
-    customizationPrice += diamondTypePrices[diamondType] || 0;
     
-    // Only add diamond carat price if real diamonds are selected
-    if (diamondType === 'real') {
-      customizationPrice += diamondCaratPrices[diamondCarat] || 0;
-    }
+    customizationSelects.forEach(select => {
+      const selectedOption = select.options[select.selectedIndex];
+      const priceModifier = parseFloat(selectedOption.getAttribute('data-price')) || 0;
+      customizationPrice += priceModifier;
+    });
     
     return customizationPrice;
   }
   
-  // Update price display
-  function updatePriceDisplay() {
+  // Generate customized product name
+  function generateCustomizedProductName() {
+    let customizedName = originalProductName;
+    const customizations = [];
+    
+    customizationSelects.forEach(select => {
+      const selectedOption = select.options[select.selectedIndex];
+      const customizationType = select.getAttribute('data-customization-type');
+      const optionText = selectedOption.textContent.replace(/\s*\(\+\$[\d,]+\)/, '').trim();
+      
+      // Only add if not the default/first option
+      if (select.selectedIndex > 0) {
+        switch(customizationType) {
+          case 'band_color':
+            customizations.push(`${optionText} Band`);
+            break;
+          case 'dial_color':
+            customizations.push(`${optionText} Dial`);
+            break;
+          case 'engraving':
+            if (optionText !== 'None') {
+              customizations.push(`with ${optionText}`);
+            }
+            break;
+          case 'size':
+            customizations.push(`${optionText}`);
+            break;
+          default:
+            customizations.push(optionText);
+        }
+      }
+    });
+    
+    if (customizations.length > 0) {
+      customizedName += ` (${customizations.join(', ')})`;
+    }
+    
+    return customizedName;
+  }
+  
+  // Update all displays
+  function updateDisplay() {
     const customizationPrice = calculateCustomizationPrice();
     const totalPrice = basePrice + customizationPrice;
     const quantityElement = document.getElementById('quantity-display');
     const quantity = quantityElement ? parseInt(quantityElement.textContent || '1') : 1;
     const finalTotal = totalPrice * quantity;
     
+    // Update customized product name
+    const customizedName = generateCustomizedProductName();
+    if (productTitleElement) {
+      productTitleElement.textContent = customizedName;
+    }
+    
     // Update customization price display
     if (customizationPriceElement) {
-      customizationPriceElement.textContent = `+$${customizationPrice.toLocaleString()}`;
+      customizationPriceElement.textContent = customizationPrice > 0 ? `+$${customizationPrice.toLocaleString()}` : '+$0';
     }
     
     // Update total price display
@@ -1839,39 +2054,77 @@ function initializeCustomizationControls() {
     const addToCartBtn = document.querySelector('.add-to-cart.product-detail-add-to-cart');
     if (addToCartBtn) {
       addToCartBtn.setAttribute('data-price', totalPrice.toString());
+      addToCartBtn.setAttribute('data-name', customizedName);
     }
   }
   
-  // Show/hide diamond carat section based on diamond type
-  function toggleDiamondCaratSection() {
-    const diamondType = diamondTypeSelect.value;
-    if (diamondCaratSection) {
-      if (diamondType === 'real') {
-        diamondCaratSection.style.display = 'block';
-      } else {
-        diamondCaratSection.style.display = 'none';
-      }
-    }
+  // Style the dropdowns
+  function styleDropdowns() {
+    customizationSelects.forEach(select => {
+      // Add enhanced styling classes
+      select.classList.add('enhanced-dropdown');
+      
+      // Create custom styling
+      select.style.cssText = `
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px 40px 12px 16px;
+        font-size: 16px;
+        font-weight: 500;
+        color: #2d3748;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+      `;
+      
+      // Add hover and focus effects
+      select.addEventListener('mouseenter', () => {
+        select.style.borderColor = '#d4af37';
+        select.style.boxShadow = '0 4px 16px rgba(212, 175, 55, 0.2)';
+        select.style.transform = 'translateY(-1px)';
+      });
+      
+      select.addEventListener('mouseleave', () => {
+        if (document.activeElement !== select) {
+          select.style.borderColor = '#e2e8f0';
+          select.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
+          select.style.transform = 'translateY(0)';
+        }
+      });
+      
+      select.addEventListener('focus', () => {
+        select.style.borderColor = '#d4af37';
+        select.style.boxShadow = '0 0 0 3px rgba(212, 175, 55, 0.1), 0 4px 16px rgba(212, 175, 55, 0.2)';
+        select.style.outline = 'none';
+      });
+      
+      select.addEventListener('blur', () => {
+        select.style.borderColor = '#e2e8f0';
+        select.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
+        select.style.transform = 'translateY(0)';
+      });
+    });
   }
   
-  // Event listeners
-  goldCaratSelect.addEventListener('change', updatePriceDisplay);
-  diamondTypeSelect.addEventListener('change', () => {
-    toggleDiamondCaratSection();
-    updatePriceDisplay();
+  // Add event listeners
+  customizationSelects.forEach(select => {
+    select.addEventListener('change', updateDisplay);
   });
-  diamondCaratSelect.addEventListener('change', updatePriceDisplay);
   
   // Listen for quantity changes
   const quantityDisplay = document.getElementById('quantity-display');
   if (quantityDisplay) {
-    const observer = new MutationObserver(updatePriceDisplay);
+    const observer = new MutationObserver(updateDisplay);
     observer.observe(quantityDisplay, { childList: true, characterData: true, subtree: true });
   }
   
-  // Initialize display
-  toggleDiamondCaratSection();
-  updatePriceDisplay();
+  // Initialize
+  styleDropdowns();
+  updateDisplay();
 }
 
 // Load watch details based on URL parameter

@@ -16,6 +16,7 @@
     <meta content="@lovable_dev" name="twitter:site">
     <meta content="https://lovable.dev/opengraph-image-p98pqg.png" name="twitter:image">
     <script type="text/javascript" src="{% static 'script.js' %}"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <link href="{% static 'index.css' %}" rel="stylesheet">
     <link href="{% static 'sonner-toaster.css' %}" rel="stylesheet">
@@ -32,12 +33,12 @@
             <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
               <div class="flex items-center gap-4 mb-4">
                 <span class="relative flex shrink-0 overflow-hidden rounded-full w-16 h-16">
-                  <span class="flex h-full w-full items-center justify-center rounded-full bg-luxury-gold text-luxury-black text-xl font-bold">JD</span>
+                  <span id="user-avatar" class="flex h-full w-full items-center justify-center rounded-full bg-luxury-gold text-luxury-black text-xl font-bold">?</span>
                 </span>
                 <div class="flex-1">
-                  <h2 class="text-xl font-bold text-luxury-black">John Doe</h2>
-                  <p class="text-luxury-gray-dark">@johndoe</p>
-                  <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 mt-1 bg-luxury-gold text-luxury-black">Platinum Member</div>
+                  <h2 id="user-name" class="text-xl font-bold text-luxury-black">Loading...</h2>
+                  <p id="user-username" class="text-luxury-gray-dark">@loading</p>
+                  <div id="user-badge" class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 mt-1 bg-luxury-gold text-luxury-black">Member</div>
                 </div>
               </div>
               <div class="grid grid-cols-3 gap-4 pt-4 border-t border-luxury-gray">
@@ -217,5 +218,67 @@
         </div>
       </div>
     </div>
+    
+    <script>
+      // Account page specific JavaScript
+      document.addEventListener('DOMContentLoaded', function() {
+        // Listen for authentication status changes
+        window.addEventListener('authStatusChanged', function(event) {
+          const { isAuthenticated, user, isTelegramUser } = event.detail;
+          updateAccountInfo(isAuthenticated, user, isTelegramUser);
+        });
+        
+        // Also check immediately if auth is already available
+        if (window.telegramAuth && window.telegramAuth.isAuthenticated) {
+          updateAccountInfo(
+            window.telegramAuth.isAuthenticated,
+            window.telegramAuth.user,
+            window.telegramAuth.isTelegramUser
+          );
+        }
+      });
+      
+      function updateAccountInfo(isAuthenticated, user, isTelegramUser) {
+        if (!isAuthenticated || !user) {
+          // Show login prompt or redirect
+          document.getElementById('user-name').textContent = 'Guest User';
+          document.getElementById('user-username').textContent = '@guest';
+          document.getElementById('user-avatar').textContent = '?';
+          document.getElementById('user-badge').textContent = 'Not Logged In';
+          return;
+        }
+        
+        // Update user display
+        const firstName = user.first_name || '';
+        const lastName = user.last_name || '';
+        const fullName = (firstName + ' ' + lastName).trim() || user.username;
+        
+        document.getElementById('user-name').textContent = fullName;
+        document.getElementById('user-username').textContent = '@' + (user.username || user.id);
+        
+        // Update avatar with initials
+        const initials = getInitials(fullName || user.username);
+        document.getElementById('user-avatar').textContent = initials;
+        
+        // Update badge based on user type
+        const badge = document.getElementById('user-badge');
+        if (isTelegramUser) {
+          badge.textContent = 'Telegram User';
+          badge.className = badge.className.replace('bg-luxury-gold', 'bg-blue-500 text-white');
+        } else {
+          badge.textContent = 'Web User';
+          badge.className = badge.className.replace('bg-luxury-gold', 'bg-green-500 text-white');
+        }
+      }
+      
+      function getInitials(name) {
+        return name
+          .split(' ')
+          .map(word => word[0])
+          .join('')
+          .toUpperCase()
+          .substring(0, 2) || '?';
+      }
+    </script>
   </body>
 </html>

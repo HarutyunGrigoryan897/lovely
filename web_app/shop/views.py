@@ -153,7 +153,10 @@ def favorites(request):
 
 def account(request):
     """User account page"""
-    context = {}
+    context = {
+        'user': request.user if request.user.is_authenticated else None,
+        'is_telegram_user': bool(getattr(request.user, 'telegram_id', None)) if request.user.is_authenticated else False,
+    }
     return render(request, 'account.html', context)
 
 
