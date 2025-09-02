@@ -43,6 +43,7 @@ DEFAULT_APPS = [
 
 PROJECT_APPS = [
     'authorization.apps.AuthorizationConfig',
+    'shop.apps.ShopConfig',
 ]
 
 THIRD_PARTY_APPS = [

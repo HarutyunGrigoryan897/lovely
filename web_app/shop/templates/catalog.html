@@ -1,0 +1,587 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>Teluxe - Luxury Watch Collection | Premium Timepieces</title>
+    <meta content="Discover the finest luxury timepieces from Rolex, Omega, Patek Philippe & more. Premium watches with authenticated quality and exclusive designs." name="description">
+    <meta content="luxury watches, premium timepieces, Rolex, Omega, Patek Philippe, Audemars Piguet, luxury accessories" name="keywords">
+    <meta content="Teluxe" name="author">
+    <meta content="Teluxe - Luxury Watch Collection" property="og:title">
+    <meta content="Discover the finest luxury timepieces from the world's most prestigious brands" property="og:description">
+    <meta content="website" property="og:type">
+    <meta content="https://lovable.dev/opengraph-image-p98pqg.png" property="og:image">
+    <meta content="summary_large_image" name="twitter:card">
+    <meta content="@lovable_dev" name="twitter:site">
+    <meta content="https://lovable.dev/opengraph-image-p98pqg.png" name="twitter:image">
+  <script type="text/javascript" src="{% static 'script.js' %}"></script>
+
+  <link href="{% static 'index.css' %}" rel="stylesheet">
+  <link href="{% static 'sonner-toaster.css' %}" rel="stylesheet">
+  </head>
+  <body>
+    <div id="root">
+      <div aria-label="Notifications (F8)" role="region" style="pointer-events:none" tabindex="-1">
+        <ol class="fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]" tabindex="-1"></ol>
+      </div>
+      <section aria-atomic="false" aria-label="Notifications alt+T" aria-live="polite" aria-relevant="additions text" tabindex="-1"></section>
+      <div class="min-h-screen bg-background font-luxury">
+        <main class="pb-16">
+          <div class="px-4 py-6 max-w-7xl mx-auto">
+            <div class="space-y-6">
+              <div class="space-y-4">
+                <h1 class="text-3xl font-bold text-luxury-black">Product Collection</h1>
+                <div class="relative">
+                  <svg class="lucide lucide-search absolute left-3 top-1/2 transform -translate-y-1/2 text-luxury-gray-dark" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                  </svg>
+                  <input id="search-input" class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-10 border-luxury-gray focus:border-luxury-gold focus:ring-luxury-gold" placeholder="Search products..." value="">
+                </div>
+              </div>
+              
+              <!-- Filter Section -->
+              <div class="flex flex-wrap gap-3 mb-6">
+                <div class="relative">
+                  <button id="brand-filter" class="flex h-10 items-center justify-between rounded-md border bg-luxury-white hover:bg-luxury-gray-light px-4 py-2 text-sm font-medium border-luxury-gray transition-colors duration-200 min-w-[140px]">
+                    <div class="flex items-center">
+                      <svg class="lucide lucide-filter mr-2" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                      </svg>
+                      <span id="brand-filter-text">{% if selected_brand %}{{ selected_brand.name }}{% else %}All Brands{% endif %}</span>
+                    </div>
+                    <svg class="lucide lucide-chevron-down h-4 w-4 opacity-50 transition-transform duration-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="m6 9 6 6 6-6"></path>
+                    </svg>
+                  </button>
+                  <div id="brand-dropdown" class="hidden absolute top-full left-0 z-50 min-w-[180px] rounded-lg border bg-luxury-white shadow-xl mt-2 overflow-hidden">
+                    <div class="py-1">
+                      <div class="brand-option px-4 py-2 hover:bg-luxury-gray text-sm font-medium cursor-pointer transition-colors duration-150" data-brand="all">All Brands</div>
+                      {% for brand in brands %}
+                      <div class="brand-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-brand="{{ brand.slug }}">{{ brand.name }}</div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="relative">
+                  <button id="price-filter" class="flex h-10 items-center justify-between rounded-md border bg-luxury-white hover:bg-luxury-gray-light px-4 py-2 text-sm font-medium border-luxury-gray transition-colors duration-200 min-w-[140px]">
+                    <div class="flex items-center">
+                      <svg class="lucide lucide-dollar-sign mr-2" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="12" x2="12" y1="2" y2="22"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                      </svg>
+                      <span id="price-filter-text">All Prices</span>
+                    </div>
+                    <svg class="lucide lucide-chevron-down h-4 w-4 opacity-50 transition-transform duration-200" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="m6 9 6 6 6-6"></path>
+                    </svg>
+                  </button>
+                  <div id="price-dropdown" class="hidden absolute top-full left-0 z-50 min-w-[200px] rounded-lg border bg-luxury-white shadow-xl mt-2 overflow-hidden">
+                    <div class="py-1">
+                      <div class="price-option px-4 py-2 hover:bg-luxury-gray text-sm font-medium cursor-pointer transition-colors duration-150" data-price="all">All Prices</div>
+                      <div class="price-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-price="0-10000">Under $10,000</div>
+                      <div class="price-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-price="10000-25000">$10,000 - $25,000</div>
+                      <div class="price-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-price="25000-50000">$25,000 - $50,000</div>
+                      <div class="price-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-price="50000+">$50,000+</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Active Filters -->
+            {% if selected_brand %}
+            <div class="mb-4">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-sm text-luxury-gray-dark">Filtered by:</span>
+                <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-luxury-gold/10 text-luxury-gold border border-luxury-gold/20">
+                  <span>{{ selected_brand.name }}</span>
+                  <a href="{% url 'shop:catalog' %}" class="ml-2 hover:text-luxury-gold-dark">
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            
+            <p id="results-count" class="text-luxury-gray-dark mb-4">
+            {% if page_obj %}{{ page_obj.paginator.count }}{% else %}{{ products.count }}{% endif %} products found
+            </p>
+            <div id="watches-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Watch Cards -->
+              {% for product in products %}
+              <div class="rounded-lg border bg-card text-card-foreground shadow-sm group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-card hover:-translate-y-1" data-id="{{ product.slug }}">
+                <a href="{% url 'shop:product_detail' product.slug %}">
+                  <div class="relative">
+                    {% if product.images.first %}
+                      <img alt="{{ product.name }}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="{{ product.images.first.image.url }}">
+                    {% else %}
+                      <img alt="{{ product.name }}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="{% static 'watch-1-L_BZsghZ.jpg' %}">
+                    {% endif %}
+                    <button class="absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 bg-luxury-white/90 text-luxury-gray-dark hover:text-luxury-gold favorite-button" 
+                            data-id="{{ product.slug }}" 
+                            data-name="{{ product.name }}" 
+                            data-price="{{ product.price }}" 
+                            data-image="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'watch-1-L_BZsghZ.jpg' %}{% endif %}" 
+                            data-brand="{{ product.brand.name }}" 
+                            onclick="event.preventDefault(); event.stopPropagation();">
+                      <svg class="lucide lucide-heart" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+                      </svg>
+                    </button>
+                    <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 absolute top-4 left-4 
+                    {% if product.stock_status == 'in_stock' %}bg-luxury-gold text-luxury-black{% elif product.stock_status == 'limited' %}bg-orange-500 text-white{% elif product.stock_status == 'pre_order' %}bg-blue-500 text-white{% else %}bg-red-500 text-white{% endif %}">
+                    {{ product.get_stock_status_display }}</div>
+                  </div>
+                </a>
+                <div class="p-4">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm text-luxury-gold font-medium">{{ product.brand.name }}</span>
+                    <div class="flex items-center">
+                      {% for i in "12345" %}
+                        {% if forloop.counter <= product.rating_stars %}
+                          <svg class="lucide lucide-star fill-luxury-gold text-luxury-gold" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a .53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
+                          </svg>
+                        {% else %}
+                          <svg class="lucide lucide-star text-luxury-gray" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11.525 2.295a .53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a .53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a .53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a .53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a .53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
+                          </svg>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <h3 class="font-semibold text-luxury-black mb-2 group-hover:text-luxury-gold transition-colors duration-200">{{ product.name }}</h3>
+                  <p class="text-xl font-bold text-luxury-black">${{ product.price|floatformat:0 }}</p>
+                  <button class="add-to-cart mt-4 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-4 py-2 bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold w-full"
+                          data-id="{{ product.slug }}"
+                          data-name="{{ product.name }}"
+                          data-price="{{ product.price }}"
+                          data-image="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'watch-1-L_BZsghZ.jpg' %}{% endif %}"
+                          data-brand="{{ product.brand.name }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart mr-2 h-5 w-5">
+                      <circle cx="8" cy="21" r="1"></circle>
+                      <circle cx="19" cy="21" r="1"></circle>
+                      <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+                    </svg>
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
+              {% endfor %}
+              {% comment %} {% empty %} {% endcomment %}
+              <div class="col-span-2 text-center py-12">
+                <svg class="lucide lucide-search-x mx-auto h-16 w-16 text-luxury-gray-dark mb-4" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="m13.5 8.5-5 5"></path>
+                  <path d="m8.5 8.5 5 5"></path>
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.3-4.3"></path>
+                </svg>
+                <h3 class="text-lg font-medium text-luxury-black mb-2">No products found</h3>
+                <p class="text-luxury-gray-dark mb-4">Try adjusting your search or filter criteria.</p>
+                <a href="{% url 'shop:catalog' %}" class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-11 rounded-md bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold px-8 py-3 transition-all duration-300 hover:scale-105">
+                  Browse All Products
+                </a>
+              </div>
+            </div>
+            
+            <!-- Pagination -->
+            {% if page_obj %}
+            <div class="flex justify-center mt-8">
+              <nav class="flex items-center space-x-2">
+                {% if page_obj.has_previous %}
+                  <a href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 text-luxury-gray-dark hover:text-luxury-gold">
+                    <svg class="lucide lucide-chevrons-left h-4 w-4" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="m11 17-5-5 5-5"></path>
+                      <path d="m18 17-5-5 5-5"></path>
+                    </svg>
+                  </a>
+                  <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 text-luxury-gray-dark hover:text-luxury-gold">
+                    <svg class="lucide lucide-chevron-left h-4 w-4" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="m15 18-6-6 6-6"></path>
+                    </svg>
+                  </a>
+                {% endif %}
+                
+                <span class="text-luxury-gray-dark">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                
+                {% if page_obj.has_next %}
+                  <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 text-luxury-gray-dark hover:text-luxury-gold">
+                    <svg class="lucide lucide-chevron-right h-4 w-4" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="m9 18 6-6-6-6"></path>
+                    </svg>
+                  </a>
+                  <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 text-luxury-gray-dark hover:text-luxury-gold">
+                    <svg class="lucide lucide-chevrons-right h-4 w-4" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="m7 17 5-5-5-5"></path>
+                      <path d="m14 17 5-5-5-5"></path>
+                    </svg>
+                  </a>
+                {% endif %}
+              </nav>
+            </div>
+            {% endif %}
+
+            </div>
+              
+
+            </div>
+          </div>
+        </main>
+        <div class="fixed bottom-0 left-0 right-0 z-50 bg-luxury-white border-t border-luxury-gray shadow-luxury">
+          <div class="grid grid-cols-4 h-16">
+            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
+              <a href="{% url 'shop:index' %}">
+                <div class="relative">
+                  <svg class="lucide lucide-house transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
+                    <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  </svg>
+                </div>
+                <span class="text-xs font-medium">Home</span>
+              </a>
+            </button>
+            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative">
+              <a href="{% url 'shop:catalog' %}">
+              <div class="relative">
+                <svg class="lucide lucide-search transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.3-4.3"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-medium">Catalog</span>
+            </a>
+            </button>
+            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
+              <a href="{% url 'shop:cart' %}">
+                <div class="relative">
+                  <svg class="lucide lucide-shopping-bag transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                    <path d="M3 6h18"></path>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                  </svg>
+                  <span class="cart-item-count absolute -top-2 -right-2 bg-luxury-gold text-luxury-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center z-10 min-w-5">0</span>
+                </div>
+                <span class="text-xs font-medium">Cart</span>
+              </a>
+            </button>
+            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
+              <a href="{% url 'shop:account' %}">
+              <div class="relative">
+                <svg class="lucide lucide-user transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="50" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <span class="text-xs font-medium">Account</span>
+              </a>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <script>
+        // Direct filter implementation with comprehensive functionality
+        document.addEventListener('DOMContentLoaded', () => {
+          console.log('Initializing catalog filters...');
+          
+          // Wait for all elements to be fully loaded
+          setTimeout(() => {
+            const searchInput = document.getElementById('search-input');
+            const brandFilter = document.getElementById('brand-filter');
+            const priceFilter = document.getElementById('price-filter');
+            const brandDropdown = document.getElementById('brand-dropdown');
+            const priceDropdown = document.getElementById('price-dropdown');
+            const watchesGrid = document.getElementById('watches-grid');
+            const resultsCount = document.getElementById('results-count');
+            
+            console.log('Elements found:', {
+              searchInput: !!searchInput,
+              brandFilter: !!brandFilter,
+              priceFilter: !!priceFilter,
+              brandDropdown: !!brandDropdown,
+              priceDropdown: !!priceDropdown,
+              watchesGrid: !!watchesGrid,
+              resultsCount: !!resultsCount
+            });
+            
+            // Ensure dropdowns start hidden
+            if (brandDropdown) {
+              brandDropdown.classList.add('hide');
+              brandDropdown.classList.remove('show');
+            }
+            if (priceDropdown) {
+              priceDropdown.classList.add('hide');
+              priceDropdown.classList.remove('show');
+            }
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', (e) => {
+              if (!brandFilter.contains(e.target) && !brandDropdown.contains(e.target)) {
+                brandDropdown.classList.remove('show');
+                brandDropdown.classList.add('hide');
+              }
+              if (!priceFilter.contains(e.target) && !priceDropdown.contains(e.target)) {
+                priceDropdown.classList.remove('show');
+                priceDropdown.classList.add('hide');
+              }
+            });
+            
+            if (!brandFilter || !priceFilter || !watchesGrid) {
+              console.error('Required elements not found');
+              return;
+            }
+            
+            let currentFilters = {
+              search: '',
+              brand: 'all',
+              price: 'all'
+            };
+            
+            // Search functionality
+            if (searchInput) {
+              searchInput.addEventListener('input', (e) => {
+                currentFilters.search = e.target.value.toLowerCase();
+                applyFilters();
+              });
+            }
+            
+            // Brand filter functionality
+            if (brandFilter && brandDropdown) {
+              console.log('Setting up brand filter...');
+              console.log('Brand filter element:', brandFilter);
+              console.log('Brand dropdown element:', brandDropdown);
+              
+              brandFilter.addEventListener('click', (e) => {
+                console.log('Brand filter clicked!');
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Simple toggle - if it has 'show' class, hide it, otherwise show it
+                if (brandDropdown.classList.contains('show')) {
+                  brandDropdown.classList.remove('show');
+                  brandDropdown.classList.add('hide');
+                  console.log('Hiding brand dropdown');
+                } else {
+                  brandDropdown.classList.remove('hide', 'hidden');
+                  brandDropdown.classList.add('show');
+                  brandDropdown.style.display = 'block';
+                  console.log('Showing brand dropdown');
+                }
+                
+                // Hide price dropdown if it's open
+                if (priceDropdown) {
+                  priceDropdown.classList.remove('show');
+                  priceDropdown.classList.add('hide');
+                }
+              });
+              
+              const brandOptions = brandDropdown.querySelectorAll('.brand-option');
+              console.log('Found brand options:', brandOptions.length);
+              brandOptions.forEach((option, index) => {
+                console.log(`Brand option ${index}:`, option.textContent, option.dataset.brand);
+                option.addEventListener('click', (e) => {
+                  console.log('Brand option clicked:', option.dataset.brand);
+                  e.preventDefault();
+                  e.stopPropagation();
+                  currentFilters.brand = option.dataset.brand;
+                  
+                  const spanElement = brandFilter.querySelector('span');
+                  if (spanElement) {
+                    spanElement.textContent = option.textContent;
+                    console.log('Updated brand filter text to:', option.textContent);
+                  }
+                  
+                  brandDropdown.classList.add('hidden');
+                  brandDropdown.style.display = 'none';
+                  applyFilters();
+                });
+              });
+            } else {
+              console.error('Brand filter elements not found:', {
+                brandFilter: !!brandFilter,
+                brandDropdown: !!brandDropdown
+              });
+            }
+            
+            // Price filter functionality
+            if (priceFilter && priceDropdown) {
+              console.log('Setting up price filter...');
+              console.log('Price filter element:', priceFilter);
+              console.log('Price dropdown element:', priceDropdown);
+              
+              priceFilter.addEventListener('click', (e) => {
+                console.log('Price filter clicked!');
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Simple toggle - if it has 'show' class, hide it, otherwise show it
+                if (priceDropdown.classList.contains('show')) {
+                  priceDropdown.classList.remove('show');
+                  priceDropdown.classList.add('hide');
+                  console.log('Hiding price dropdown');
+                } else {
+                  priceDropdown.classList.remove('hide', 'hidden');
+                  priceDropdown.classList.add('show');
+                  priceDropdown.style.display = 'block';
+                  console.log('Showing price dropdown');
+                }
+                
+                // Hide brand dropdown if it's open
+                if (brandDropdown) {
+                  brandDropdown.classList.remove('show');
+                  brandDropdown.classList.add('hide');
+                }
+                
+                // Hide brand dropdown
+                if (brandDropdown) {
+                  brandDropdown.style.display = 'none';
+                  brandDropdown.classList.add('hidden');
+                }
+              });
+              
+              const priceOptions = priceDropdown.querySelectorAll('.price-option');
+              console.log('Found price options:', priceOptions.length);
+              priceOptions.forEach((option, index) => {
+                console.log(`Price option ${index}:`, option.textContent, option.dataset.price);
+                option.addEventListener('click', (e) => {
+                  console.log('Price option clicked:', option.dataset.price);
+                  e.preventDefault();
+                  e.stopPropagation();
+                  currentFilters.price = option.dataset.price;
+                  
+                  const spanElement = priceFilter.querySelector('span');
+                  if (spanElement) {
+                    spanElement.textContent = option.textContent;
+                    console.log('Updated price filter text to:', option.textContent);
+                  }
+                  
+                  priceDropdown.classList.add('hidden');
+                  priceDropdown.style.display = 'none';
+                  applyFilters();
+                });
+              });
+            } else {
+              console.error('Price filter elements not found:', {
+                priceFilter: !!priceFilter,
+                priceDropdown: !!priceDropdown
+              });
+            }
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', (e) => {
+              if (!brandFilter?.contains(e.target)) {
+                brandDropdown?.classList.add('hidden');
+                if (brandDropdown) brandDropdown.style.display = 'none';
+              }
+              if (!priceFilter?.contains(e.target)) {
+                priceDropdown?.classList.add('hidden');
+                if (priceDropdown) priceDropdown.style.display = 'none';
+              }
+            });
+            
+            // Filter application function
+            function applyFilters() {
+              if (typeof watchData === 'undefined') {
+                console.error('watchData not available');
+                return;
+              }
+              
+              let filteredWatches = Object.values(watchData);
+              
+              // Apply search filter
+              if (currentFilters.search) {
+                filteredWatches = filteredWatches.filter(watch => 
+                  watch.name.toLowerCase().includes(currentFilters.search) ||
+                  watch.brand.toLowerCase().includes(currentFilters.search) ||
+                  watch.description.toLowerCase().includes(currentFilters.search)
+                );
+              }
+              
+              // Apply brand filter
+              if (currentFilters.brand !== 'all') {
+                filteredWatches = filteredWatches.filter(watch => 
+                  watch.brand === currentFilters.brand
+                );
+              }
+              
+              // Apply price filter
+              if (currentFilters.price !== 'all') {
+                filteredWatches = filteredWatches.filter(watch => {
+                  const price = watch.price;
+                  switch (currentFilters.price) {
+                    case '0-10000':
+                      return price < 10000;
+                    case '10000-25000':
+                      return price >= 10000 && price <= 25000;
+                    case '25000-50000':
+                      return price >= 25000 && price <= 50000;
+                    case '50000+':
+                      return price > 50000;
+                    default:
+                      return true;
+                  }
+                });
+              }
+              
+              // Update results count
+              if (resultsCount) {
+                resultsCount.textContent = `${filteredWatches.length} watch${filteredWatches.length !== 1 ? 'es' : ''} found`;
+              }
+              
+              // Render filtered watches
+              renderFilteredWatches(filteredWatches);
+            }
+            
+            // Render watches function
+            function renderFilteredWatches(watches) {
+              if (!watchesGrid) return;
+              
+              watchesGrid.innerHTML = watches.map(watch => `
+                <div class="rounded-lg border bg-card text-card-foreground shadow-sm group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-card hover:-translate-y-1" data-id="${watch.id}">
+                  <a href="/product/${watch.id}/">
+                    <div class="relative">
+                      <img alt="${watch.name}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="${watch.image}">
+                      <button class="absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 bg-luxury-white/90 text-luxury-gray-dark hover:text-luxury-gold favorite-button" data-id="${watch.id}" data-name="${watch.name}" data-price="${watch.price}" data-image="${watch.image}" data-brand="${watch.brand}" onclick="event.preventDefault(); event.stopPropagation();">
+                        <svg class="lucide lucide-heart" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </a>
+                  <div class="p-4">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-sm text-luxury-gold font-medium">${watch.brand}</span>
+                      <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-green-100 text-green-800 hover:bg-green-100">${watch.stock}</div>
+                    </div>
+                    <h3 class="font-semibold text-luxury-black mb-2">${watch.name}</h3>
+                    <p class="text-2xl font-bold text-luxury-black mb-3">$${watch.price.toLocaleString()}</p>
+                    <button class="w-full bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold py-2 px-4 rounded-md transition-colors duration-200 add-to-cart-btn" data-id="${watch.id}" data-name="${watch.name}" data-price="${watch.price}" data-image="${watch.image}" data-brand="${watch.brand}">
+                      Add to Cart
+                    </button>
+                  </div>
+                </div>
+              `).join('');
+              
+              // Re-attach event listeners for favorites and cart
+              if (typeof FavoritesManager !== 'undefined') {
+                FavoritesManager.attachFavoriteListeners();
+              }
+              if (typeof CartManager !== 'undefined') {
+                CartManager.attachCartListeners();
+              }
+            }
+            
+            // Initial render
+            applyFilters();
+            console.log('Filter system initialized successfully');
+            
+          }, 100);
+        });
+      </script>
+  </body>
+</html>

@@ -1,0 +1,285 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>Teluxe - Luxury Watch Collection | Premium Timepieces</title>
+    <meta content="Discover the finest luxury timepieces from Rolex, Omega, Patek Philippe & more. Premium watches with authenticated quality and exclusive designs." name="description">
+    <meta content="luxury watches, premium timepieces, Rolex, Omega, Patek Philippe, Audemars Piguet, luxury accessories" name="keywords">
+    <meta content="Teluxe" name="author">
+    <meta content="Teluxe - Luxury Watch Collection" property="og:title">
+    <meta content="Discover the finest luxury timepieces from the world's most prestigious brands" property="og:description">
+    <meta content="website" property="og:type">
+    <meta content="https://lovable.dev/opengraph-image-p98pqg.png" property="og:image">
+    <meta content="summary_large_image" name="twitter:card">
+    <meta content="@lovable_dev" name="twitter:site">
+    <meta content="https://lovable.dev/opengraph-image-p98pqg.png" name="twitter:image">
+    <script type="text/javascript" src="{% static 'script.js' %}"></script>
+
+    <link href="{% static 'index.css' %}" rel="stylesheet">
+    <link href="{% static 'sonner-toaster.css' %}" rel="stylesheet">
+  </head>
+  <body>
+    <div id="root">
+      <div aria-label="Notifications (F8)" role="region" style="pointer-events:none" tabindex="-1">
+        <ol class="fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]" tabindex="-1"></ol>
+      </div>
+      <section aria-atomic="false" aria-label="Notifications alt+T" aria-live="polite" aria-relevant="additions text" tabindex="-1"></section>
+      <div class="min-h-screen bg-background font-luxury">
+        <main class="pb-16">
+          <div class="p-4 space-y-6">
+            <div class="flex items-center gap-4">
+              <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 rounded-md p-2" onclick="history.back()">
+                <svg class="lucide lucide-arrow-left w-5 h-5" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="m12 19-7-7 7-7"></path>
+                  <path d="M19 12H5"></path>
+                </svg>
+              </button>
+              <h1 class="text-3xl font-bold text-luxury-black">Settings</h1>
+            </div>
+            <div class="space-y-6">
+              <div>
+                <h2 class="text-lg font-semibold text-luxury-black mb-3">Notifications</h2>
+                <div class="rounded-lg border bg-card text-card-foreground shadow-sm divide-y divide-luxury-gray">
+                  <div class="p-4">
+                    <div class="flex items-center gap-4">
+                      <div class="p-2 bg-luxury-gold/10 rounded-lg">
+                        <svg class="lucide lucide-bell text-luxury-gold" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+                        </svg>
+                      </div>
+                      <div class="flex-1">
+                        <h3 class="font-semibold text-luxury-black">Push Notifications</h3>
+                        <p class="text-sm text-luxury-gray-dark">Get notified about orders and deals</p>
+                      </div>
+                      <button class="peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input" aria-checked="true" data-state="checked" role="switch" type="button" value="on">
+                        <span class="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0" data-state="checked"></span>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="p-4">
+                    <div class="flex items-center gap-4">
+                      <div class="p-2 bg-luxury-gold/10 rounded-lg">
+                        <svg class="lucide lucide-volume2 text-luxury-gold" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"></path>
+                          <path d="M16 9a5 5 0 0 1 0 6"></path>
+                          <path d="M19.364 18.364a9 9 0 0 0 0-12.728"></path>
+                        </svg>
+                      </div>
+                      <div class="flex-1">
+                        <h3 class="font-semibold text-luxury-black">Sound Effects</h3>
+                        <p class="text-sm text-luxury-gray-dark">Enable sound for interactions</p>
+                      </div>
+                      <button class="peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input" aria-checked="true" data-state="checked" role="switch" type="button" value="on">
+                        <span class="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0" data-state="checked"></span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-luxury-black mb-3">Appearance</h2>
+                <div class="rounded-lg border bg-card text-card-foreground shadow-sm divide-y divide-luxury-gray">
+                  <div class="p-4">
+                    <div class="flex items-center gap-4">
+                      <div class="p-2 bg-luxury-gold/10 rounded-lg">
+                        <svg class="lucide lucide-moon text-luxury-gold" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                        </svg>
+                      </div>
+                      <div class="flex-1">
+                        <h3 class="font-semibold text-luxury-black">Dark Mode</h3>
+                        <p class="text-sm text-luxury-gray-dark">Switch to dark theme</p>
+                      </div>
+                      <button class="peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input" aria-checked="false" data-state="unchecked" role="switch" type="button" value="on">
+                        <span class="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0" data-state="unchecked"></span>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="p-4">
+                    <div class="flex items-center gap-4">
+                      <div class="p-2 bg-luxury-gold/10 rounded-lg">
+                        <svg class="lucide lucide-globe text-luxury-gold" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                          <path d="M2 12h20"></path>
+                        </svg>
+                      </div>
+                      <div class="flex-1">
+                        <h3 class="font-semibold text-luxury-black">Language</h3>
+                        <p class="text-sm text-luxury-gray-dark">English</p>
+                      </div>
+                      <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 rounded-md p-2">
+                        <svg class="lucide lucide-chevron-right text-luxury-gray-dark" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+                          <path d="m9 18 6-6-6-6"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-luxury-black mb-3">Account</h2>
+                <div class="rounded-lg border bg-card text-card-foreground shadow-sm divide-y divide-luxury-gray">
+                  <div class="p-4">
+                    <div class="flex items-center gap-4">
+                      <div class="p-2 bg-luxury-gold/10 rounded-lg">
+                        <svg class="lucide lucide-shield text-luxury-gold" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+                        </svg>
+                      </div>
+                      <div class="flex-1">
+                        <h3 class="font-semibold text-luxury-black">Privacy & Security</h3>
+                        <p class="text-sm text-luxury-gray-dark">Manage your privacy settings</p>
+                      </div>
+                      <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 rounded-md p-2">
+                        <svg class="lucide lucide-chevron-right text-luxury-gray-dark" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+                          <path d="m9 18 6-6-6-6"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="p-4">
+                    <div class="flex items-center gap-4">
+                      <div class="p-2 bg-luxury-gold/10 rounded-lg">
+                        <svg class="lucide lucide-credit-card text-luxury-gold" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+                          <rect height="14" rx="2" width="20" x="2" y="5"></rect>
+                          <line x1="2" x2="22" y1="10" y2="10"></line>
+                        </svg>
+                      </div>
+                      <div class="flex-1">
+                        <h3 class="font-semibold text-luxury-black">Payment Methods</h3>
+                        <p class="text-sm text-luxury-gray-dark">Manage saved payment methods</p>
+                      </div>
+                      <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 rounded-md p-2">
+                        <svg class="lucide lucide-chevron-right text-luxury-gray-dark" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+                          <path d="m9 18 6-6-6-6"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="p-4">
+                    <div class="flex items-center gap-4">
+                      <div class="p-2 bg-luxury-gold/10 rounded-lg">
+                        <svg class="lucide lucide-truck text-luxury-gold" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path>
+                          <path d="M15 18H9"></path>
+                          <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path>
+                          <circle cx="17" cy="18" r="2"></circle>
+                          <circle cx="7" cy="18" r="2"></circle>
+                        </svg>
+                      </div>
+                      <div class="flex-1">
+                        <h3 class="font-semibold text-luxury-black">Shipping Addresses</h3>
+                        <p class="text-sm text-luxury-gray-dark">Manage delivery addresses</p>
+                      </div>
+                      <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 rounded-md p-2">
+                        <svg class="lucide lucide-chevron-right text-luxury-gray-dark" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+                          <path d="m9 18 6-6-6-6"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-luxury-black mb-3">Data</h2>
+                <div class="rounded-lg border bg-card text-card-foreground shadow-sm divide-y divide-luxury-gray">
+                  <div class="p-4">
+                    <div class="flex items-center gap-4">
+                      <div class="p-2 bg-luxury-gold/10 rounded-lg">
+                        <svg class="lucide lucide-heart text-luxury-gold" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+                        </svg>
+                      </div>
+                      <div class="flex-1">
+                        <h3 class="font-semibold text-red-600">Clear Favorites</h3>
+                        <p class="text-sm text-luxury-gray-dark">Remove all saved favorites</p>
+                      </div>
+                      <button id="clear-favorites-btn" class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border bg-background hover:text-accent-foreground h-9 rounded-md px-3 border-red-200 text-red-600 hover:bg-red-50">Clear</button>
+                    </div>
+                  </div>
+                  <div class="p-4">
+                    <div class="flex items-center gap-4">
+                      <div class="p-2 bg-luxury-gold/10 rounded-lg">
+                        <svg class="lucide lucide-shopping-bag text-luxury-gold" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                          <path d="M3 6h18"></path>
+                          <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                      </div>
+                      <div class="flex-1">
+                        <h3 class="font-semibold text-red-600">Clear Cart</h3>
+                        <p class="text-sm text-luxury-gray-dark">Remove all items from cart</p>
+                      </div>
+                      <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border bg-background hover:text-accent-foreground h-9 rounded-md px-3 border-red-200 text-red-600 hover:bg-red-50">Clear</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
+              <div class="text-center space-y-2">
+                <h3 class="font-semibold text-luxury-black">Luxury Watches</h3>
+                <p class="text-sm text-luxury-gray-dark">Version 1.0.0</p>
+                <p class="text-xs text-luxury-gray">Built for Telegram • Made with ❤️</p>
+              </div>
+            </div>
+          </div>
+        </main>
+        <div class="fixed bottom-0 left-0 right-0 z-50 bg-luxury-white border-t border-luxury-gray shadow-luxury">
+          <div class="grid grid-cols-4 h-16">
+            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative">
+              <a href="{% url 'shop:index' %}">
+                <div class="relative">
+                  <svg class="lucide lucide-house transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
+                    <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  </svg>
+                </div>
+                <span class="text-xs font-medium">Home</span>
+              </a>
+            </button>
+            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
+              <a href="{% url 'shop:catalog' %}">
+              <div class="relative">
+                <svg class="lucide lucide-search transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.3-4.3"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-medium">Catalog</span>
+            </a>
+            </button>
+            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
+              <a href="{% url 'shop:cart' %}">
+                <div class="relative">
+                  <svg class="lucide lucide-shopping-bag transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                    <path d="M3 6h18"></path>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                  </svg>
+                  <span class="cart-item-count absolute -top-2 -right-2 bg-luxury-gold text-luxury-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center z-10 min-w-5">0</span>
+                </div>
+                <span class="text-xs font-medium">Cart</span>
+              </a>
+            </button>
+            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
+              <a href="{% url 'shop:account' %}">
+              <div class="relative">
+                <svg class="lucide lucide-user transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="50" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <span class="text-xs font-medium">Account</span>
+              </a>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
