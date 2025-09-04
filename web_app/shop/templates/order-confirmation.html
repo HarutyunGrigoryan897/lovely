@@ -8,6 +8,7 @@
     <meta content="Order confirmation for your luxury watch purchase from Teluxe." name="description">
     <meta content="luxury watches, order confirmation, premium timepieces" name="keywords">
     <meta content="Teluxe" name="author">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <meta content="Order Confirmation - Teluxe" property="og:title">
     <meta content="Your luxury watch order has been confirmed" property="og:description">
     <meta content="website" property="og:type">
@@ -16,6 +17,7 @@
     <meta content="@lovable_dev" name="twitter:site">
     <meta content="https://lovable.dev/opengraph-image-p98pqg.png" name="twitter:image">
     <script type="text/javascript" src="{% static 'script.js' %}"></script>
+  <script type="text/javascript" src="{% static 'cart.js' %}"></script>
     <link href="{% static 'index.css' %}" rel="stylesheet">
     <link href="{% static 'sonner-toaster.css' %}" rel="stylesheet">
   </head>
@@ -55,7 +57,63 @@
               
               <!-- Order Details Card -->
               <div class="bg-luxury-white rounded-lg border border-luxury-gray p-6 text-left shadow-lg" id="order-confirmation-details">
-                <!-- Order details will be populated here -->
+                {% if order %}
+                <!-- Actual order details -->
+                <div class="space-y-4">
+                  <div class="flex justify-between items-center pb-4 border-b border-luxury-gray">
+                    <span class="text-luxury-gray-dark">Order Number:</span>
+                    <span class="font-semibold text-luxury-black" id="order-number">{{ order.order_number }}</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-luxury-gray-dark">Order Date:</span>
+                    <span class="font-semibold text-luxury-black" id="order-date">{{ order.created_at|date:"F j, Y" }}</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-luxury-gray-dark">Total Amount:</span>
+                    <span class="font-semibold text-luxury-black" id="total-amount">${{ order.total_amount }}</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-luxury-gray-dark">Status:</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium
+                      {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                      {% elif order.status == 'confirmed' %}bg-blue-100 text-blue-800
+                      {% elif order.status == 'processing' %}bg-orange-100 text-orange-800
+                      {% elif order.status == 'shipped' %}bg-purple-100 text-purple-800
+                      {% elif order.status == 'delivered' %}bg-green-100 text-green-800
+                      {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                      {% else %}bg-gray-100 text-gray-800{% endif %}">
+                      {{ order.get_status_display }}
+                    </span>
+                  </div>
+                </div>
+                
+                <!-- Order Items -->
+                {% if order_items %}
+                <div class="mt-6 pt-4 border-t border-luxury-gray">
+                  <h4 class="font-semibold text-luxury-black mb-3">Order Items:</h4>
+                  <div class="space-y-3">
+                    {% for item in order_items %}
+                    <div class="flex justify-between items-center">
+                      <div class="flex-1">
+                        <div class="font-medium text-luxury-black">{{ item.product.name }}</div>
+                        <div class="text-sm text-luxury-gray-dark">Quantity: {{ item.quantity }}</div>
+                        {% if item.customization_data %}
+                        <div class="text-xs text-luxury-gray-dark mt-1">
+                          Customized
+                        </div>
+                        {% endif %}
+                      </div>
+                      <div class="text-right">
+                        <div class="font-semibold text-luxury-black">${{ item.total_price }}</div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+                {% endif %}
+                
+                {% else %}
+                <!-- Default/placeholder order details -->
                 <div class="space-y-4">
                   <div class="flex justify-between items-center pb-4 border-b border-luxury-gray">
                     <span class="text-luxury-gray-dark">Order Number:</span>
@@ -70,6 +128,7 @@
                     <span class="font-semibold text-luxury-black" id="delivery-date">September 9, 2025</span>
                   </div>
                 </div>
+                {% endif %}
               </div>
             </div>
 
@@ -144,57 +203,27 @@
         </main>
         
         <!-- Bottom Navigation -->
-        <div class="fixed bottom-0 left-0 right-0 z-50 bg-luxury-white border-t border-luxury-gray shadow-luxury">
-          <div class="grid grid-cols-4 h-16">
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="{% url 'shop:index' %}" class="flex flex-col items-center space-y-1">
-                <div class="relative">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
-                    <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                  </svg>
-                </div>
-                <span class="text-xs font-medium">Home</span>
-              </a>
-            </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="{% url 'shop:catalog' %}" class="flex flex-col items-center space-y-1">
-                <div class="relative">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.3-4.3"></path>
-                  </svg>
-                </div>
-                <span class="text-xs font-medium">Catalog</span>
-              </a>
-            </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="{% url 'shop:cart' %}" class="flex flex-col items-center space-y-1">
-                <div class="relative">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                    <path d="M3 6h18"></path>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                  </svg>
-                  <span class="cart-item-count absolute -top-2 -right-2 bg-luxury-gold text-luxury-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center min-w-5">0</span>
-                </div>
-                <span class="text-xs font-medium">Cart</span>
-              </a>
-            </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 text-luxury-gold">
-              <a href="{% url 'shop:account' %}" class="flex flex-col items-center space-y-1">
-                <div class="relative">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                </div>
-                <span class="text-xs font-medium">Account</span>
-              </a>
-            </button>
-          </div>
-        </div>
+        {% with active_page='account' %}
+          {% include 'navbar.html' %}
+        {% endwith %}
       </div>
-    </div>
+    </div>>
+    
+    <script>
+      // Initialize cart manager and update cart count
+      document.addEventListener('DOMContentLoaded', async () => {
+        // Load cart manager if available
+        if (window.ServerCartManager) {
+          await window.ServerCartManager.loadCart();
+        }
+        
+        // Update cart count to 0 since order was placed
+        const cartCountElements = document.querySelectorAll('.cart-item-count');
+        cartCountElements.forEach(element => {
+          element.textContent = '0';
+          element.style.display = 'none';
+        });
+      });
+    </script>
   </body>
 </html>

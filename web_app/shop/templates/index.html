@@ -16,6 +16,7 @@
     <meta content="@lovable_dev" name="twitter:site">
     <meta content="https://lovable.dev/opengraph-image-p98pqg.png" name="twitter:image">
   <script type="text/javascript" src="{% static 'script.js' %}"></script>
+  <script type="text/javascript" src="{% static 'cart.js' %}"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link href="{% static 'index.css' %}" rel="stylesheet">
   <link href="{% static 'sonner-toaster.css' %}" rel="stylesheet">
@@ -30,17 +31,34 @@
         <main class="pb-16">
           <div class="space-y-6">
             <section class="relative h-96 bg-gradient-hero overflow-hidden">
-              <div class="absolute inset-0 bg-cover bg-center" style="background-image:url({% static 'hero-watch-D40AmJ87.jpg' %})"></div>
+              {% if hero_section and hero_section.background_image %}
+                <div class="absolute inset-0 bg-cover bg-center" style="background-image:url({{ hero_section.background_image.url }})"></div>
+              {% else %}
+                <div class="absolute inset-0 bg-cover bg-center" style="background-image:url({% static 'hero-watch-D40AmJ87.jpg' %})"></div>
+              {% endif %}
               <div class="absolute inset-0 bg-luxury-black/40"></div>
               <div class="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 sm:px-6">
-                <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold text-luxury-white mb-4">Teluxe</h1>
-                <p class="text-lg sm:text-xl text-luxury-white/90 mb-8 max-w-md px-4">Discover the finest luxury timepieces from the world's most prestigious brands</p>
-                  <a href="{% url 'shop:catalog' %}" >
-                    <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-11 rounded-md bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold px-6 sm:px-8 py-3 transition-all duration-300 hover:scale-105">Explore Collection <svg class="lucide lucide-chevron-right ml-2 h-5 w-5" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="m9 18 6-6-6-6"></path>
-                      </svg>
-                    </button>
-                  </a>
+                <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold text-luxury-white mb-4">
+                  {% if hero_section %}{{ hero_section.title }}{% else %}Teluxe{% endif %}
+                </h1>
+                <p class="text-lg sm:text-xl text-luxury-white/90 mb-8 max-w-md px-4">
+                  {% if hero_section %}{{ hero_section.subtitle }}{% else %}Discover the finest luxury timepieces from the world's most prestigious brands{% endif %}
+                </p>
+                  {% if hero_section %}
+                    <a href="{{ hero_section.button_url }}" >
+                      <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-11 rounded-md bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold px-6 sm:px-8 py-3 transition-all duration-300 hover:scale-105">{{ hero_section.button_text }} <svg class="lucide lucide-chevron-right ml-2 h-5 w-5" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                          <path d="m9 18 6-6-6-6"></path>
+                        </svg>
+                      </button>
+                    </a>
+                  {% else %}
+                    <a href="{% url 'shop:catalog' %}" >
+                      <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-11 rounded-md bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold px-6 sm:px-8 py-3 transition-all duration-300 hover:scale-105">Explore Collection <svg class="lucide lucide-chevron-right ml-2 h-5 w-5" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                          <path d="m9 18 6-6-6-6"></path>
+                        </svg>
+                      </button>
+                    </a>
+                  {% endif %}
 
               </div>
             </section>
@@ -97,7 +115,7 @@
                       {% else %}
                         <img alt="{{ product.name }}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="{% static 'watch-1-L_BZsghZ.jpg' %}">
                       {% endif %}
-                      <button class="absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 bg-luxury-white/90 text-luxury-gray-dark hover:text-luxury-gold favorite-button" 
+                      <button class="absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 bg-luxury-white/90 text-luxury-gray-dark hover:text-red-500 favorite-button" 
                               data-id="{{ product.slug }}" 
                               data-name="{{ product.name }}" 
                               data-price="{{ product.price }}" 
@@ -108,8 +126,8 @@
                           <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
                         </svg>
                       </button>
-                      <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 absolute top-4 left-4 
-                      {% if product.stock_status == 'in_stock' %}bg-luxury-gold text-luxury-black{% elif product.stock_status == 'limited' %}bg-orange-500 text-white{% elif product.stock_status == 'pre_order' %}bg-blue-500 text-white{% else %}bg-red-500 text-white{% endif %}">
+                      <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent absolute top-4 left-4 
+                      {% if product.stock_status == 'in_stock' %}bg-luxury-gold text-luxury-black hover:bg-luxury-gold{% elif product.stock_status == 'limited' %}bg-red-500 text-white hover:bg-red-600{% elif product.stock_status == 'pre_order' %}bg-blue-500 text-white hover:bg-blue-600{% else %}bg-red-500 text-white hover:bg-red-600{% endif %}">
                       {{ product.get_stock_status_display }}</div>
                     </div>
                   </a>
@@ -153,57 +171,9 @@
           </div>
         </main>
         
-        <!-- Bottom Navigation -->
-        <div class="fixed bottom-0 left-0 right-0 z-50 bg-luxury-white border-t border-luxury-gray shadow-luxury">
-          <div class="grid grid-cols-4 h-16">
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative">
-              <a href="{% url 'shop:index' %}">
-                <div class="relative">
-                  <svg class="lucide lucide-house transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
-                    <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                  </svg>
-                </div>
-                <span class="text-xs font-medium">Home</span>
-              </a>
-            </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="{% url 'shop:catalog' %}">
-              <div class="relative">
-                <svg class="lucide lucide-search transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.3-4.3"></path>
-                </svg>
-              </div>
-              <span class="text-xs font-medium">Catalog</span>
-            </a>
-            </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="{% url 'shop:cart' %}">
-                <div class="relative">
-                  <svg class="lucide lucide-shopping-bag transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                    <path d="M3 6h18"></path>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                  </svg>
-                  <span class="cart-item-count absolute -top-2 -right-2 bg-luxury-gold text-luxury-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center z-10 min-w-5">0</span>
-                </div>
-                <span class="text-xs font-medium">Cart</span>
-              </a>
-            </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="{% url 'shop:account' %}">
-              <div class="relative">
-                <svg class="lucide lucide-user transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="50" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-              </div>
-              <span class="text-xs font-medium">Account</span>
-              </a>
-            </button>
-          </div>
-        </div>
+        {% with active_page='home' %}
+          {% include 'navbar.html' %}
+        {% endwith %}
       </div>
     </div>
     

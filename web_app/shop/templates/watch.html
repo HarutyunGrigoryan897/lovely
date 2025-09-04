@@ -16,8 +16,33 @@
     <meta content="@lovable_dev" name="twitter:site">
     <meta content="https://lovable.dev/opengraph-image-p98pqg.png" name="twitter:image">
     <script type="text/javascript" src="{% static 'script.js' %}"></script>
+    <script type="text/javascript" src="{% static 'cart.js' %}"></script>
     <link href="{% static 'index.css' %}" rel="stylesheet">
     <link href="{% static 'sonner-toaster.css' %}" rel="stylesheet">
+    <style>
+      .image-indicator.active {
+        background-color: white !important;
+        transform: scale(1.2);
+      }
+      
+      .image-indicator {
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+      
+      .image-indicator:hover {
+        transform: scale(1.1);
+      }
+      
+      #main-image {
+        transition: opacity 0.3s ease;
+      }
+      
+      /* Navigation button hover effects */
+      #prev-image:hover, #next-image:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+    </style>
   </head>
   <body>
     <div id="root">
@@ -37,7 +62,7 @@
                 </svg>
               </button>
               <h1 class="font-semibold text-luxury-black">{{ product.category.name }} Details</h1>
-              <button class="p-2 rounded-full transition-colors duration-200 text-luxury-gray-dark hover:text-luxury-gold favorite-button" data-id="{{ product.slug }}" data-name="{{ product.name }}" data-price="{{ product.price }}" data-image="{% if product.image %}{{ product.image.url }}{% else %}{% static 'watch-1-L_BZsghZ.jpg' %}{% endif %}" data-brand="{{ product.brand.name }}">
+              <button class="p-2 rounded-full transition-colors duration-200 text-luxury-gray-dark hover:text-red-500 favorite-button" data-id="{{ product.slug }}" data-name="{{ product.name }}" data-price="{{ product.price }}" data-image="{% if product.image %}{{ product.image.url }}{% else %}{% static 'watch-1-L_BZsghZ.jpg' %}{% endif %}" data-brand="{{ product.brand.name }}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart">
                   <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
                 </svg>
@@ -46,15 +71,69 @@
 
             <!-- Product details content -->
             <div class="px-4 space-y-6" data-id="{{ product.slug }}">
-              <!-- Product image -->
+              <!-- Product image gallery -->
               <div class="relative">
-                {% if product.image %}
-                  <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-80 object-cover rounded-xl">
-                {% else %}
-                  <img src="{% static 'watch-1-L_BZsghZ.jpg' %}" alt="{{ product.name }}" class="w-full h-80 object-cover rounded-xl">
+                <div class="relative overflow-hidden rounded-xl">
+                  <!-- Main image container -->
+                  <div id="main-image-container" class="relative w-full h-80">
+                    {% if product.image %}
+                      <img id="main-image" src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-80 object-cover rounded-xl transition-opacity duration-300">
+                    {% else %}
+                      <img id="main-image" src="{% static 'watch-1-L_BZsghZ.jpg' %}" alt="{{ product.name }}" class="w-full h-80 object-cover rounded-xl transition-opacity duration-300">
+                    {% endif %}
+                    
+                    <!-- Navigation buttons - only show if there are additional images -->
+                    {% if additional_images %}
+                      <button id="prev-image" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-luxury-black rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110 z-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="m15 18-6-6 6-6"></path>
+                        </svg>
+                      </button>
+                      <button id="next-image" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-luxury-black rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110 z-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="m9 18 6-6-6-6"></path>
+                        </svg>
+                      </button>
+                    {% endif %}
+                  </div>
+                  
+                  <!-- Image indicators/dots -->
+                  {% if additional_images %}
+                    <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+                      <button class="image-indicator active w-2 h-2 bg-white rounded-full transition-all duration-200" data-index="0"></button>
+                      {% for image in additional_images %}
+                        <button class="image-indicator w-2 h-2 bg-white/50 hover:bg-white/75 rounded-full transition-all duration-200" data-index="{{ forloop.counter }}"></button>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+                
+                <!-- Thumbnail strip - only show if there are additional images -->
+                {% if additional_images %}
+                  <div class="mt-4">
+                    <div class="flex space-x-2 overflow-x-auto pb-2">
+                      <!-- Main image thumbnail -->
+                      <button class="thumbnail-button flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 border-luxury-gold transition-all duration-200" data-index="0">
+                        {% if product.image %}
+                          <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                        {% else %}
+                          <img src="{% static 'watch-1-L_BZsghZ.jpg' %}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                        {% endif %}
+                      </button>
+                      
+                      <!-- Additional image thumbnails -->
+                      {% for image in additional_images %}
+                        <button class="thumbnail-button flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 border-transparent hover:border-luxury-gold/50 transition-all duration-200" data-index="{{ forloop.counter }}">
+                          <img src="{{ image.image.url }}" alt="{{ image.alt_text|default:product.name }}" class="w-full h-full object-cover">
+                        </button>
+                      {% endfor %}
+                    </div>
+                  </div>
                 {% endif %}
-                <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 absolute top-4 left-4 
-                {% if product.stock_status == 'in_stock' %}bg-luxury-gold text-luxury-black{% elif product.stock_status == 'limited' %}bg-orange-500 text-white{% elif product.stock_status == 'pre_order' %}bg-blue-500 text-white{% else %}bg-red-500 text-white{% endif %}">
+                
+                <!-- Stock status badge -->
+                <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent absolute top-4 left-4 
+                {% if product.stock_status == 'in_stock' %}bg-luxury-gold text-luxury-black hover:bg-luxury-gold{% elif product.stock_status == 'limited' %}bg-red-500 text-white hover:bg-red-600{% elif product.stock_status == 'pre_order' %}bg-blue-500 text-white hover:bg-blue-600{% else %}bg-red-500 text-white hover:bg-red-600{% endif %}">
                 {{ product.get_stock_status_display }}</div>
               </div>
 
@@ -240,57 +319,151 @@
           </div>
         </main>
         <!-- Bottom Navigation -->
-        <div class="fixed bottom-0 left-0 right-0 z-50 bg-luxury-white border-t border-luxury-gray shadow-luxury">
-          <div class="grid grid-cols-4 h-16">
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative">
-              <a href="{% url 'shop:index' %}">
-                <div class="relative">
-                  <svg class="lucide lucide-house transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
-                    <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                  </svg>
-                </div>
-                <span class="text-xs font-medium">Home</span>
-              </a>
-            </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="{% url 'shop:catalog' %}">
-              <div class="relative">
-                <svg class="lucide lucide-search transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.3-4.3"></path>
-                </svg>
-              </div>
-              <span class="text-xs font-medium">Catalog</span>
-            </a>
-            </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="{% url 'shop:cart' %}">
-                <div class="relative">
-                  <svg class="lucide lucide-shopping-bag transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                    <path d="M3 6h18"></path>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                  </svg>
-                  <span class="cart-item-count absolute -top-2 -right-2 bg-luxury-gold text-luxury-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center z-10 min-w-5">0</span>
-                </div>
-                <span class="text-xs font-medium">Cart</span>
-              </a>
-            </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="{% url 'shop:account' %}">
-                <div class="relative">
-                  <svg class="lucide lucide-user transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                </div>
-                <span class="text-xs font-medium">Account</span>
-              </a>
-            </button>
-          </div>
-        </div>
+        {% include 'navbar.html' %}
       </div>
-    </div>
+    </div>>
+    
+    <!-- Image Gallery JavaScript -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Image gallery functionality
+        const mainImage = document.getElementById('main-image');
+        const prevButton = document.getElementById('prev-image');
+        const nextButton = document.getElementById('next-image');
+        const indicators = document.querySelectorAll('.image-indicator');
+        const thumbnails = document.querySelectorAll('.thumbnail-button');
+        
+        // Create array of all images (main + additional)
+        const images = [
+            {
+                url: '{% if product.image %}{{ product.image.url }}{% else %}{% static "watch-1-L_BZsghZ.jpg" %}{% endif %}',
+                alt: '{{ product.name }}'
+            }
+            {% for image in additional_images %},
+            {
+                url: '{{ image.image.url }}',
+                alt: '{{ image.alt_text|default:product.name }}'
+            }
+            {% endfor %}
+        ];
+        
+        let currentImageIndex = 0;
+        
+        // Only initialize gallery if there are additional images
+        if (images.length > 1) {
+            // Previous image button
+            if (prevButton) {
+                prevButton.addEventListener('click', function() {
+                    currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+                    updateImage();
+                });
+            }
+            
+            // Next image button
+            if (nextButton) {
+                nextButton.addEventListener('click', function() {
+                    currentImageIndex = (currentImageIndex + 1) % images.length;
+                    updateImage();
+                });
+            }
+            
+            // Image indicators
+            indicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', function() {
+                    currentImageIndex = index;
+                    updateImage();
+                });
+            });
+            
+            // Thumbnail buttons
+            thumbnails.forEach((thumbnail, index) => {
+                thumbnail.addEventListener('click', function() {
+                    currentImageIndex = index;
+                    updateImage();
+                });
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowLeft' && prevButton) {
+                    prevButton.click();
+                } else if (e.key === 'ArrowRight' && nextButton) {
+                    nextButton.click();
+                }
+            });
+            
+            // Touch/swipe support for mobile
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            const imageContainer = document.getElementById('main-image-container');
+            if (imageContainer) {
+                imageContainer.addEventListener('touchstart', function(e) {
+                    touchStartX = e.changedTouches[0].screenX;
+                });
+                
+                imageContainer.addEventListener('touchend', function(e) {
+                    touchEndX = e.changedTouches[0].screenX;
+                    handleSwipe();
+                });
+            }
+            
+            function handleSwipe() {
+                const swipeThreshold = 50;
+                const swipeDistance = touchEndX - touchStartX;
+                
+                if (Math.abs(swipeDistance) > swipeThreshold) {
+                    if (swipeDistance > 0 && prevButton) {
+                        // Swipe right - previous image
+                        prevButton.click();
+                    } else if (swipeDistance < 0 && nextButton) {
+                        // Swipe left - next image
+                        nextButton.click();
+                    }
+                }
+            }
+        }
+        
+        function updateImage() {
+            if (mainImage && images[currentImageIndex]) {
+                // Fade out
+                mainImage.style.opacity = '0';
+                
+                setTimeout(() => {
+                    // Update image
+                    mainImage.src = images[currentImageIndex].url;
+                    mainImage.alt = images[currentImageIndex].alt;
+                    
+                    // Update indicators
+                    indicators.forEach((indicator, index) => {
+                        if (index === currentImageIndex) {
+                            indicator.classList.add('active');
+                            indicator.classList.remove('bg-white/50');
+                            indicator.classList.add('bg-white');
+                        } else {
+                            indicator.classList.remove('active');
+                            indicator.classList.remove('bg-white');
+                            indicator.classList.add('bg-white/50');
+                        }
+                    });
+                    
+                    // Update thumbnails
+                    thumbnails.forEach((thumbnail, index) => {
+                        if (index === currentImageIndex) {
+                            thumbnail.classList.add('border-luxury-gold');
+                            thumbnail.classList.remove('border-transparent');
+                        } else {
+                            thumbnail.classList.remove('border-luxury-gold');
+                            thumbnail.classList.add('border-transparent');
+                        }
+                    });
+                    
+                    // Fade in
+                    mainImage.style.opacity = '1';
+                }, 150);
+            }
+        }
+    });
+    </script>
   </body>
 </html>

@@ -2,6 +2,9 @@ from django.db import models
 from django.utils.text import slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
 from decimal import Decimal
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class Brand(models.Model):
@@ -400,4 +403,217 @@ class Review(models.Model):
         verbose_name_plural = 'Product Reviews'
 
     def __str__(self):
-        return f"{self.product.name} - {self.rating} stars by {self.customer_name}"
+        return f"{self.customer_name} - {self.product.name} ({self.rating} stars)"
+
+
+class Cart(models.Model):
+    """Shopping cart for users"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cart')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Shopping Cart'
+        verbose_name_plural = 'Shopping Carts'
+
+    def __str__(self):
+        return f"Cart for {self.user.username or self.user.telegram_id}"
+
+    @property
+    def total_items(self):
+        """Total number of items in cart"""
+        return self.items.aggregate(
+            total=models.Sum('quantity')
+        )['total'] or 0
+
+    @property
+    def total_price(self):
+        """Total price of all items in cart"""
+        total = Decimal('0.00')
+        for item in self.items.all():
+            total += item.total_price
+        return total
+
+    @property
+    def item_count(self):
+        """Number of different items in cart"""
+        return self.items.count()
+
+    def clear(self):
+        """Remove all items from cart"""
+        self.items.all().delete()
+
+
+class CartItem(models.Model):
+    """Individual items in a shopping cart"""
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
+    
+    # Store customization details
+    customization_data = models.JSONField(blank=True, null=True, help_text="Store product customization options")
+    customization_price = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    
+    # Store the price at the time of adding to cart
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['cart', 'product', 'customization_data']
+        verbose_name = 'Cart Item'
+        verbose_name_plural = 'Cart Items'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        customization_info = ""
+        if self.customization_data:
+            customization_info = f" (Customized)"
+        return f"{self.quantity}x {self.product.name}{customization_info}"
+
+    def save(self, *args, **kwargs):
+        # Store the current product price when adding to cart
+        if not self.unit_price:
+            self.unit_price = self.product.price
+        super().save(*args, **kwargs)
+
+    @property
+    def total_price(self):
+        """Total price for this cart item including customizations"""
+        return (self.unit_price + self.customization_price) * self.quantity
+
+    @property
+    def customized_product_name(self):
+        """Get product name with customization details"""
+        if not self.customization_data:
+            return self.product.name
+        
+        name = self.product.name
+        customizations = []
+        
+        for key, value in self.customization_data.items():
+            if value and value != 'None':
+                # Format customization display
+                if key == 'band_color':
+                    customizations.append(f"{value} Band")
+                elif key == 'dial_color':
+                    customizations.append(f"{value} Dial")
+                elif key == 'engraving':
+                    customizations.append(f"with {value}")
+                elif key == 'size':
+                    customizations.append(f"{value}")
+                else:
+                    customizations.append(value)
+        
+        if customizations:
+            name += f" ({', '.join(customizations)})"
+        
+        return name
+
+
+class Order(models.Model):
+    """Customer order model"""
+    ORDER_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    order_number = models.CharField(max_length=20, unique=True)
+    status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='pending')
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    total_items = models.PositiveIntegerField()
+    
+    # Customer information (in case user updates their profile later)
+    customer_email = models.EmailField()
+    customer_first_name = models.CharField(max_length=100, blank=True)
+    customer_last_name = models.CharField(max_length=100, blank=True)
+    
+    # Shipping information
+    shipping_first_name = models.CharField(max_length=100, blank=True)
+    shipping_last_name = models.CharField(max_length=100, blank=True)
+    shipping_address = models.CharField(max_length=255, blank=True)
+    shipping_city = models.CharField(max_length=100, blank=True)
+    shipping_zip_code = models.CharField(max_length=20, blank=True)
+    shipping_country = models.CharField(max_length=100, blank=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Order'
+        verbose_name_plural = 'Orders'
+    
+    def __str__(self):
+        return f"Order {self.order_number} - {self.user.username}"
+    
+    def save(self, *args, **kwargs):
+        if not self.order_number:
+            import uuid
+            from datetime import datetime
+            # Generate order number: ORD-YYYYMMDD-XXXX
+            date_part = datetime.now().strftime('%Y%m%d')
+            unique_part = str(uuid.uuid4())[:8].upper()
+            self.order_number = f"ORD-{date_part}-{unique_part}"
+        super().save(*args, **kwargs)
+
+
+class OrderItem(models.Model):
+    """Individual items in an order"""
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(max_digits=10, decimal_places=2)  # Price at time of order
+    customization_data = models.JSONField(null=True, blank=True)  # Store customization details
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = 'Order Item'
+        verbose_name_plural = 'Order Items'
+    
+    def __str__(self):
+        customizations = ""
+        if self.customization_data:
+            try:
+                data = self.customization_data if isinstance(self.customization_data, dict) else {}
+                customizations = f" ({', '.join(f'{k}: {v}' for k, v in data.items())})"
+            except:
+                pass
+        return f"{self.product.name}{customizations} x{self.quantity}"
+    
+    @property
+    def total_price(self):
+        return self.price * self.quantity
+
+
+class HeroSection(models.Model):
+    """Homepage hero section content"""
+    title = models.CharField(max_length=100, default="Teluxe")
+    subtitle = models.CharField(max_length=200, default="Discover the finest luxury timepieces from the world's most prestigious brands")
+    background_image = models.ImageField(upload_to='hero/', help_text="High-quality hero background image")
+    button_text = models.CharField(max_length=50, default="Explore Collection")
+    button_url = models.CharField(max_length=200, default="/catalog/", help_text="URL the button should link to")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Hero Section'
+        verbose_name_plural = 'Hero Sections'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Hero: {self.title}"
+
+    @classmethod
+    def get_active_hero(cls):
+        """Get the currently active hero section"""
+        return cls.objects.filter(is_active=True).first()

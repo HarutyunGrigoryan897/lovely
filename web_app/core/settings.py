@@ -29,6 +29,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+# CSRF settings for ngrok and other development tunnels
+CSRF_TRUSTED_ORIGINS = [
+    'https://4a321641ae36.ngrok.app',
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+]
+
 
 # Application definition
 

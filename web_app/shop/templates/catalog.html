@@ -15,7 +15,32 @@
     <meta content="summary_large_image" name="twitter:card">
     <meta content="@lovable_dev" name="twitter:site">
     <meta content="https://lovable.dev/opengraph-image-p98pqg.png" name="twitter:image">
+  
+  <script type="text/javascript">
+    // Inject product data for JavaScript filtering
+    window.watchData = {
+      {% for product in all_products %}
+      "{{ product.slug }}": {
+        id: "{{ product.slug }}",
+        name: "{{ product.name|escapejs }}",
+        price: {{ product.price }},
+        image: "{% if product.image %}{{ product.image.url }}{% else %}{% static 'watch-1-L_BZsghZ.jpg' %}{% endif %}",
+        brand: "{{ product.brand.name|escapejs }}",
+        brandSlug: "{{ product.brand.slug }}",
+        description: "{{ product.description|escapejs }}",
+        stock_status: "{{ product.stock_status }}",
+        specifications: {
+          "Case Material": "{{ product.case_material|default:'Stainless Steel'|escapejs }}",
+          "Movement": "{{ product.movement_type|default:'Automatic'|escapejs }}",
+          "Water Resistance": "{{ product.water_resistance|default:'100m'|escapejs }}",
+          "Case Size": "{{ product.case_diameter|default:'40mm'|escapejs }}"
+        }
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    };
+  </script>
   <script type="text/javascript" src="{% static 'script.js' %}"></script>
+  <script type="text/javascript" src="{% static 'cart.js' %}"></script>
 
   <link href="{% static 'index.css' %}" rel="stylesheet">
   <link href="{% static 'sonner-toaster.css' %}" rel="stylesheet">
@@ -117,24 +142,24 @@
               <div class="rounded-lg border bg-card text-card-foreground shadow-sm group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-card hover:-translate-y-1" data-id="{{ product.slug }}">
                 <a href="{% url 'shop:product_detail' product.slug %}">
                   <div class="relative">
-                    {% if product.images.first %}
-                      <img alt="{{ product.name }}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="{{ product.images.first.image.url }}">
+                    {% if product.image %}
+                      <img alt="{{ product.name }}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="{{ product.image.url }}">
                     {% else %}
                       <img alt="{{ product.name }}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="{% static 'watch-1-L_BZsghZ.jpg' %}">
                     {% endif %}
-                    <button class="absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 bg-luxury-white/90 text-luxury-gray-dark hover:text-luxury-gold favorite-button" 
+                    <button class="absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 bg-luxury-white/90 text-luxury-gray-dark hover:text-red-500 favorite-button" 
                             data-id="{{ product.slug }}" 
                             data-name="{{ product.name }}" 
                             data-price="{{ product.price }}" 
-                            data-image="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'watch-1-L_BZsghZ.jpg' %}{% endif %}" 
+                            data-image="{% if product.image %}{{ product.image.url }}{% else %}{% static 'watch-1-L_BZsghZ.jpg' %}{% endif %}" 
                             data-brand="{{ product.brand.name }}" 
                             onclick="event.preventDefault(); event.stopPropagation();">
                       <svg class="lucide lucide-heart" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
                         <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
                       </svg>
                     </button>
-                    <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 absolute top-4 left-4 
-                    {% if product.stock_status == 'in_stock' %}bg-luxury-gold text-luxury-black{% elif product.stock_status == 'limited' %}bg-orange-500 text-white{% elif product.stock_status == 'pre_order' %}bg-blue-500 text-white{% else %}bg-red-500 text-white{% endif %}">
+                    <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent absolute top-4 left-4 
+                    {% if product.stock_status == 'in_stock' %}bg-luxury-gold text-luxury-black hover:bg-luxury-gold{% elif product.stock_status == 'limited' %}bg-red-500 text-white hover:bg-red-600{% elif product.stock_status == 'pre_order' %}bg-blue-500 text-white hover:bg-blue-600{% else %}bg-red-500 text-white hover:bg-red-600{% endif %}">
                     {{ product.get_stock_status_display }}</div>
                   </div>
                 </a>
@@ -161,7 +186,7 @@
                           data-id="{{ product.slug }}"
                           data-name="{{ product.name }}"
                           data-price="{{ product.price }}"
-                          data-image="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}{% static 'watch-1-L_BZsghZ.jpg' %}{% endif %}"
+                          data-image="{% if product.image %}{{ product.image.url }}{% else %}{% static 'watch-1-L_BZsghZ.jpg' %}{% endif %}"
                           data-brand="{{ product.brand.name }}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart mr-2 h-5 w-5">
                       <circle cx="8" cy="21" r="1"></circle>
@@ -172,8 +197,7 @@
                   </button>
                 </div>
               </div>
-              {% endfor %}
-              {% comment %} {% empty %} {% endcomment %}
+              {% empty %}
               <div class="col-span-2 text-center py-12">
                 <svg class="lucide lucide-search-x mx-auto h-16 w-16 text-luxury-gray-dark mb-4" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
                   <path d="m13.5 8.5-5 5"></path>
@@ -187,6 +211,7 @@
                   Browse All Products
                 </a>
               </div>
+              {% endfor %}
             </div>
             
             <!-- Pagination -->
@@ -232,56 +257,9 @@
             </div>
           </div>
         </main>
-        <div class="fixed bottom-0 left-0 right-0 z-50 bg-luxury-white border-t border-luxury-gray shadow-luxury">
-          <div class="grid grid-cols-4 h-16">
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="{% url 'shop:index' %}">
-                <div class="relative">
-                  <svg class="lucide lucide-house transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
-                    <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                  </svg>
-                </div>
-                <span class="text-xs font-medium">Home</span>
-              </a>
-            </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative">
-              <a href="{% url 'shop:catalog' %}">
-              <div class="relative">
-                <svg class="lucide lucide-search transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.3-4.3"></path>
-                </svg>
-              </div>
-              <span class="text-xs font-medium">Catalog</span>
-            </a>
-            </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="{% url 'shop:cart' %}">
-                <div class="relative">
-                  <svg class="lucide lucide-shopping-bag transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                    <path d="M3 6h18"></path>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                  </svg>
-                  <span class="cart-item-count absolute -top-2 -right-2 bg-luxury-gold text-luxury-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center z-10 min-w-5">0</span>
-                </div>
-                <span class="text-xs font-medium">Cart</span>
-              </a>
-            </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="{% url 'shop:account' %}">
-              <div class="relative">
-                <svg class="lucide lucide-user transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="50" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-              </div>
-              <span class="text-xs font-medium">Account</span>
-              </a>
-            </button>
-          </div>
-        </div>
+        {% with active_page='catalog' %}
+          {% include 'navbar.html' %}
+        {% endwith %}
       </div>
       
       <script>
@@ -311,23 +289,19 @@
             
             // Ensure dropdowns start hidden
             if (brandDropdown) {
-              brandDropdown.classList.add('hide');
-              brandDropdown.classList.remove('show');
+              brandDropdown.classList.add('hidden');
             }
             if (priceDropdown) {
-              priceDropdown.classList.add('hide');
-              priceDropdown.classList.remove('show');
+              priceDropdown.classList.add('hidden');
             }
             
             // Close dropdowns when clicking outside
             document.addEventListener('click', (e) => {
               if (!brandFilter.contains(e.target) && !brandDropdown.contains(e.target)) {
-                brandDropdown.classList.remove('show');
-                brandDropdown.classList.add('hide');
+                brandDropdown.classList.add('hidden');
               }
               if (!priceFilter.contains(e.target) && !priceDropdown.contains(e.target)) {
-                priceDropdown.classList.remove('show');
-                priceDropdown.classList.add('hide');
+                priceDropdown.classList.add('hidden');
               }
             });
             
@@ -342,10 +316,13 @@
               price: 'all'
             };
             
+            let initialLoad = true; // Flag to track if this is the initial load
+            
             // Search functionality
             if (searchInput) {
               searchInput.addEventListener('input', (e) => {
                 currentFilters.search = e.target.value.toLowerCase();
+                initialLoad = false; // Force re-render when searching
                 applyFilters();
               });
             }
@@ -361,22 +338,18 @@
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Simple toggle - if it has 'show' class, hide it, otherwise show it
-                if (brandDropdown.classList.contains('show')) {
-                  brandDropdown.classList.remove('show');
-                  brandDropdown.classList.add('hide');
-                  console.log('Hiding brand dropdown');
-                } else {
-                  brandDropdown.classList.remove('hide', 'hidden');
-                  brandDropdown.classList.add('show');
-                  brandDropdown.style.display = 'block';
+                // Simple toggle - if it's hidden, show it, otherwise hide it
+                if (brandDropdown.classList.contains('hidden')) {
+                  brandDropdown.classList.remove('hidden');
                   console.log('Showing brand dropdown');
+                } else {
+                  brandDropdown.classList.add('hidden');
+                  console.log('Hiding brand dropdown');
                 }
                 
                 // Hide price dropdown if it's open
                 if (priceDropdown) {
-                  priceDropdown.classList.remove('show');
-                  priceDropdown.classList.add('hide');
+                  priceDropdown.classList.add('hidden');
                 }
               });
               
@@ -389,15 +362,15 @@
                   e.preventDefault();
                   e.stopPropagation();
                   currentFilters.brand = option.dataset.brand;
+                  initialLoad = false; // Force re-render when filtering
                   
-                  const spanElement = brandFilter.querySelector('span');
+                  const spanElement = document.getElementById('brand-filter-text');
                   if (spanElement) {
                     spanElement.textContent = option.textContent;
                     console.log('Updated brand filter text to:', option.textContent);
                   }
                   
                   brandDropdown.classList.add('hidden');
-                  brandDropdown.style.display = 'none';
                   applyFilters();
                 });
               });
@@ -419,27 +392,17 @@
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Simple toggle - if it has 'show' class, hide it, otherwise show it
-                if (priceDropdown.classList.contains('show')) {
-                  priceDropdown.classList.remove('show');
-                  priceDropdown.classList.add('hide');
-                  console.log('Hiding price dropdown');
-                } else {
-                  priceDropdown.classList.remove('hide', 'hidden');
-                  priceDropdown.classList.add('show');
-                  priceDropdown.style.display = 'block';
+                // Simple toggle - if it's hidden, show it, otherwise hide it
+                if (priceDropdown.classList.contains('hidden')) {
+                  priceDropdown.classList.remove('hidden');
                   console.log('Showing price dropdown');
+                } else {
+                  priceDropdown.classList.add('hidden');
+                  console.log('Hiding price dropdown');
                 }
                 
                 // Hide brand dropdown if it's open
                 if (brandDropdown) {
-                  brandDropdown.classList.remove('show');
-                  brandDropdown.classList.add('hide');
-                }
-                
-                // Hide brand dropdown
-                if (brandDropdown) {
-                  brandDropdown.style.display = 'none';
                   brandDropdown.classList.add('hidden');
                 }
               });
@@ -453,15 +416,15 @@
                   e.preventDefault();
                   e.stopPropagation();
                   currentFilters.price = option.dataset.price;
+                  initialLoad = false; // Force re-render when filtering
                   
-                  const spanElement = priceFilter.querySelector('span');
+                  const spanElement = document.getElementById('price-filter-text');
                   if (spanElement) {
                     spanElement.textContent = option.textContent;
                     console.log('Updated price filter text to:', option.textContent);
                   }
                   
                   priceDropdown.classList.add('hidden');
-                  priceDropdown.style.display = 'none';
                   applyFilters();
                 });
               });
@@ -476,13 +439,57 @@
             document.addEventListener('click', (e) => {
               if (!brandFilter?.contains(e.target)) {
                 brandDropdown?.classList.add('hidden');
-                if (brandDropdown) brandDropdown.style.display = 'none';
               }
               if (!priceFilter?.contains(e.target)) {
                 priceDropdown?.classList.add('hidden');
-                if (priceDropdown) priceDropdown.style.display = 'none';
               }
             });
+            
+            // Stock status styling functions
+            function getStockStatusClass(status) {
+              switch(status) {
+                case 'in_stock':
+                  return 'bg-green-100 hover:bg-green-100';
+                case 'limited':
+                  return 'bg-red-500 hover:bg-red-600';
+                case 'pre_order':
+                  return 'bg-blue-100 hover:bg-blue-100';
+                case 'out_of_stock':
+                  return 'bg-red-500 hover:bg-red-600';
+                default:
+                  return 'bg-gray-100 hover:bg-gray-100';
+              }
+            }
+            
+            function getStockStatusTextClass(status) {
+              switch(status) {
+                case 'in_stock':
+                  return 'text-green-800';
+                case 'limited':
+                  return 'text-white';
+                case 'pre_order':
+                  return 'text-blue-800';
+                case 'out_of_stock':
+                  return 'text-white';
+                default:
+                  return 'text-gray-800';
+              }
+            }
+            
+            function getStockStatusDisplayText(status) {
+              switch(status) {
+                case 'in_stock':
+                  return 'In Stock';
+                case 'limited':
+                  return 'Limited Stock';
+                case 'pre_order':
+                  return 'Pre Order';
+                case 'out_of_stock':
+                  return 'Out of Stock';
+                default:
+                  return 'Unknown';
+              }
+            }
             
             // Filter application function
             function applyFilters() {
@@ -490,6 +497,14 @@
                 console.error('watchData not available');
                 return;
               }
+              
+              // Skip rendering on initial load if no filters are active
+              if (initialLoad && currentFilters.search === '' && currentFilters.brand === 'all' && currentFilters.price === 'all') {
+                initialLoad = false;
+                return;
+              }
+              
+              initialLoad = false;
               
               let filteredWatches = Object.values(watchData);
               
@@ -505,7 +520,7 @@
               // Apply brand filter
               if (currentFilters.brand !== 'all') {
                 filteredWatches = filteredWatches.filter(watch => 
-                  watch.brand === currentFilters.brand
+                  watch.brandSlug === currentFilters.brand
                 );
               }
               
@@ -543,24 +558,32 @@
               
               watchesGrid.innerHTML = watches.map(watch => `
                 <div class="rounded-lg border bg-card text-card-foreground shadow-sm group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-card hover:-translate-y-1" data-id="${watch.id}">
-                  <a href="/product/${watch.id}/">
+                  <a href="/watch/${watch.id}/">
                     <div class="relative">
                       <img alt="${watch.name}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" src="${watch.image}">
-                      <button class="absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 bg-luxury-white/90 text-luxury-gray-dark hover:text-luxury-gold favorite-button" data-id="${watch.id}" data-name="${watch.name}" data-price="${watch.price}" data-image="${watch.image}" data-brand="${watch.brand}" onclick="event.preventDefault(); event.stopPropagation();">
+                      <button class="absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 bg-luxury-white/90 text-luxury-gray-dark hover:text-red-500 favorite-button" data-id="${watch.id}" data-name="${watch.name}" data-price="${watch.price}" data-image="${watch.image}" data-brand="${watch.brand}" onclick="event.preventDefault(); event.stopPropagation();">
                         <svg class="lucide lucide-heart" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
                           <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
                         </svg>
                       </button>
+                      <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent absolute top-4 left-4 ${getStockStatusClass(watch.stock_status)} ${getStockStatusTextClass(watch.stock_status)}">${getStockStatusDisplayText(watch.stock_status)}</div>
                     </div>
                   </a>
                   <div class="p-4">
                     <div class="flex items-center justify-between mb-2">
                       <span class="text-sm text-luxury-gold font-medium">${watch.brand}</span>
-                      <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-green-100 text-green-800 hover:bg-green-100">${watch.stock}</div>
+                      <div class="flex items-center">
+                        ${'★'.repeat(Math.floor(watch.rating || 4))}${'☆'.repeat(5 - Math.floor(watch.rating || 4))}
+                      </div>
                     </div>
-                    <h3 class="font-semibold text-luxury-black mb-2">${watch.name}</h3>
-                    <p class="text-2xl font-bold text-luxury-black mb-3">$${watch.price.toLocaleString()}</p>
-                    <button class="w-full bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold py-2 px-4 rounded-md transition-colors duration-200 add-to-cart-btn" data-id="${watch.id}" data-name="${watch.name}" data-price="${watch.price}" data-image="${watch.image}" data-brand="${watch.brand}">
+                    <h3 class="font-semibold text-luxury-black mb-2 group-hover:text-luxury-gold transition-colors duration-200">${watch.name}</h3>
+                    <p class="text-xl font-bold text-luxury-black">$${watch.price.toLocaleString()}</p>
+                    <button class="add-to-cart mt-4 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold w-full" data-id="${watch.id}" data-name="${watch.name}" data-price="${watch.price}" data-image="${watch.image}" data-brand="${watch.brand}">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart mr-2 h-5 w-5">
+                        <circle cx="8" cy="21" r="1"></circle>
+                        <circle cx="19" cy="21" r="1"></circle>
+                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+                      </svg>
                       Add to Cart
                     </button>
                   </div>

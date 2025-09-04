@@ -1,162 +1,348 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
-    <meta content="width=device-width,initial-scale=1" name="viewport">
-    <title>Teluxe - Luxury Watch Collection | Premium Timepieces</title>
-    <meta content="Discover the finest luxury timepieces from Rolex, Omega, Patek Philippe & more. Premium watches with authenticated quality and exclusive designs." name="description">
-    <meta content="luxury watches, premium timepieces, Rolex, Omega, Patek Philippe, Audemars Piguet, luxury accessories" name="keywords">
-    <meta content="Teluxe" name="author">
-    <meta content="Teluxe - Luxury Watch Collection" property="og:title">
-    <meta content="Discover the finest luxury timepieces from the world's most prestigious brands" property="og:description">
-    <meta content="website" property="og:type">
-    <meta content="https://lovable.dev/opengraph-image-p98pqg.png" property="og:image">
-    <meta content="summary_large_image" name="twitter:card">
-    <meta content="@lovable_dev" name="twitter:site">
-    <meta content="https://lovable.dev/opengraph-image-p98pqg.png" name="twitter:image">
-    <script type="text/javascript" src="{% static 'script.js' %}"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Teluxe</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <link href="{% static 'index.css' %}" rel="stylesheet">
     <link href="{% static 'sonner-toaster.css' %}" rel="stylesheet">
-  </head>
-  <body>
-    <div id="root">
-      <div aria-label="Notifications (F8)" role="region" style="pointer-events:none" tabindex="-1">
-        <ol class="fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]" tabindex="-1"></ol>
-      </div>
-      <section aria-atomic="false" aria-label="Notifications alt+T" aria-live="polite" aria-relevant="additions text" tabindex="-1"></section>
-      <div class="min-h-screen bg-background font-luxury">
+</head>
+<body>
+    <div class="min-h-screen bg-background font-luxury">
         <main class="pb-16">
-          <div class="space-y-6">
-            <div class="flex items-center justify-between p-4 border-b border-luxury-gray">
-              <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground h-10 p-2 hover:bg-luxury-gray">
-                <svg class="lucide lucide-arrow-left" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
-                  <path d="m12 19-7-7 7-7"></path>
-                  <path d="M19 12H5"></path>
-                </svg>
-              </button>
-              <h1 class="font-semibold text-luxury-black">Shipping</h1>
-              <div class="w-10"></div>
-            </div>
-            <div class="px-4 space-y-6">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium bg-luxury-gold text-luxury-black">1</div>
-                <div class="flex-1 h-0.5 bg-luxury-gray"></div>
-                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium bg-luxury-gray text-luxury-gray-dark">2</div>
-              </div>
-              <div class="space-y-6">
-                <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-                  <div class="flex items-center gap-3 mb-4">
-                    <svg class="lucide lucide-map-pin text-luxury-gold" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path>
-                      <circle cx="12" cy="10" r="3"></circle>
+            <!-- Back button -->
+            <div class="p-4">
+                <button onclick="window.history.back()" class="flex items-center text-luxury-gray-dark hover:text-luxury-black transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
-                    <h3 class="font-semibold text-luxury-black">Shipping Address</h3>
-                  </div>
-                  <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                      <div>
-                        <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="firstName">First Name</label>
-                        <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm mt-1" id="firstName" placeholder="John">
-                      </div>
-                      <div>
-                        <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="lastName">Last Name</label>
-                        <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm mt-1" id="lastName" placeholder="Doe">
-                      </div>
-                    </div>
-                    <div>
-                      <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="address">Address</label>
-                      <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm mt-1" id="address" placeholder="123 Main Street">
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                      <div>
-                        <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="city">City</label>
-                        <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm mt-1" id="city" placeholder="New York">
-                      </div>
-                      <div>
-                        <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="zipCode">ZIP Code</label>
-                        <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm mt-1" id="zipCode" placeholder="10001">
-                      </div>
-                    </div>
-                    <div>
-                      <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="country">Country</label>
-                      <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm mt-1" id="country" placeholder="United States">
-                    </div>
-                  </div>
-                </div>
-                <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-                  <div class="flex items-center gap-3 mb-4">
-                    <svg class="lucide lucide-shopping-cart text-luxury-gold" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="8" cy="21" r="1"></circle>
-                      <circle cx="19" cy="21" r="1"></circle>
-                      <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
-                    </svg>
-                    <h3 class="font-semibold text-luxury-black">Order Summary</h3>
-                  </div>
-                  <div class="order-summary-items space-y-2 mb-4">
-                    <!-- Cart items will be rendered here by JavaScript -->
-                  </div>
-                  <div class="flex justify-between items-center text-lg font-bold text-luxury-black">
-                    <span>Total:</span> <span class="order-summary-total">$0.00</span>
-                  </div>
-                </div>
-                <button class="place-order-button inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-11 rounded-md px-8 w-full bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold py-3">Place Order</button>
-              </div>
+                    Back
+                </button>
             </div>
-          </div>
+            
+            <div class="p-4 max-w-4xl mx-auto">
+                <h1 class="text-3xl font-bold text-luxury-black mb-8">Checkout</h1>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Checkout Form -->
+                    <div class="lg:col-span-1">
+                        <form id="checkout-form" class="space-y-6">
+                            {% csrf_token %}
+                            
+                            <div class="bg-luxury-white p-6 rounded-lg shadow-sm">
+                                <h2 class="text-xl font-bold text-luxury-black mb-4">Shipping Information</h2>
+                                
+                                <div class="mb-4">
+                                    <label for="customer_email" class="block text-sm font-medium text-luxury-gray-dark mb-2">Email Address</label>
+                                    <input type="email" id="customer_email" name="customer_email" required
+                                           placeholder="your.email@example.com"
+                                           class="w-full px-3 py-2 border border-luxury-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold focus:border-luxury-gold transition-colors">
+                                    <p class="text-xs text-luxury-gray-dark mt-1">We'll use this email for order confirmation</p>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <label for="shipping_address" class="block text-sm font-medium text-luxury-gray-dark mb-2">Address</label>
+                                    <input type="text" id="shipping_address" name="shipping_address" required
+                                           placeholder="Street address, apartment, suite, etc."
+                                           class="w-full px-3 py-2 border border-luxury-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold focus:border-luxury-gold transition-colors">
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4 mt-4">
+                                    <div>
+                                        <label for="shipping_city" class="block text-sm font-medium text-luxury-gray-dark mb-2">City</label>
+                                        <input type="text" id="shipping_city" name="shipping_city" required
+                                               class="w-full px-3 py-2 border border-luxury-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold focus:border-luxury-gold transition-colors">
+                                    </div>
+                                    <div>
+                                        <label for="shipping_zip_code" class="block text-sm font-medium text-luxury-gray-dark mb-2">ZIP Code</label>
+                                        <input type="text" id="shipping_zip_code" name="shipping_zip_code" required
+                                               class="w-full px-3 py-2 border border-luxury-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold focus:border-luxury-gold transition-colors">
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <label for="shipping_country" class="block text-sm font-medium text-luxury-gray-dark mb-2">Country</label>
+                                    <div class="relative">
+                                        <button id="country-filter" class="flex h-10 w-full items-center justify-between rounded-md border bg-luxury-white hover:bg-luxury-gray-light px-4 py-2 text-sm font-medium border-luxury-gray transition-colors duration-200">
+                                            <span id="country-filter-text">🌍 Select Country</span>
+                                            <svg class="lucide lucide-chevron-down h-4 w-4 opacity-50 transition-transform duration-200" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                                                <path d="m6 9 6 6 6-6"></path>
+                                            </svg>
+                                        </button>
+                                        <div id="country-dropdown" class="hidden absolute top-full left-0 z-50 w-full rounded-lg border bg-luxury-white shadow-xl mt-2 overflow-hidden">
+                                            <div class="py-1 max-h-60 overflow-y-auto">
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="">🌍 Select Country</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="United States">🇺🇸 United States</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Canada">🇨🇦 Canada</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="United Kingdom">🇬🇧 United Kingdom</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Australia">🇦🇺 Australia</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Germany">🇩🇪 Germany</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="France">🇫🇷 France</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Italy">🇮🇹 Italy</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Spain">🇪🇸 Spain</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Switzerland">🇨🇭 Switzerland</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Japan">🇯🇵 Japan</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Netherlands">🇳🇱 Netherlands</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Sweden">🇸🇪 Sweden</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Norway">🇳🇴 Norway</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Denmark">🇩🇰 Denmark</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Belgium">🇧🇪 Belgium</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Austria">🇦� Austria</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Other">🌐 Other</div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="shipping_country" name="shipping_country" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" id="place-order-btn" 
+                                    class="w-full bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold py-3 rounded-lg transition-colors">
+                                Complete Order
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Order Summary -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-luxury-white p-6 rounded-lg shadow-sm sticky top-4">
+                            <h2 class="text-xl font-bold text-luxury-black mb-4">Order Summary</h2>
+                            
+                            <div id="checkout-items" class="space-y-4 mb-6">
+                                <!-- Cart items will be loaded here -->
+                            </div>
+                            
+                            <div class="border-t pt-4">
+                                <div class="flex justify-between text-luxury-gray-dark mb-2">
+                                    <span>Subtotal</span>
+                                    <span id="subtotal">$0.00</span>
+                                </div>
+                                <div class="flex justify-between text-luxury-gray-dark mb-2">
+                                    <span>Shipping</span>
+                                    <span class="text-green-600">Free</span>
+                                </div>
+                                <div class="flex justify-between text-luxury-gray-dark mb-4">
+                                    <span>Tax</span>
+                                    <span>Included</span>
+                                </div>
+                                <div class="flex justify-between text-xl font-bold text-luxury-black">
+                                    <span>Total</span>
+                                    <span id="total" class="text-luxury-gold">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
-        <div class="fixed bottom-0 left-0 right-0 z-50 bg-luxury-white border-t border-luxury-gray shadow-luxury">
-          <div class="grid grid-cols-4 h-16">
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative">
-              <a href="{% url 'shop:index' %}">
-                <div class="relative">
-                  <svg class="lucide lucide-house transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
-                    <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                  </svg>
-                </div>
-                <span class="text-xs font-medium">Home</span>
-              </a>
-            </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="{% url 'shop:catalog' %}">
-              <div class="relative">
-                <svg class="lucide lucide-search transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.3-4.3"></path>
-                </svg>
-              </div>
-              <span class="text-xs font-medium">Catalog</span>
-            </a>
-            </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="{% url 'shop:cart' %}">
-                <div class="relative">
-                  <svg class="lucide lucide-shopping-bag transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="40" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                    <path d="M3 6h18"></path>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                  </svg>
-                  <span class="cart-item-count absolute -top-2 -right-2 bg-luxury-gold text-luxury-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center z-10 min-w-5">0</span>
-                </div>
-                <span class="text-xs font-medium">Cart</span>
-              </a>
-            </button>
-            <button class="flex flex-col items-center justify-center space-y-1 transition-colors duration-200 relative text-luxury-gray-dark hover:text-luxury-gold">
-              <a href="{% url 'shop:account' %}">
-              <div class="relative">
-                <svg class="lucide lucide-user transition-transform duration-200" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="50" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-              </div>
-              <span class="text-xs font-medium">Account</span>
-              </a>
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
-  </body>
+
+    <!-- Toast notifications -->
+    <div aria-label="Notifications (F8)" role="region" style="pointer-events:none" tabindex="-1">
+        <ol class="fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]" tabindex="-1"></ol>
+    </div>
+
+    <script>
+        // Country dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const countryFilter = document.getElementById('country-filter');
+            const countryDropdown = document.getElementById('country-dropdown');
+            const countryFilterText = document.getElementById('country-filter-text');
+            const hiddenCountryInput = document.getElementById('shipping_country');
+            const chevron = countryFilter.querySelector('.lucide-chevron-down');
+
+            countryFilter.addEventListener('click', function(e) {
+                e.preventDefault();
+                const isHidden = countryDropdown.classList.contains('hidden');
+                
+                if (isHidden) {
+                    countryDropdown.classList.remove('hidden');
+                    chevron.style.transform = 'rotate(180deg)';
+                } else {
+                    countryDropdown.classList.add('hidden');
+                    chevron.style.transform = 'rotate(0deg)';
+                }
+            });
+
+            // Handle country selection
+            const countryOptions = countryDropdown.querySelectorAll('.country-option');
+            countryOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const country = this.getAttribute('data-country');
+                    const text = this.textContent.trim();
+                    
+                    countryFilterText.textContent = text;
+                    hiddenCountryInput.value = country;
+                    countryDropdown.classList.add('hidden');
+                    chevron.style.transform = 'rotate(0deg)';
+                });
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!countryFilter.contains(e.target) && !countryDropdown.contains(e.target)) {
+                    countryDropdown.classList.add('hidden');
+                    chevron.style.transform = 'rotate(0deg)';
+                }
+            });
+        });
+
+        // Load cart data and populate order summary
+        async function loadCheckoutData() {
+            try {
+                const response = await fetch('/api/get-cart/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load cart data');
+                }
+
+                const cartData = await response.json();
+                
+                if (!cartData.success) {
+                    throw new Error(cartData.error || 'Failed to load cart');
+                }
+                
+                const cart = cartData.cart;
+                
+                if (cart.items.length === 0) {
+                    window.location.href = '/cart/';
+                    return;
+                }
+
+                // Populate order summary
+                const itemsContainer = document.getElementById('checkout-items');
+                const subtotal = document.getElementById('subtotal');
+                const total = document.getElementById('total');
+
+                itemsContainer.innerHTML = cart.items.map(item => `
+                    <div class="flex items-center gap-3">
+                        <img src="${item.product.image || '/static/hero-watch-D40AmJ87.jpg'}" 
+                             alt="${item.product.name}" 
+                             class="w-12 h-12 object-cover rounded">
+                        <div class="flex-1">
+                            <h4 class="font-medium text-luxury-black">${item.product.name}</h4>
+                            <p class="text-sm text-luxury-gray-dark">Qty: ${item.quantity}</p>
+                        </div>
+                        <span class="font-semibold text-luxury-gold">$${item.total_price.toFixed(2)}</span>
+                    </div>
+                `).join('');
+
+                subtotal.textContent = `$${cart.total_price.toFixed(2)}`;
+                total.textContent = `$${cart.total_price.toFixed(2)}`;
+
+            } catch (error) {
+                console.error('Error loading checkout data:', error);
+                showToast('Failed to load cart data', 'error');
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('checkout-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Email validation
+            const emailField = document.getElementById('customer_email');
+            const emailValue = emailField.value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (!emailRegex.test(emailValue)) {
+                showToast('Please enter a valid email address', 'error');
+                emailField.focus();
+                return;
+            }
+            
+            const submitBtn = document.getElementById('place-order-btn');
+            const originalText = submitBtn.textContent;
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+            
+            try {
+                const formData = new FormData(this);
+                const response = await fetch('/process-checkout/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update button to show success state
+                    submitBtn.textContent = 'Order Placed! Redirecting...';
+                    submitBtn.classList.remove('bg-luxury-gold', 'hover:bg-luxury-gold-dark');
+                    submitBtn.classList.add('bg-green-500');
+                    
+                    // Show success message
+                    showToast('Order placed successfully!', 'success');
+                    
+                    // Redirect to order confirmation immediately
+                    window.location.href = `/order-confirmation/${result.order_id}/`;
+                } else {
+                    showToast(result.error || 'Failed to process order', 'error');
+                    // Re-enable button only on error
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            } catch (error) {
+                console.error('Error processing checkout:', error);
+                showToast('An error occurred while processing your order', 'error');
+                // Re-enable button only on error
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
+        // Simple toast notification function
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-4 py-2 rounded-lg text-white z-50 transition-all duration-300 ${
+                type === 'error' ? 'bg-red-500' : 'bg-green-500'
+            }`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => toast.classList.add('translate-x-0'), 100);
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-x-full');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        // Real-time email validation
+        document.getElementById('customer_email').addEventListener('input', function(e) {
+            const email = e.target.value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (email === '') {
+                e.target.classList.remove('border-red-500', 'border-green-500');
+                e.target.classList.add('border-luxury-gray');
+            } else if (emailRegex.test(email)) {
+                e.target.classList.remove('border-red-500', 'border-luxury-gray');
+                e.target.classList.add('border-green-500');
+            } else {
+                e.target.classList.remove('border-green-500', 'border-luxury-gray');
+                e.target.classList.add('border-red-500');
+            }
+        });
+
+        // Load checkout data when page loads
+        document.addEventListener('DOMContentLoaded', loadCheckoutData);
+    </script>
+
+    <!-- Bottom Navigation -->
+    {% include 'navbar.html' %}
+</body>
 </html>
