@@ -235,11 +235,11 @@ const ServerCartManager = {
     if (this.cart.items.length === 0) {
       cartContainer.innerHTML = `
         <div class="text-center py-12">
-          <div class="w-24 h-24 mx-auto mb-4 opacity-30">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 10v1a1 1 0 001 1h8a1 1 0 001-1v-1m-10 0a1 1 0 11-2 0 1 1 0 012 0zm10 0a1 1 0 11-2 0 1 1 0 012 0z" />
-            </svg>
-          </div>
+          <svg class="lucide lucide-shopping-bag mx-auto text-luxury-gray mb-4" fill="none" height="64" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="64" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+            <path d="M3 6h18"></path>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
           <h3 class="text-xl font-semibold text-luxury-black mb-2">Your cart is empty</h3>
           <p class="text-luxury-gray-dark mb-6">Discover our luxury timepieces and add them to your cart</p>
           <a href="/catalog/" class="inline-flex items-center justify-center px-6 py-3 bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold rounded-lg transition-colors">

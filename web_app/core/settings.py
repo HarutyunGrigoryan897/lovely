@@ -31,7 +31,7 @@ ALLOWED_HOSTS = ["*"]
 
 # CSRF settings for ngrok and other development tunnels
 CSRF_TRUSTED_ORIGINS = [
-    'https://4a321641ae36.ngrok.app',
+    'https://5ac2709e9cd9.ngrok.app',
     'http://127.0.0.1:8000',
     'http://localhost:8000',
 ]
@@ -150,6 +150,10 @@ AUTH_USER_MODEL = "authorization.CustomUser"
 
 API_SECRET = config("API_SECRET")
 BOT_TOKEN = config("BOT_TOKEN")
+
+# Development setting to bypass Telegram authentication
+# Set BYPASS_TELEGRAM_AUTH=True in your .env file to disable Telegram-only requirement during development
+BYPASS_TELEGRAM_AUTH = config("BYPASS_TELEGRAM_AUTH", default=False, cast=bool)
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [

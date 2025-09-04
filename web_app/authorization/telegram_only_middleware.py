@@ -31,6 +31,10 @@ class TelegramOnlyMiddleware(MiddlewareMixin):
         if any(request.path.startswith(url) for url in self.ALLOWED_URLS):
             return None
         
+        # Development bypass - set this in your .env file if you want to bypass Telegram requirement during development
+        if settings.DEBUG and getattr(settings, 'BYPASS_TELEGRAM_AUTH', False):
+            return None
+        
         # Check for Telegram Bot API requests (server-to-server from your bot)
         auth_header = request.headers.get("Authorization", "")
         if auth_header.startswith("Bearer "):
@@ -67,6 +71,17 @@ class TelegramOnlyMiddleware(MiddlewareMixin):
             request.user.telegram_id is not None
         )
         
+        # Debug logging (remove in production)
+        if settings.DEBUG:
+            print(f"TelegramOnlyMiddleware Debug:")
+            print(f"  Path: {request.path}")
+            print(f"  User authenticated: {request.user.is_authenticated}")
+            print(f"  Has telegram_id: {hasattr(request.user, 'telegram_id') if request.user.is_authenticated else 'N/A'}")
+            print(f"  Telegram ID: {getattr(request.user, 'telegram_id', 'N/A') if request.user.is_authenticated else 'N/A'}")
+            print(f"  Is Telegram WebApp: {is_telegram_webapp}")
+            print(f"  Is Telegram Authenticated: {is_telegram_authenticated}")
+            print(f"  User Agent: {user_agent[:100]}")
+        
         # For API requests, return JSON error
         if request.path.startswith('/api/'):
             if not is_telegram_webapp and not is_telegram_authenticated:
@@ -76,7 +91,7 @@ class TelegramOnlyMiddleware(MiddlewareMixin):
                 }, status=403)
             return None
         
-        # For regular page requests
+        # For regular page requests - allow if either from Telegram OR already authenticated
         if not is_telegram_webapp and not is_telegram_authenticated:
             # Return a page explaining that Telegram is required
             return HttpResponse(self.get_telegram_required_page(), content_type='text/html')
