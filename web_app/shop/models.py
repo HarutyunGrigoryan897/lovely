@@ -7,6 +7,124 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
+class GoldPrice(models.Model):
+    """Gold price per gram configuration"""
+    price_per_gram = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price per gram in USD")
+    markup_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=25.00, help_text="Markup percentage (default 25%)")
+    is_active = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Gold Price'
+        verbose_name_plural = 'Gold Prices'
+
+    def __str__(self):
+        return f"${self.price_per_gram}/gram (+{self.markup_percentage}% markup) - {'Active' if self.is_active else 'Inactive'}"
+
+    @classmethod
+    def get_current_price(cls):
+        """Get the current active gold price"""
+        active_price = cls.objects.filter(is_active=True).first()
+        if active_price:
+            # Apply markup
+            base_price = active_price.price_per_gram
+            markup = base_price * (active_price.markup_percentage / 100)
+            return base_price + markup
+        return Decimal('0.00')
+
+
+class DiamondPrice(models.Model):
+    """Diamond pricing - Price per unit for each size range"""
+    DIAMOND_TYPE_CHOICES = [
+        ('natural', 'Natural Diamond'),
+        ('lab', 'Lab Diamond'),
+    ]
+    
+    SIZE_CHOICES = [
+        ('under_5', 'Under 5'),
+        ('5_to_7', '5 to 7'),
+        ('8_to_12', '8 to 12'),
+        ('13_to_17', '13 to 17'),
+    ]
+    
+    diamond_type = models.CharField(max_length=20, choices=DIAMOND_TYPE_CHOICES)
+    size_category = models.CharField(max_length=20, choices=SIZE_CHOICES)
+    carats_info = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Reference carat size (display only)")
+    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Price per unit - will be multiplied by user's quantity")
+    is_active = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['diamond_type', 'size_category']
+        verbose_name = 'Diamond Price'
+        verbose_name_plural = 'Diamond Prices'
+        unique_together = ['diamond_type', 'size_category']
+
+    def __str__(self):
+        return f"{self.get_diamond_type_display()} - {self.get_size_category_display()} - ${self.price_per_unit}/unit"
+
+    def calculate_price_for_quantity(self, quantity):
+        """Calculate total price: price_per_unit × quantity"""
+        if quantity > 0:
+            return self.price_per_unit * Decimal(str(quantity))
+        return Decimal('0.00')
+
+
+class WorkPrice(models.Model):
+    """Work/labor price configuration"""
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=7000.00, help_text="Work price in USD")
+    is_active = models.BooleanField(default=True)
+    description = models.TextField(blank=True, help_text="Description of what this work price covers")
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Work Price'
+        verbose_name_plural = 'Work Prices'
+
+    def __str__(self):
+        return f"Work Price: ${self.price} - {'Active' if self.is_active else 'Inactive'}"
+
+    @classmethod
+    def get_current_price(cls):
+        """Get the current active work price"""
+        active_price = cls.objects.filter(is_active=True).first()
+        return active_price.price if active_price else Decimal('7000.00')
+
+
+class ShippingAddress(models.Model):
+    """User's saved shipping addresses"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='shipping_addresses')
+    label = models.CharField(max_length=50, help_text="e.g., Home, Work, Office")
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    address = models.CharField(max_length=255)
+    city = models.CharField(max_length=100)
+    zip_code = models.CharField(max_length=20)
+    country = models.CharField(max_length=100)
+    is_default = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-is_default', '-created_at']
+        verbose_name = 'Shipping Address'
+        verbose_name_plural = 'Shipping Addresses'
+
+    def __str__(self):
+        return f"{self.label} - {self.first_name} {self.last_name}, {self.city}, {self.country}"
+
+    def save(self, *args, **kwargs):
+        # If this is set as default, remove default from other addresses
+        if self.is_default:
+            ShippingAddress.objects.filter(user=self.user, is_default=True).exclude(pk=self.pk).update(is_default=False)
+        super().save(*args, **kwargs)
+
+
 class Brand(models.Model):
     """Luxury brand model for watches and jewelry"""
     name = models.CharField(max_length=100, unique=True)
@@ -77,10 +195,23 @@ class Product(models.Model):
     description = models.TextField()
     short_description = models.CharField(max_length=500, blank=True)
     
-    # Pricing
-    price = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
-    original_price = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    cost_price = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    # Pricing - DEPRECATED: Price is now calculated from gold_weight_grams
+    # Keeping these fields for backward compatibility but they are no longer used
+    # The actual price is calculated via display_price property
+    original_price = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2, 
+        blank=True, 
+        null=True,
+        help_text='DEPRECATED: Not used. Price is calculated from gold weight.'
+    )
+    cost_price = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2, 
+        blank=True, 
+        null=True,
+        help_text='Internal cost tracking only'
+    )
     
     # Images
     image = models.ImageField(upload_to='products/')
@@ -95,6 +226,23 @@ class Product(models.Model):
     sku = models.CharField(max_length=50, unique=True, blank=True)
     model_number = models.CharField(max_length=100, blank=True)
     year_released = models.PositiveIntegerField(blank=True, null=True)
+    
+    # Gold and Diamond specifications
+    gold_weight_grams = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0,
+        validators=[MinValueValidator(Decimal('0.00'))],
+        help_text="Weight of gold in grams"
+    )
+    has_diamonds = models.BooleanField(default=False, help_text="Does this product include diamonds?")
+    diamond_type = models.CharField(
+        max_length=20,
+        choices=[('natural', 'Natural Diamond'), ('lab', 'Lab Diamond')],
+        blank=True,
+        null=True,
+        help_text="Type of diamonds used"
+    )
     
     # Ratings and reviews
     rating_stars = models.PositiveIntegerField(default=5, validators=[MinValueValidator(1), MaxValueValidator(5)])
@@ -120,7 +268,6 @@ class Product(models.Model):
         indexes = [
             models.Index(fields=['slug']),
             models.Index(fields=['brand', 'category']),
-            models.Index(fields=['price']),
             models.Index(fields=['is_active', 'stock_status']),
         ]
 
@@ -156,6 +303,70 @@ class Product(models.Model):
     def is_low_stock(self):
         return self.stock_quantity <= self.low_stock_threshold
 
+    def calculate_gold_price(self):
+        """Calculate the price of gold in this product"""
+        if self.gold_weight_grams > 0:
+            gold_price_per_gram = GoldPrice.get_current_price()
+            return self.gold_weight_grams * gold_price_per_gram
+        return Decimal('0.00')
+    
+    @property
+    def display_price(self):
+        """
+        PRIMARY PRICE - Always calculated from gold + work
+        This is the base price without diamonds (minimum price for the item)
+        There is no static price field - everything is calculated
+        """
+        gold_price = self.calculate_gold_price()
+        work_price = WorkPrice.get_current_price()
+        return gold_price + work_price
+    
+    @property
+    def base_price(self):
+        """Alias for display_price - for backward compatibility"""
+        return self.display_price
+    
+    @property
+    def price(self):
+        """Backward compatibility - returns calculated price"""
+        return self.display_price
+
+    def calculate_base_price(self, diamond_quantities=None):
+        """
+        Calculate total price: gold + diamonds + work
+        diamond_quantities: dict like {'under_5': 10, '5_to_7': 5, ...} - user enters quantities
+        """
+        # Gold price
+        gold_price = self.calculate_gold_price()
+        
+        # Diamond price - multiply total price by user's quantity
+        diamond_price = Decimal('0.00')
+        if self.has_diamonds and diamond_quantities and self.diamond_type:
+            for size_cat, quantity in diamond_quantities.items():
+                if quantity > 0:
+                    try:
+                        diamond_pricing = DiamondPrice.objects.get(
+                            diamond_type=self.diamond_type,
+                            size_category=size_cat,
+                            is_active=True
+                        )
+                        # Each size category has a total_price, multiply by quantity
+                        diamond_price += diamond_pricing.calculate_price_for_quantity(quantity)
+                    except DiamondPrice.DoesNotExist:
+                        continue
+        
+        # Work price
+        work_price = WorkPrice.get_current_price()
+        
+        # Total
+        total = gold_price + diamond_price + work_price
+        return {
+            'gold_price': gold_price,
+            'diamond_price': diamond_price,
+            'work_price': work_price,
+            'total_price': total
+        }
+
 
 class ProductImage(models.Model):
     """Additional product images"""
@@ -173,6 +384,32 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - Image {self.sort_order}"
+
+
+class ProductDiamondOption(models.Model):
+    """Default diamond configuration for a product"""
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='diamond_options')
+    size_category = models.CharField(
+        max_length=20,
+        choices=[
+            ('under_5', 'Under 5 (2.22mm)'),
+            ('5_to_7', '5 to 7 (3.57mm)'),
+            ('8_to_12', '8 to 12 (1.85mm)'),
+            ('13_to_17', '13 to 17 (0.16mm)'),
+        ]
+    )
+    default_quantity = models.IntegerField(default=0, help_text="Default quantity for this size")
+    min_quantity = models.IntegerField(default=0, help_text="Minimum quantity allowed")
+    max_quantity = models.IntegerField(default=1000, help_text="Maximum quantity allowed")
+    
+    class Meta:
+        unique_together = ['product', 'size_category']
+        ordering = ['size_category']
+        verbose_name = 'Product Diamond Option'
+        verbose_name_plural = 'Product Diamond Options'
+    
+    def __str__(self):
+        return f"{self.product.name} - {self.get_size_category_display()}: {self.default_quantity} diamonds"
 
 
 class WatchSpecification(models.Model):
@@ -475,7 +712,7 @@ class CartItem(models.Model):
     def save(self, *args, **kwargs):
         # Store the current product price when adding to cart
         if not self.unit_price:
-            self.unit_price = self.product.price
+            self.unit_price = self.product.display_price
         super().save(*args, **kwargs)
 
     @property
@@ -492,19 +729,28 @@ class CartItem(models.Model):
         name = self.product.name
         customizations = []
         
-        for key, value in self.customization_data.items():
-            if value and value != 'None':
-                # Format customization display
-                if key == 'band_color':
-                    customizations.append(f"{value} Band")
-                elif key == 'dial_color':
-                    customizations.append(f"{value} Dial")
-                elif key == 'engraving':
-                    customizations.append(f"with {value}")
-                elif key == 'size':
-                    customizations.append(f"{value}")
-                else:
-                    customizations.append(value)
+        # Handle diamond specifications format
+        if isinstance(self.customization_data, dict):
+            if 'diamond_type' in self.customization_data:
+                # This is a diamond specification
+                diamond_type = self.customization_data.get('diamond_type', 'natural')
+                customizations.append(f"{diamond_type.capitalize()} Diamonds")
+                return f"{name} ({', '.join(customizations)})"
+            
+            # Handle other customization types
+            for key, value in self.customization_data.items():
+                if value and value != 'None' and not isinstance(value, (dict, list)):
+                    # Format customization display
+                    if key == 'band_color':
+                        customizations.append(f"{value} Band")
+                    elif key == 'dial_color':
+                        customizations.append(f"{value} Dial")
+                    elif key == 'engraving':
+                        customizations.append(f"with {value}")
+                    elif key == 'size':
+                        customizations.append(f"{value}")
+                    elif key not in ['diamond_quantities', 'gold_price', 'diamond_price', 'work_price']:
+                        customizations.append(str(value))
         
         if customizations:
             name += f" ({', '.join(customizations)})"
@@ -534,7 +780,10 @@ class Order(models.Model):
     customer_first_name = models.CharField(max_length=100, blank=True)
     customer_last_name = models.CharField(max_length=100, blank=True)
     
-    # Shipping information
+    # Reference to shipping address (for new orders)
+    shipping_address_ref = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
+    
+    # Shipping information snapshot (kept for historical orders)
     shipping_first_name = models.CharField(max_length=100, blank=True)
     shipping_last_name = models.CharField(max_length=100, blank=True)
     shipping_address = models.CharField(max_length=255, blank=True)

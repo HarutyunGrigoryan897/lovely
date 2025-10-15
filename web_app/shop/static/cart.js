@@ -49,7 +49,8 @@ const ServerCartManager = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRFToken': this.getCSRFToken()
+          'X-CSRFToken': this.getCSRFToken(),
+          'X-Request-Source': 'CART.JS-SERVER-CART-MANAGER'  // 🔍 DEBUG: Identify request source
         },
         credentials: 'same-origin',
         body: JSON.stringify({
@@ -558,19 +559,15 @@ const ServerCartManager = {
 
 // Initialize cart when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
+  console.log('🛒 [CART.JS] DOMContentLoaded - Initializing cart');
   // Load cart data
   await ServerCartManager.loadCart();
   
   // Replace the old CartManager with ServerCartManager
   window.CartManager = ServerCartManager;
   
-  // Attach event listeners to existing add-to-cart buttons
-  document.querySelectorAll('.add-to-cart').forEach(button => {
-    button.addEventListener('click', async (e) => {
-      e.preventDefault();
-      await ServerCartManager.handleAddToCartClick(button);
-    });
-  });
+  // NOTE: Event listeners for add-to-cart buttons are attached in script.js
+  // to avoid duplicate event handlers. Do not attach them here.
   
-  console.log('Server-side CartManager initialized');
+  console.log('🛒 [CART.JS] Server-side CartManager initialized');
 });

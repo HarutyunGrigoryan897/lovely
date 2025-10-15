@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -42,99 +43,141 @@
             <div class="space-y-4" id="orders-container">
               {% if orders %}
                 {% for order in orders %}
-                <div class="bg-luxury-white rounded-xl shadow-lg p-6 border border-luxury-gray hover:shadow-xl transition-all duration-300">
-                  <div class="flex justify-between items-start mb-6">
-                    <div class="flex items-center space-x-3">
-                      <div class="bg-luxury-gold/10 p-2 rounded-lg">
-                        <svg class="w-6 h-6 text-luxury-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 class="text-lg font-bold text-luxury-black">Order #{{ order.order_number }}</h3>
-                        <p class="text-sm text-luxury-gray-dark">{{ order.created_at|date:"F j, Y" }} at {{ order.created_at|time:"g:i A" }}</p>
-                      </div>
-                    </div>
-                    <div class="text-right">
-                      <div class="text-xl font-bold text-luxury-gold mb-2">${{ order.total_amount }}</div>
-                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold shadow-sm
-                        {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800 border border-yellow-200
-                        {% elif order.status == 'confirmed' %}bg-blue-100 text-blue-800 border border-blue-200
-                        {% elif order.status == 'processing' %}bg-purple-100 text-purple-800 border border-purple-200
-                        {% elif order.status == 'shipped' %}bg-indigo-100 text-indigo-800 border border-indigo-200
-                        {% elif order.status == 'delivered' %}bg-green-100 text-green-800 border border-green-200
-                        {% elif order.status == 'cancelled' %}bg-red-100 text-red-800 border border-red-200
+                <div class="bg-white rounded-2xl shadow-sm border border-luxury-gray/10 overflow-hidden mb-4">
+                  <!-- Order Header -->
+                  <div class="bg-luxury-gray-light/30 px-4 py-3 border-b border-luxury-gray/10">
+                    <div class="flex justify-between items-center gap-2 mb-1">
+                      <h3 class="text-xs font-bold text-luxury-black truncate">#{{ order.order_number }}</h3>
+                      <span class="inline-flex px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide flex-shrink-0
+                        {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                        {% elif order.status == 'confirmed' %}bg-blue-100 text-blue-800
+                        {% elif order.status == 'processing' %}bg-purple-100 text-purple-800
+                        {% elif order.status == 'shipped' %}bg-indigo-100 text-indigo-800
+                        {% elif order.status == 'delivered' %}bg-green-100 text-green-800
+                        {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
                         {% endif %}">
                         {{ order.get_status_display }}
                       </span>
                     </div>
+                    <p class="text-[10px] text-luxury-gray-dark">{{ order.created_at|date:"M j, Y" }} at {{ order.created_at|time:"g:i A" }}</p>
                   </div>
                   
-                  <div class="space-y-3">
+                  <!-- Order Items -->
+                  <div class="p-4 space-y-4">
                     {% for item in order.items.all %}
-                    <div class="bg-luxury-gray-light rounded-lg p-4 transition-all duration-200 hover:bg-luxury-gray">
-                      <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0">
-                          <img src="{% if item.product.image %}{{ item.product.image.url }}{% else %}{% static 'hero-watch-D40AmJ87.jpg' %}{% endif %}" 
-                               alt="{{ item.product.name }}" 
-                               class="w-16 h-16 object-cover rounded-lg shadow-sm">
+                    <div class="flex gap-3 pb-4 {% if not forloop.last %}border-b border-luxury-gray/10{% endif %}">
+                      <div class="flex-shrink-0">
+                        <img src="{% if item.product.image %}{{ item.product.image.url }}{% else %}{% static 'hero-watch-D40AmJ87.jpg' %}{% endif %}" 
+                             alt="{{ item.product.name }}" 
+                             class="w-20 h-20 object-cover rounded-xl shadow-sm">
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <h4 class="font-semibold text-sm text-luxury-black leading-tight mb-1">{{ item.product.name }}</h4>
+                        <p class="text-xs text-luxury-gray-dark mb-2">{{ item.product.brand.name }}</p>
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                          <span class="text-xs text-luxury-gray-dark">Qty: {{ item.quantity }} × ${{ item.price|floatformat:2 }}</span>
+                          <span class="text-sm font-bold text-luxury-gold whitespace-nowrap">${{ item.total_price|floatformat:2 }}</span>
                         </div>
-                        <div class="flex-1 min-w-0">
-                          <h4 class="font-semibold text-luxury-black truncate">{{ item.product.name }}</h4>
-                          <p class="text-sm text-luxury-gray-dark mt-1">{{ item.product.brand.name }}</p>
-                          {% if item.customization_data %}
-                            <div class="mt-2">
-                              <div class="flex flex-wrap gap-2">
-                                {% for key, value in item.customization_data.items %}
-                                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-luxury-gold/20 text-luxury-gold border border-luxury-gold/30">
-                                    {{ key }}: {{ value }}
-                                  </span>
+                        
+                        {% if item.customization_data %}
+                          <!-- Customization Info -->
+                          <div class="space-y-2 mt-2">
+                            {% if item.customization_data.diamond_type %}
+                            <div class="flex items-start gap-1.5">
+                              <span class="inline-block px-2 py-1 rounded-full text-[10px] font-medium bg-luxury-gray-light text-luxury-black">
+                                Diamond: {{ item.customization_data.diamond_type|title }}
+                              </span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if item.customization_data.diamond_quantities %}
+                            <div class="bg-luxury-gray-light/50 rounded-xl p-2">
+                              <p class="text-[10px] font-semibold text-luxury-black mb-1">Diamond Details:</p>
+                              <div class="space-y-0.5">
+                                {% for size, qty in item.customization_data.diamond_quantities.items %}
+                                  {% if qty > 0 %}
+                                  <div class="flex justify-between text-[10px]">
+                                    <span class="text-luxury-gray-dark">{{ size|replace:"_, "|title }}:</span>
+                                    <span class="font-medium text-luxury-black">{{ qty }} pcs</span>
+                                  </div>
+                                  {% endif %}
                                 {% endfor %}
                               </div>
                             </div>
+                            {% endif %}
+                            
+                            <!-- Gold Weight - check customization_data first, then product -->
+                            {% if item.customization_data.gold_weight or item.product.gold_weight_grams %}
+                            <div class="bg-luxury-gold/5 rounded-xl p-2 border border-luxury-gold/20">
+                              <div class="flex justify-between items-center">
+                                <span class="text-[10px] font-semibold text-luxury-black">Gold Weight:</span>
+                                <span class="text-xs font-bold text-luxury-gold">
+                                  {% if item.customization_data.gold_weight %}
+                                    {{ item.customization_data.gold_weight }}g
+                                  {% else %}
+                                    {{ item.product.gold_weight_grams }}g
+                                  {% endif %}
+                                </span>
+                              </div>
+                            </div>
+                            {% endif %}
+                          </div>
+                          
+                          <!-- Price Breakdown -->
+                          {% if item.customization_data.gold_price or item.customization_data.diamond_price or item.customization_data.work_price %}
+                            <details class="mt-2">
+                              <summary class="cursor-pointer text-[10px] text-luxury-gray-dark font-medium hover:text-luxury-gold transition-colors select-none">
+                                View price breakdown
+                              </summary>
+                              <div class="mt-2 space-y-1 bg-white rounded-xl p-2 border border-luxury-gray/10">
+                                {% if item.customization_data.gold_price %}
+                                  <div class="flex justify-between gap-2 text-[10px]">
+                                    <span class="text-luxury-gray-dark">Gold Price:</span>
+                                    <span class="font-semibold text-luxury-black">${{ item.customization_data.gold_price }}</span>
+                                  </div>
+                                {% endif %}
+                                {% if item.customization_data.diamond_price %}
+                                  <div class="flex justify-between gap-2 text-[10px]">
+                                    <span class="text-luxury-gray-dark">Diamond Price:</span>
+                                    <span class="font-semibold text-luxury-black">${{ item.customization_data.diamond_price }}</span>
+                                  </div>
+                                {% endif %}
+                                {% if item.customization_data.work_price %}
+                                  <div class="flex justify-between gap-2 text-[10px]">
+                                    <span class="text-luxury-gray-dark">Work Price:</span>
+                                    <span class="font-semibold text-luxury-black">${{ item.customization_data.work_price }}</span>
+                                  </div>
+                                {% endif %}
+                              </div>
+                            </details>
                           {% endif %}
-                        </div>
-                        <div class="flex-shrink-0 text-right">
-                          <div class="text-sm text-luxury-gray-dark mb-1">
-                            {{ item.quantity }} × ${{ item.price }}
-                          </div>
-                          <div class="text-lg font-bold text-luxury-black">
-                            ${{ item.total_price }}
-                          </div>
-                        </div>
+                        {% endif %}
                       </div>
                     </div>
                     {% endfor %}
                   </div>
                   
-                  <div class="mt-6 pt-4 border-t border-luxury-gray-light bg-luxury-gray-light/50 rounded-lg p-4">
-                    <div class="flex justify-between items-center">
-                      <div class="flex items-center space-x-2">
-                        <svg class="w-5 h-5 text-luxury-gray-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                        </svg>
-                        <span class="text-luxury-gray-dark font-medium">{{ order.total_items }} item{{ order.total_items|pluralize }}</span>
-                      </div>
-                      <div class="text-right">
-                        <span class="text-sm text-luxury-gray-dark">Order Total:</span>
-                        <div class="text-xl font-bold text-luxury-black">${{ order.total_amount }}</div>
-                      </div>
-                    </div>
+                  <!-- Order Footer -->
+                  <div class="bg-luxury-gray-light/20 px-4 py-3 border-t border-luxury-gray/10 flex justify-between items-center">
+                    <span class="text-xs font-medium text-luxury-gray-dark uppercase tracking-wide">Total</span>
+                    <span class="text-lg font-bold text-luxury-gold">${{ order.total_amount|floatformat:2 }}</span>
                   </div>
                 </div>
                 {% endfor %}
               {% else %}
-                <div class="text-center py-12">
-                  <div class="text-luxury-gray-dark mb-4">
-                    <svg class="w-16 h-16 mx-auto mb-4 text-luxury-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                    </svg>
-                    <h3 class="text-lg font-medium text-luxury-black mb-2">No orders yet</h3>
-                    <p>You haven't placed any orders yet. Start shopping to see your order history here.</p>
+                <div class="text-center py-12 px-4">
+                  <div class="bg-white rounded-lg shadow-sm p-6 max-w-sm mx-auto border border-luxury-gray/10">
+                    <div class="bg-luxury-gold/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg class="w-8 h-8 text-luxury-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                      </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-luxury-black mb-2">No Orders Yet</h3>
+                    <p class="text-sm text-luxury-gray-dark mb-6 leading-relaxed">Browse our exclusive collection and place your first order.</p>
+                    <a href="{% url 'shop:catalog' %}" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-luxury-gold hover:bg-luxury-gold-dark text-white text-sm font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-lg">
+                      Browse Catalog
+                    </a>
                   </div>
-                  <a href="{% url 'shop:catalog' %}" class="bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black px-6 py-2 rounded-md font-semibold">
-                    Browse Catalog
-                  </a>
                 </div>
               {% endif %}
             </div>

@@ -93,13 +93,42 @@
                   <h4 class="font-semibold text-luxury-black mb-3">Order Items:</h4>
                   <div class="space-y-3">
                     {% for item in order_items %}
-                    <div class="flex justify-between items-center">
+                    <div class="flex justify-between items-start">
                       <div class="flex-1">
                         <div class="font-medium text-luxury-black">{{ item.product.name }}</div>
                         <div class="text-sm text-luxury-gray-dark">Quantity: {{ item.quantity }}</div>
                         {% if item.customization_data %}
                         <div class="text-xs text-luxury-gray-dark mt-1">
-                          Customized
+                          {% if item.customization_data.diamond_type %}
+                            <div class="mb-1"><strong>Diamond Type:</strong> {{ item.customization_data.diamond_type|capfirst }}</div>
+                            {% if item.customization_data.diamond_quantities %}
+                              <div><strong>Diamond Quantities:</strong></div>
+                              <ul class="ml-4 list-disc">
+                                {% for size, qty in item.customization_data.diamond_quantities.items %}
+                                  {% if qty > 0 %}
+                                    <li>
+                                      {% if size == 'under_5' %}Under 5mm
+                                      {% elif size == '5_to_7' %}5-7mm
+                                      {% elif size == '8_to_12' %}8-12mm
+                                      {% elif size == '13_to_17' %}13-17mm
+                                      {% endif %}: {{ qty }}
+                                    </li>
+                                  {% endif %}
+                                {% endfor %}
+                              </ul>
+                            {% endif %}
+                            {% if item.customization_data.gold_price %}
+                              <div class="mt-1"><strong>Gold:</strong> ${{ item.customization_data.gold_price }}</div>
+                            {% endif %}
+                            {% if item.customization_data.diamond_price %}
+                              <div><strong>Diamonds:</strong> ${{ item.customization_data.diamond_price }}</div>
+                            {% endif %}
+                            {% if item.customization_data.work_price %}
+                              <div><strong>Work:</strong> ${{ item.customization_data.work_price }}</div>
+                            {% endif %}
+                          {% else %}
+                            <div>Customized</div>
+                          {% endif %}
                         </div>
                         {% endif %}
                       </div>

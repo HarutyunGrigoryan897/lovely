@@ -33,4 +33,16 @@ urlpatterns = [
     path('process-checkout/', views.process_checkout, name='process_checkout'),
     path('api/add-to-favorites/', views.add_to_favorites, name='add_to_favorites'),
     path('api/remove-from-favorites/', views.remove_from_favorites, name='remove_from_favorites'),
+    
+    # Shipping address management
+    path('api/shipping-addresses/', views.get_shipping_addresses, name='get_shipping_addresses'),
+    path('api/shipping-addresses/add/', views.add_shipping_address, name='add_shipping_address'),
+    path('api/shipping-addresses/<int:address_id>/update/', views.update_shipping_address, name='update_shipping_address'),
+    path('api/shipping-addresses/<int:address_id>/delete/', views.delete_shipping_address, name='delete_shipping_address'),
+    path('api/shipping-addresses/<int:address_id>/set-default/', views.set_default_address, name='set_default_address'),
+    
+    # Product pricing and details
+    path('api/product/<slug:product_slug>/calculate-price/', views.calculate_product_price, name='calculate_product_price'),
+    path('api/product/<slug:product_slug>/details/', views.get_product_details, name='get_product_details'),
+    path('api/get-diamond-prices/', views.get_diamond_prices, name='get_diamond_prices'),
 ]

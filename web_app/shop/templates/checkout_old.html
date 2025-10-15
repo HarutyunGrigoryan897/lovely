@@ -32,7 +32,7 @@
                             {% csrf_token %}
                             
                             <div class="bg-luxury-white p-6 rounded-lg shadow-sm">
-                                <h2 class="text-xl font-bold text-luxury-black mb-4">Shipping Address</h2>
+                                <h2 class="text-xl font-bold text-luxury-black mb-4">Shipping Information</h2>
                                 
                                 <div class="mb-4">
                                     <label for="customer_email" class="block text-sm font-medium text-luxury-gray-dark mb-2">Email Address</label>
@@ -42,21 +42,58 @@
                                     <p class="text-xs text-luxury-gray-dark mt-1">We'll use this email for order confirmation</p>
                                 </div>
                                 
-                                <!-- Shipping Addresses Selection -->
-                                <div id="addresses-container" class="mt-4">
-                                    <div class="flex justify-between items-center mb-3">
-                                        <label class="block text-sm font-medium text-luxury-gray-dark">Select Shipping Address</label>
-                                        <button type="button" onclick="window.location.href='/account/#addresses'" 
-                                                class="text-sm text-luxury-gold hover:text-luxury-gold-dark">
-                                            + Add New Address
-                                        </button>
+                                <div class="mt-4">
+                                    <label for="shipping_address" class="block text-sm font-medium text-luxury-gray-dark mb-2">Address</label>
+                                    <input type="text" id="shipping_address" name="shipping_address" required
+                                           placeholder="Street address, apartment, suite, etc."
+                                           class="w-full px-3 py-2 border border-luxury-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold focus:border-luxury-gold transition-colors">
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4 mt-4">
+                                    <div>
+                                        <label for="shipping_city" class="block text-sm font-medium text-luxury-gray-dark mb-2">City</label>
+                                        <input type="text" id="shipping_city" name="shipping_city" required
+                                               class="w-full px-3 py-2 border border-luxury-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold focus:border-luxury-gold transition-colors">
                                     </div>
-                                    
-                                    <div id="addresses-list" class="space-y-3">
-                                        <!-- Addresses will be loaded here -->
-                                        <div class="text-center py-8 text-luxury-gray-dark">
-                                            <p>Loading addresses...</p>
+                                    <div>
+                                        <label for="shipping_zip_code" class="block text-sm font-medium text-luxury-gray-dark mb-2">ZIP Code</label>
+                                        <input type="text" id="shipping_zip_code" name="shipping_zip_code" required
+                                               class="w-full px-3 py-2 border border-luxury-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold focus:border-luxury-gold transition-colors">
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <label for="shipping_country" class="block text-sm font-medium text-luxury-gray-dark mb-2">Country</label>
+                                    <div class="relative">
+                                        <button id="country-filter" class="flex h-10 w-full items-center justify-between rounded-md border bg-luxury-white hover:bg-luxury-gray-light px-4 py-2 text-sm font-medium border-luxury-gray transition-colors duration-200">
+                                            <span id="country-filter-text">🌍 Select Country</span>
+                                            <svg class="lucide lucide-chevron-down h-4 w-4 opacity-50 transition-transform duration-200" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                                                <path d="m6 9 6 6 6-6"></path>
+                                            </svg>
+                                        </button>
+                                        <div id="country-dropdown" class="hidden absolute top-full left-0 z-50 w-full rounded-lg border bg-luxury-white shadow-xl mt-2 overflow-hidden">
+                                            <div class="py-1 max-h-60 overflow-y-auto">
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="">🌍 Select Country</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="United States">🇺🇸 United States</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Canada">🇨🇦 Canada</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="United Kingdom">🇬🇧 United Kingdom</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Australia">🇦🇺 Australia</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Germany">🇩🇪 Germany</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="France">🇫🇷 France</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Italy">🇮🇹 Italy</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Spain">🇪🇸 Spain</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Switzerland">🇨🇭 Switzerland</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Japan">🇯🇵 Japan</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Netherlands">🇳🇱 Netherlands</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Sweden">🇸🇪 Sweden</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Norway">🇳🇴 Norway</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Denmark">🇩🇰 Denmark</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Belgium">🇧🇪 Belgium</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Austria">🇦� Austria</div>
+                                                <div class="country-option px-4 py-2 hover:bg-luxury-gray text-sm cursor-pointer transition-colors duration-150" data-country="Other">🌐 Other</div>
+                                            </div>
                                         </div>
+                                        <input type="hidden" id="shipping_country" name="shipping_country" required>
                                     </div>
                                 </div>
                             </div>
@@ -108,101 +145,49 @@
     </div>
 
     <script>
-        let selectedAddressId = null;
+        // Country dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const countryFilter = document.getElementById('country-filter');
+            const countryDropdown = document.getElementById('country-dropdown');
+            const countryFilterText = document.getElementById('country-filter-text');
+            const hiddenCountryInput = document.getElementById('shipping_country');
+            const chevron = countryFilter.querySelector('.lucide-chevron-down');
 
-        // Load shipping addresses
-        async function loadShippingAddresses() {
-            try {
-                const response = await fetch('/api/shipping-addresses/', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to load shipping addresses');
-                }
-
-                const data = await response.json();
+            countryFilter.addEventListener('click', function(e) {
+                e.preventDefault();
+                const isHidden = countryDropdown.classList.contains('hidden');
                 
-                if (!data.success) {
-                    throw new Error(data.error || 'Failed to load addresses');
-                }
-                
-                const addressesList = document.getElementById('addresses-list');
-                
-                if (data.addresses.length === 0) {
-                    addressesList.innerHTML = `
-                        <div class="text-center py-8 border-2 border-dashed border-luxury-gray rounded-lg">
-                            <svg class="mx-auto h-12 w-12 text-luxury-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                            <p class="mt-2 text-luxury-gray-dark">No shipping addresses found</p>
-                            <button onclick="window.location.href='/account/#addresses'" 
-                                    class="mt-3 text-luxury-gold hover:text-luxury-gold-dark font-medium">
-                                Add your first address
-                            </button>
-                        </div>
-                    `;
-                    return;
-                }
-
-                addressesList.innerHTML = data.addresses.map(address => `
-                    <div class="address-option border-2 rounded-lg p-4 cursor-pointer transition-all ${address.is_default ? 'border-luxury-gold bg-luxury-gold/5' : 'border-luxury-gray hover:border-luxury-gold'}"
-                         data-address-id="${address.id}"
-                         onclick="selectAddress(${address.id})">
-                        <div class="flex items-start justify-between">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="font-semibold text-luxury-black">${address.label}</span>
-                                    ${address.is_default ? '<span class="text-xs px-2 py-0.5 bg-luxury-gold text-luxury-black rounded-full">Default</span>' : ''}
-                                </div>
-                                <p class="text-sm text-luxury-gray-dark">${address.first_name} ${address.last_name}</p>
-                                <p class="text-sm text-luxury-gray-dark">${address.address}</p>
-                                <p class="text-sm text-luxury-gray-dark">${address.city}, ${address.zip_code}</p>
-                                <p class="text-sm text-luxury-gray-dark">${address.country}</p>
-                            </div>
-                            <div class="address-check-icon hidden">
-                                <svg class="w-6 h-6 text-luxury-gold" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-                
-                // Auto-select default address
-                const defaultAddress = data.addresses.find(addr => addr.is_default);
-                if (defaultAddress) {
-                    selectAddress(defaultAddress.id);
-                }
-
-            } catch (error) {
-                console.error('Error loading addresses:', error);
-                showToast('Failed to load shipping addresses', 'error');
-            }
-        }
-
-        // Select an address
-        function selectAddress(addressId) {
-            selectedAddressId = addressId;
-            
-            // Update UI
-            document.querySelectorAll('.address-option').forEach(el => {
-                const isSelected = el.dataset.addressId === String(addressId);
-                if (isSelected) {
-                    el.classList.add('border-luxury-gold', 'bg-luxury-gold/5');
-                    el.classList.remove('border-luxury-gray');
-                    el.querySelector('.address-check-icon').classList.remove('hidden');
+                if (isHidden) {
+                    countryDropdown.classList.remove('hidden');
+                    chevron.style.transform = 'rotate(180deg)';
                 } else {
-                    el.classList.remove('border-luxury-gold', 'bg-luxury-gold/5');
-                    el.classList.add('border-luxury-gray');
-                    el.querySelector('.address-check-icon').classList.add('hidden');
+                    countryDropdown.classList.add('hidden');
+                    chevron.style.transform = 'rotate(0deg)';
                 }
             });
-        }
+
+            // Handle country selection
+            const countryOptions = countryDropdown.querySelectorAll('.country-option');
+            countryOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const country = this.getAttribute('data-country');
+                    const text = this.textContent.trim();
+                    
+                    countryFilterText.textContent = text;
+                    hiddenCountryInput.value = country;
+                    countryDropdown.classList.add('hidden');
+                    chevron.style.transform = 'rotate(0deg)';
+                });
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!countryFilter.contains(e.target) && !countryDropdown.contains(e.target)) {
+                    countryDropdown.classList.add('hidden');
+                    chevron.style.transform = 'rotate(0deg)';
+                }
+            });
+        });
 
         // Load cart data and populate order summary
         async function loadCheckoutData() {
@@ -262,7 +247,7 @@
         document.getElementById('checkout-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Validate email
+            // Email validation
             const emailField = document.getElementById('customer_email');
             const emailValue = emailField.value.trim();
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -270,12 +255,6 @@
             if (!emailRegex.test(emailValue)) {
                 showToast('Please enter a valid email address', 'error');
                 emailField.focus();
-                return;
-            }
-            
-            // Validate address selection
-            if (!selectedAddressId) {
-                showToast('Please select a shipping address', 'error');
                 return;
             }
             
@@ -287,14 +266,11 @@
             submitBtn.textContent = 'Processing...';
             
             try {
+                const formData = new FormData(this);
                 const response = await fetch('/process-checkout/', {
                     method: 'POST',
-                    body: JSON.stringify({
-                        customer_email: emailValue,
-                        shipping_address_id: selectedAddressId
-                    }),
+                    body: formData,
                     headers: {
-                        'Content-Type': 'application/json',
                         'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                     }
                 });
@@ -310,7 +286,7 @@
                     // Show success message
                     showToast('Order placed successfully!', 'success');
                     
-                    // Redirect to order confirmation
+                    // Redirect to order confirmation immediately
                     window.location.href = `/order-confirmation/${result.order_id}/`;
                 } else {
                     showToast(result.error || 'Failed to process order', 'error');
@@ -362,11 +338,8 @@
             }
         });
 
-        // Load data when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            loadCheckoutData();
-            loadShippingAddresses();
-        });
+        // Load checkout data when page loads
+        document.addEventListener('DOMContentLoaded', loadCheckoutData);
     </script>
 
     <!-- Bottom Navigation -->

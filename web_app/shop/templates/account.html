@@ -4,6 +4,7 @@
   <head>
     <meta charset="UTF-8">
     <meta content="width=device-width,initial-scale=1" name="viewport">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>Teluxe - Luxury Watch Collection | Premium Timepieces</title>
     <meta content="Discover the finest luxury timepieces from Rolex, Omega, Patek Philippe & more. Premium watches with authenticated quality and exclusive designs." name="description">
     <meta content="luxury watches, premium timepieces, Rolex, Omega, Patek Philippe, Audemars Piguet, luxury accessories" name="keywords">
@@ -23,6 +24,7 @@
     <link href="{% static 'sonner-toaster.css' %}" rel="stylesheet">
   </head>
   <body>
+    {% csrf_token %}
     <div id="root">
       <div aria-label="Notifications (F8)" role="region" style="pointer-events:none" tabindex="-1">
         <ol class="fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]" tabindex="-1"></ol>
@@ -109,6 +111,27 @@
                 </div>
               </div>
             </div>
+            
+            <!-- Shipping Addresses Section -->
+            <div id="addresses">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-luxury-black">Shipping Addresses</h3>
+                <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-luxury-gold hover:bg-luxury-gold-dark h-10 px-4 py-2 text-luxury-black" onclick="showAddAddressModal()">
+                  <svg class="lucide lucide-plus h-4 w-4" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 12h14"></path>
+                    <path d="M12 5v14"></path>
+                  </svg>
+                  Add Address
+                </button>
+              </div>
+              <div id="addresses-list" class="space-y-3">
+                <!-- Addresses will be loaded here -->
+                <div class="text-center py-8">
+                  <p class="text-luxury-gray-dark">Loading addresses...</p>
+                </div>
+              </div>
+            </div>
+            
             <div>
               <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold text-luxury-black">Recent Orders</h3>
@@ -185,26 +208,394 @@
       </div>
     </div>
     
-    <script>
-      // Account page specific JavaScript
-      document.addEventListener('DOMContentLoaded', function() {
-        // Initialize favorites manager - this will show empty state if no favorites
-        FavoritesManager.loadFavorites();
+    <!-- Add/Edit Address Modal -->
+    <div id="address-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div class="bg-luxury-white rounded-lg max-w-md w-full p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 id="modal-title" class="text-xl font-bold text-luxury-black">Add Shipping Address</h3>
+          <button onclick="closeAddressModal()" class="text-luxury-gray-dark hover:text-luxury-black">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
         
-        // Listen for authentication status changes
+        <form id="address-form" class="space-y-4">
+          <input type="hidden" id="address-id" name="address_id">
+          
+          <div>
+            <label for="address-label" class="block text-sm font-medium text-luxury-gray-dark mb-1">Label *</label>
+            <input type="text" id="address-label" name="label" required
+                   placeholder="e.g., Home, Work, Office"
+                   class="w-full px-3 py-2 border border-luxury-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold">
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="address-first-name" class="block text-sm font-medium text-luxury-gray-dark mb-1">First Name *</label>
+              <input type="text" id="address-first-name" name="first_name" required
+                     class="w-full px-3 py-2 border border-luxury-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold">
+            </div>
+            <div>
+              <label for="address-last-name" class="block text-sm font-medium text-luxury-gray-dark mb-1">Last Name *</label>
+              <input type="text" id="address-last-name" name="last_name" required
+                     class="w-full px-3 py-2 border border-luxury-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold">
+            </div>
+          </div>
+          
+          <div>
+            <label for="address-address" class="block text-sm font-medium text-luxury-gray-dark mb-1">Address *</label>
+            <input type="text" id="address-address" name="address" required
+                   placeholder="Street address, apartment, suite, etc."
+                   class="w-full px-3 py-2 border border-luxury-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold">
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="address-city" class="block text-sm font-medium text-luxury-gray-dark mb-1">City *</label>
+              <input type="text" id="address-city" name="city" required
+                     class="w-full px-3 py-2 border border-luxury-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold">
+            </div>
+            <div>
+              <label for="address-zip" class="block text-sm font-medium text-luxury-gray-dark mb-1">ZIP Code *</label>
+              <input type="text" id="address-zip" name="zip_code" required
+                     class="w-full px-3 py-2 border border-luxury-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold">
+            </div>
+          </div>
+          
+          <div>
+            <label for="address-country" class="block text-sm font-medium text-luxury-gray-dark mb-1">Country *</label>
+            <select id="address-country" name="country" required
+                    class="w-full px-3 py-2 border border-luxury-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold">
+              <option value="">Select Country</option>
+              <option value="United States">🇺🇸 United States</option>
+              <option value="Canada">🇨🇦 Canada</option>
+              <option value="United Kingdom">🇬🇧 United Kingdom</option>
+              <option value="Australia">🇦🇺 Australia</option>
+              <option value="Germany">🇩🇪 Germany</option>
+              <option value="France">🇫🇷 France</option>
+              <option value="Italy">🇮🇹 Italy</option>
+              <option value="Spain">🇪🇸 Spain</option>
+              <option value="Switzerland">🇨🇭 Switzerland</option>
+              <option value="Japan">🇯🇵 Japan</option>
+              <option value="Netherlands">🇳🇱 Netherlands</option>
+              <option value="Sweden">🇸🇪 Sweden</option>
+              <option value="Norway">🇳🇴 Norway</option>
+              <option value="Denmark">🇩🇰 Denmark</option>
+              <option value="Belgium">🇧🇪 Belgium</option>
+              <option value="Austria">🇦🇹 Austria</option>
+              <option value="Other">🌐 Other</option>
+            </select>
+          </div>
+          
+          <div class="flex items-center">
+            <input type="checkbox" id="address-default" name="is_default"
+                   class="w-4 h-4 text-luxury-gold focus:ring-luxury-gold border-luxury-gray rounded">
+            <label for="address-default" class="ml-2 text-sm text-luxury-gray-dark">Set as default address</label>
+          </div>
+          
+          <div class="flex gap-3 pt-4">
+            <button type="button" onclick="closeAddressModal()" 
+                    class="flex-1 px-4 py-2 border border-luxury-gray text-luxury-gray-dark rounded-lg hover:bg-luxury-gray transition-colors">
+              Cancel
+            </button>
+            <button type="submit" 
+                    class="flex-1 px-4 py-2 bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold rounded-lg transition-colors">
+              Save Address
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <script>
+      let editingAddressId = null;
+      
+      // Load shipping addresses
+      async function loadShippingAddresses() {
+        try {
+          const response = await fetch('/api/shipping-addresses/');
+          const data = await response.json();
+          
+          if (!data.success) {
+            throw new Error(data.error || 'Failed to load addresses');
+          }
+          
+          const addressesList = document.getElementById('addresses-list');
+          
+          if (data.addresses.length === 0) {
+            addressesList.innerHTML = `
+              <div class="text-center py-8 border-2 border-dashed border-luxury-gray rounded-lg">
+                <svg class="mx-auto h-12 w-12 text-luxury-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <p class="mt-2 text-luxury-gray-dark">No shipping addresses yet</p>
+                <button onclick="showAddAddressModal()" class="mt-3 text-luxury-gold hover:text-luxury-gold-dark font-medium">
+                  Add your first address
+                </button>
+              </div>
+            `;
+            return;
+          }
+          
+          addressesList.innerHTML = data.addresses.map(address => `
+            <div class="bg-luxury-white rounded-lg border border-luxury-gray p-4">
+              <div class="flex justify-between items-start">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-2">
+                    <h4 class="font-semibold text-luxury-black">${address.label}</h4>
+                    ${address.is_default ? '<span class="text-xs px-2 py-0.5 bg-luxury-gold text-luxury-black rounded-full">Default</span>' : ''}
+                  </div>
+                  <p class="text-sm text-luxury-gray-dark">${address.first_name} ${address.last_name}</p>
+                  <p class="text-sm text-luxury-gray-dark">${address.address}</p>
+                  <p class="text-sm text-luxury-gray-dark">${address.city}, ${address.zip_code}</p>
+                  <p class="text-sm text-luxury-gray-dark">${address.country}</p>
+                </div>
+                <div class="flex gap-2">
+                  ${!address.is_default ? `
+                    <button onclick="setDefaultAddress(${address.id})" 
+                            class="p-2 text-luxury-gray-dark hover:text-luxury-gold transition-colors" 
+                            title="Set as default">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                    </button>
+                  ` : ''}
+                  <button onclick='editAddress(${JSON.stringify(address)})' 
+                          class="p-2 text-luxury-gray-dark hover:text-luxury-gold transition-colors"
+                          title="Edit">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                  </button>
+                  <button onclick="deleteAddress(${address.id})" 
+                          class="p-2 text-luxury-gray-dark hover:text-red-500 transition-colors"
+                          title="Delete">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `).join('');
+          
+        } catch (error) {
+          console.error('Error loading addresses:', error);
+          document.getElementById('addresses-list').innerHTML = `
+            <div class="text-center py-8 text-red-500">
+              <p>Failed to load shipping addresses</p>
+            </div>
+          `;
+        }
+      }
+      
+      // Show add address modal
+      function showAddAddressModal() {
+        editingAddressId = null;
+        document.getElementById('modal-title').textContent = 'Add Shipping Address';
+        document.getElementById('address-form').reset();
+        document.getElementById('address-id').value = '';
+        document.getElementById('address-modal').classList.remove('hidden');
+      }
+      
+      // Edit address
+      function editAddress(address) {
+        editingAddressId = address.id;
+        document.getElementById('modal-title').textContent = 'Edit Shipping Address';
+        document.getElementById('address-id').value = address.id;
+        document.getElementById('address-label').value = address.label;
+        document.getElementById('address-first-name').value = address.first_name;
+        document.getElementById('address-last-name').value = address.last_name;
+        document.getElementById('address-address').value = address.address;
+        document.getElementById('address-city').value = address.city;
+        document.getElementById('address-zip').value = address.zip_code;
+        document.getElementById('address-country').value = address.country;
+        document.getElementById('address-default').checked = address.is_default;
+        document.getElementById('address-modal').classList.remove('hidden');
+      }
+      
+      // Close address modal
+      function closeAddressModal() {
+        document.getElementById('address-modal').classList.add('hidden');
+        document.getElementById('address-form').reset();
+        editingAddressId = null;
+      }
+      
+      // Handle address form submission
+      document.getElementById('address-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = {
+          label: document.getElementById('address-label').value,
+          first_name: document.getElementById('address-first-name').value,
+          last_name: document.getElementById('address-last-name').value,
+          address: document.getElementById('address-address').value,
+          city: document.getElementById('address-city').value,
+          zip_code: document.getElementById('address-zip').value,
+          country: document.getElementById('address-country').value,
+          is_default: document.getElementById('address-default').checked
+        };
+        
+        try {
+          const url = editingAddressId 
+            ? `/api/shipping-addresses/${editingAddressId}/update/`
+            : '/api/shipping-addresses/add/';
+          
+          // Get CSRF token
+          const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value 
+                         || document.querySelector('meta[name="csrf-token"]')?.content;
+          if (!csrfToken) {
+            console.error('CSRF token not found');
+            showToast('Security token missing. Please refresh the page.', 'error');
+            return;
+          }
+          
+          console.log('Sending request to:', url);
+          console.log('Form data:', formData);
+          
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(formData)
+          });
+          
+          console.log('Response status:', response.status);
+          
+          const result = await response.json();
+          console.log('Response data:', result);
+          
+          if (result.success) {
+            closeAddressModal();
+            loadShippingAddresses();
+            showToast(result.message, 'success');
+          } else {
+            showToast(result.error || 'Failed to save address', 'error');
+          }
+        } catch (error) {
+          console.error('Error saving address:', error);
+          showToast('An error occurred while saving the address', 'error');
+        }
+      });
+      
+      // Delete address
+      async function deleteAddress(addressId) {
+        if (!confirm('Are you sure you want to delete this address?')) {
+          return;
+        }
+        
+        try {
+          const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value 
+                         || document.querySelector('meta[name="csrf-token"]')?.content;
+          if (!csrfToken) {
+            console.error('CSRF token not found');
+            showToast('Security token missing. Please refresh the page.', 'error');
+            return;
+          }
+          
+          const response = await fetch(`/api/shipping-addresses/${addressId}/delete/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken
+            }
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            loadShippingAddresses();
+            showToast(result.message, 'success');
+          } else {
+            showToast(result.error || 'Failed to delete address', 'error');
+          }
+        } catch (error) {
+          console.error('Error deleting address:', error);
+          showToast('An error occurred while deleting the address', 'error');
+        }
+      }
+      
+      // Set default address
+      async function setDefaultAddress(addressId) {
+        try {
+          const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value 
+                         || document.querySelector('meta[name="csrf-token"]')?.content;
+          if (!csrfToken) {
+            console.error('CSRF token not found');
+            showToast('Security token missing. Please refresh the page.', 'error');
+            return;
+          }
+          
+          const response = await fetch(`/api/shipping-addresses/${addressId}/set-default/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken
+            }
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            loadShippingAddresses();
+            showToast(result.message, 'success');
+          } else {
+            showToast(result.error || 'Failed to set default address', 'error');
+          }
+        } catch (error) {
+          console.error('Error setting default address:', error);
+          showToast('An error occurred while setting the default address', 'error');
+        }
+      }
+      
+      // Simple toast notification
+      function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `fixed top-4 right-4 px-4 py-2 rounded-lg text-white z-50 transition-all duration-300 ${
+          type === 'error' ? 'bg-red-500' : 'bg-green-500'
+        }`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.classList.add('translate-x-0'), 100);
+        setTimeout(() => {
+          toast.classList.add('opacity-0', 'translate-x-full');
+          setTimeout(() => toast.remove(), 300);
+        }, 5000);
+      }
+    
+      // Account page specific JavaScript
+      document.addEventListener('DOMContentLoaded', async function() {
+        // Wait for authentication to complete before loading page content
+        try {
+          const authStatus = await window.waitForAuth();
+          
+          if (authStatus.isAuthenticated) {
+            // Initialize favorites manager - this will show empty state if no favorites
+            FavoritesManager.loadFavorites();
+            
+            // Load shipping addresses
+            loadShippingAddresses();
+            
+            // Update account info with authenticated user
+            updateAccountInfo(authStatus.isAuthenticated, authStatus.user, authStatus.isTelegramUser);
+          } else {
+            // Handle unauthenticated state (development mode or other access)
+            console.log('User not authenticated via Telegram');
+          }
+        } catch (error) {
+          console.error('Error waiting for authentication:', error);
+        }
+        
+        // Also listen for authentication status changes (for real-time updates)
         window.addEventListener('authStatusChanged', function(event) {
           const { isAuthenticated, user, isTelegramUser } = event.detail;
           updateAccountInfo(isAuthenticated, user, isTelegramUser);
         });
-        
-        // Also check immediately if auth is already available
-        if (window.telegramAuth && window.telegramAuth.isAuthenticated) {
-          updateAccountInfo(
-            window.telegramAuth.isAuthenticated,
-            window.telegramAuth.user,
-            window.telegramAuth.isTelegramUser
-          );
-        }
       });
       
       function updateAccountInfo(isAuthenticated, user, isTelegramUser) {

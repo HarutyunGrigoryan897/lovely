@@ -7,7 +7,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from decimal import Decimal
 import json
-from .models import Product, Category, Brand, WatchSpecification, JewelrySpecification, ProductCustomization, Cart, CartItem, Order, OrderItem, HeroSection
+from .models import Product, Category, Brand, WatchSpecification, JewelrySpecification, ProductCustomization, Cart, CartItem, Order, OrderItem, HeroSection, ShippingAddress
 
 
 def index(request):
@@ -304,12 +304,22 @@ def get_or_create_cart(user):
 @login_required
 def add_to_cart_api(request):
     """Add item to cart via AJAX API"""
+    print("\n" + "="*80)
+    print("🔷 [DJANGO] add_to_cart_api called")
+    print(f"🎯 [DJANGO] REQUEST SOURCE: {request.headers.get('X-Request-Source', 'UNKNOWN')}")
+    print("="*80)
+    
     try:
         data = json.loads(request.body)
+        print(f"📥 [DJANGO] Received data: {data}")
+        
         product_slug = data.get('product_id')
         quantity = int(data.get('quantity', 1))
         customization_data = data.get('customization', {})
         customization_price = Decimal(data.get('customization_price', '0.00'))
+        unit_price = data.get('unit_price')  # Get custom unit price if provided
+        
+        print(f"📦 [DJANGO] Parsed: product_slug={product_slug}, quantity={quantity}, unit_price={unit_price}")
         
         # Validate inputs
         if not product_slug:
@@ -321,38 +331,77 @@ def add_to_cart_api(request):
         # Get product
         try:
             product = Product.objects.get(slug=product_slug, is_active=True)
+            print(f"✅ [DJANGO] Product found: {product.name} (ID: {product.id})")
         except Product.DoesNotExist:
+            print(f"❌ [DJANGO] Product not found: {product_slug}")
             return JsonResponse({'success': False, 'error': 'Product not found'}, status=404)
         
         # Check stock
         if product.stock_status == 'out_of_stock':
             return JsonResponse({'success': False, 'error': 'Product is out of stock'}, status=400)
         
+        # Use provided unit price (calculated from frontend) or product's display price
+        if unit_price is None:
+            unit_price = product.display_price
+        else:
+            unit_price = Decimal(str(unit_price))
+        
         # Get or create cart
         cart = get_or_create_cart(request.user)
+        print(f"🛒 [DJANGO] Cart ID: {cart.id}, Current items: {cart.total_items}")
         
+        # Normalize empty customization data
+        if not customization_data or customization_data == {}:
+            customization_data = None
+        
+        print(f"🔍 [DJANGO] Checking for existing cart item...")
         # Check if item with same customization already exists
-        existing_item = CartItem.objects.filter(
-            cart=cart,
-            product=product,
-            customization_data=customization_data
-        ).first()
+        existing_item = None
+        if customization_data:
+            # For items with customization, match exactly
+            existing_item = CartItem.objects.filter(
+                cart=cart,
+                product=product,
+                customization_data=customization_data
+            ).first()
+        else:
+            # For items without customization, find any without customization
+            existing_item = CartItem.objects.filter(
+                cart=cart,
+                product=product,
+                customization_data__isnull=True
+            ).first()
+            
+            # Also check for empty dict
+            if not existing_item:
+                existing_item = CartItem.objects.filter(
+                    cart=cart,
+                    product=product,
+                    customization_data={}
+                ).first()
         
         if existing_item:
             # Update quantity
+            print(f"♻️ [DJANGO] Existing item found! Current qty: {existing_item.quantity}, adding: {quantity}")
             existing_item.quantity += quantity
             existing_item.save()
             cart_item = existing_item
+            print(f"♻️ [DJANGO] Updated item quantity to: {existing_item.quantity}")
         else:
             # Create new cart item
+            print(f"➕ [DJANGO] Creating new cart item with quantity: {quantity}")
             cart_item = CartItem.objects.create(
                 cart=cart,
                 product=product,
                 quantity=quantity,
                 customization_data=customization_data,
                 customization_price=customization_price,
-                unit_price=product.price
+                unit_price=unit_price
             )
+            print(f"➕ [DJANGO] New cart item created with ID: {cart_item.id}")
+        
+        print(f"🛒 [DJANGO] Cart now has {cart.total_items} items, total: ${cart.total_price}")
+        print("="*80 + "\n")
         
         return JsonResponse({
             'success': True,
@@ -461,10 +510,11 @@ def get_cart_data(request):
                     'slug': item.product.slug,
                     'name': item.customized_product_name,
                     'brand': item.product.brand.name,
-                    'image': item.product.image.url if item.product.image else None,
+                    'image_url': item.product.image.url if item.product.image else None,
                     'price': float(item.unit_price),
                 },
                 'quantity': item.quantity,
+                'price': float(item.total_price),
                 'customization_price': float(item.customization_price),
                 'total_price': float(item.total_price),
                 'customization_data': item.customization_data
@@ -477,7 +527,9 @@ def get_cart_data(request):
                 'total_items': cart.total_items,
                 'total_price': float(cart.total_price),
                 'item_count': cart.item_count
-            }
+            },
+            'cart_item_count': cart.total_items,  # Total quantity for badge
+            'cart_total': float(cart.total_price)
         })
         
     except Exception as e:
@@ -598,21 +650,36 @@ def process_checkout(request):
         total_amount = sum(item.unit_price * item.quantity for item in cart_items)
         total_items = sum(item.quantity for item in cart_items)
         
+        # Get shipping address ID from request
+        data = json.loads(request.body)
+        shipping_address_id = data.get('shipping_address_id')
+        
+        if not shipping_address_id:
+            return JsonResponse({'success': False, 'error': 'Please select a shipping address'}, status=400)
+        
+        # Get the shipping address
+        try:
+            shipping_address = ShippingAddress.objects.get(id=shipping_address_id, user=user)
+        except ShippingAddress.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Invalid shipping address'}, status=400)
+        
         # Create the order with shipping information
         order = Order.objects.create(
             user=user,
             total_amount=total_amount,
             total_items=total_items,
-            customer_email=request.POST.get('customer_email', user.email),
+            customer_email=data.get('customer_email', user.email),
             customer_first_name=user.first_name,
             customer_last_name=user.last_name,
-            # Shipping information from form
-            shipping_first_name=request.POST.get('shipping_first_name', ''),
-            shipping_last_name=request.POST.get('shipping_last_name', ''),
-            shipping_address=request.POST.get('shipping_address', ''),
-            shipping_city=request.POST.get('shipping_city', ''),
-            shipping_zip_code=request.POST.get('shipping_zip_code', ''),
-            shipping_country=request.POST.get('shipping_country', ''),
+            # Reference to the shipping address
+            shipping_address_ref=shipping_address,
+            # Snapshot of shipping information
+            shipping_first_name=shipping_address.first_name,
+            shipping_last_name=shipping_address.last_name,
+            shipping_address=shipping_address.address,
+            shipping_city=shipping_address.city,
+            shipping_zip_code=shipping_address.zip_code,
+            shipping_country=shipping_address.country,
         )
         
         # Create order items
@@ -644,5 +711,302 @@ def process_checkout(request):
             'order_id': order.id
         })
         
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid request data'}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': f'Failed to create order: {str(e)}'}, status=500)
+
+
+# ============== SHIPPING ADDRESS VIEWS ==============
+
+@login_required
+def get_shipping_addresses(request):
+    """Get all shipping addresses for the current user"""
+    try:
+        # Check if user is authenticated
+        if not request.user.is_authenticated:
+            return JsonResponse({'success': False, 'error': 'Authentication required'}, status=401)
+        
+        addresses = ShippingAddress.objects.filter(user=request.user)
+        addresses_data = [{
+            'id': addr.id,
+            'label': addr.label,
+            'first_name': addr.first_name,
+            'last_name': addr.last_name,
+            'address': addr.address,
+            'city': addr.city,
+            'zip_code': addr.zip_code,
+            'country': addr.country,
+            'is_default': addr.is_default,
+        } for addr in addresses]
+        
+        return JsonResponse({
+            'success': True,
+            'addresses': addresses_data
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': f'Failed to fetch addresses: {str(e)}'}, status=500)
+
+
+@csrf_exempt
+@require_POST
+def add_shipping_address(request):
+    """Add a new shipping address"""
+    try:
+        # Check if user is authenticated
+        if not request.user.is_authenticated:
+            return JsonResponse({'success': False, 'error': 'Authentication required'}, status=401)
+        
+        data = json.loads(request.body)
+        
+        # Validate required fields
+        required_fields = ['label', 'first_name', 'last_name', 'address', 'city', 'zip_code', 'country']
+        for field in required_fields:
+            if not data.get(field):
+                return JsonResponse({'success': False, 'error': f'{field.replace("_", " ").title()} is required'}, status=400)
+        
+        # Create the address
+        address = ShippingAddress.objects.create(
+            user=request.user,
+            label=data['label'],
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            address=data['address'],
+            city=data['city'],
+            zip_code=data['zip_code'],
+            country=data['country'],
+            is_default=data.get('is_default', False)
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Address added successfully',
+            'address': {
+                'id': address.id,
+                'label': address.label,
+                'first_name': address.first_name,
+                'last_name': address.last_name,
+                'address': address.address,
+                'city': address.city,
+                'zip_code': address.zip_code,
+                'country': address.country,
+                'is_default': address.is_default,
+            }
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': f'Failed to add address: {str(e)}'}, status=500)
+
+
+@csrf_exempt
+@require_POST
+def update_shipping_address(request, address_id):
+    """Update an existing shipping address"""
+    try:
+        # Check if user is authenticated
+        if not request.user.is_authenticated:
+            return JsonResponse({'success': False, 'error': 'Authentication required'}, status=401)
+        
+        data = json.loads(request.body)
+        
+        # Get the address
+        try:
+            address = ShippingAddress.objects.get(id=address_id, user=request.user)
+        except ShippingAddress.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Address not found'}, status=404)
+        
+        # Update fields
+        address.label = data.get('label', address.label)
+        address.first_name = data.get('first_name', address.first_name)
+        address.last_name = data.get('last_name', address.last_name)
+        address.address = data.get('address', address.address)
+        address.city = data.get('city', address.city)
+        address.zip_code = data.get('zip_code', address.zip_code)
+        address.country = data.get('country', address.country)
+        address.is_default = data.get('is_default', address.is_default)
+        address.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Address updated successfully',
+            'address': {
+                'id': address.id,
+                'label': address.label,
+                'first_name': address.first_name,
+                'last_name': address.last_name,
+                'address': address.address,
+                'city': address.city,
+                'zip_code': address.zip_code,
+                'country': address.country,
+                'is_default': address.is_default,
+            }
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': f'Failed to update address: {str(e)}'}, status=500)
+
+
+@csrf_exempt
+@require_POST
+def delete_shipping_address(request, address_id):
+    """Delete a shipping address"""
+    try:
+        # Check if user is authenticated
+        if not request.user.is_authenticated:
+            return JsonResponse({'success': False, 'error': 'Authentication required'}, status=401)
+        
+        # Get the address
+        try:
+            address = ShippingAddress.objects.get(id=address_id, user=request.user)
+        except ShippingAddress.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Address not found'}, status=404)
+        
+        address.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Address deleted successfully'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': f'Failed to delete address: {str(e)}'}, status=500)
+
+
+@csrf_exempt
+@require_POST
+def set_default_address(request, address_id):
+    """Set an address as default"""
+    try:
+        # Check if user is authenticated
+        if not request.user.is_authenticated:
+            return JsonResponse({'success': False, 'error': 'Authentication required'}, status=401)
+        
+        # Get the address
+        try:
+            address = ShippingAddress.objects.get(id=address_id, user=request.user)
+        except ShippingAddress.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Address not found'}, status=404)
+        
+        # Set as default (the model's save method will handle removing default from others)
+        address.is_default = True
+        address.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Default address updated'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': f'Failed to set default address: {str(e)}'}, status=500)
+
+
+@csrf_exempt
+@require_POST
+def calculate_product_price(request, product_slug):
+    """Calculate product price based on diamond quantities and type"""
+    try:
+        product = get_object_or_404(Product, slug=product_slug, is_active=True)
+        
+        # Parse diamond quantities and type from request
+        data = json.loads(request.body)
+        diamond_quantities = data.get('diamond_quantities', {})
+        diamond_type = data.get('diamond_type', product.diamond_type or 'natural')
+        
+        # Temporarily override product's diamond type for calculation
+        original_type = product.diamond_type
+        product.diamond_type = diamond_type
+        
+        # Calculate price breakdown
+        pricing = product.calculate_base_price(diamond_quantities)
+        
+        # Restore original type
+        product.diamond_type = original_type
+        
+        return JsonResponse({
+            'success': True,
+            'pricing': {
+                'gold_price': float(pricing['gold_price']),
+                'diamond_price': float(pricing['diamond_price']),
+                'work_price': float(pricing['work_price']),
+                'total_price': float(pricing['total_price']),
+            },
+            'product': {
+                'name': product.name,
+                'brand': product.brand.name,
+                'gold_weight_grams': float(product.gold_weight_grams),
+                'has_diamonds': product.has_diamonds,
+                'diamond_type': diamond_type,
+            },
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def get_product_details(request, product_slug):
+    """Get detailed product information including pricing options"""
+    try:
+        product = get_object_or_404(Product, slug=product_slug, is_active=True)
+        
+        # Get default diamond quantities
+        diamond_quantities = {}
+        diamond_options = []
+        
+        for option in product.diamond_options.all():
+            diamond_quantities[option.size_category] = option.default_quantity
+            diamond_options.append({
+                'size_category': option.size_category,
+                'size_label': option.get_size_category_display(),
+                'default_quantity': option.default_quantity,
+                'min_quantity': option.min_quantity,
+                'max_quantity': option.max_quantity,
+            })
+        
+        # Calculate default price
+        pricing = product.calculate_base_price(diamond_quantities) if product.has_diamonds else None
+        
+        return JsonResponse({
+            'success': True,
+            'product': {
+                'id': product.id,
+                'name': product.name,
+                'slug': product.slug,
+                'brand': product.brand.name,
+                'description': product.description,
+                'gold_weight_grams': float(product.gold_weight_grams) if product.gold_weight_grams else 0,
+                'has_diamonds': product.has_diamonds,
+                'diamond_type': product.diamond_type,
+                'diamond_type_display': product.get_diamond_type_display() if product.diamond_type else None,
+            },
+            'diamond_options': diamond_options,
+            'pricing': {
+                'gold_price': float(pricing['gold_price']) if pricing else 0,
+                'diamond_price': float(pricing['diamond_price']) if pricing else 0,
+                'work_price': float(pricing['work_price']) if pricing else 0,
+                'total_price': float(pricing['total_price']) if pricing else 0,
+            } if pricing else None,
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def get_diamond_prices(request):
+    """Get all diamond prices for both natural and lab diamonds"""
+    from .models import DiamondPrice
+    try:
+        prices = {
+            'natural': {},
+            'lab': {}
+        }
+        
+        for dp in DiamondPrice.objects.filter(is_active=True):
+            prices[dp.diamond_type][dp.size_category] = float(dp.price_per_unit)
+        
+        return JsonResponse({
+            'success': True,
+            'prices': prices
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+

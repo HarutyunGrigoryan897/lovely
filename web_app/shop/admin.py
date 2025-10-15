@@ -3,7 +3,8 @@ from django.utils.html import format_html
 from .models import (
     Brand, Category, Product, ProductImage, WatchSpecification,
     JewelrySpecification, ProductCustomization, Review, Cart, CartItem,
-    Order, OrderItem, HeroSection
+    Order, OrderItem, HeroSection, ShippingAddress, GoldPrice, DiamondPrice, 
+    WorkPrice, ProductDiamondOption
 )
 
 
@@ -114,22 +115,39 @@ class JewelrySpecificationInline(admin.StackedInline):
     )
 
 
+class ProductDiamondOptionInline(admin.TabularInline):
+    model = ProductDiamondOption
+    extra = 0
+    fields = ('size_category', 'default_quantity', 'min_quantity', 'max_quantity')
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'brand', 'category', 'price', 'stock_status', 'rating_stars', 'is_active', 'is_featured', 'show_on_homepage', 'created_at')
-    list_filter = ('brand', 'category', 'stock_status', 'is_active', 'is_featured', 'show_on_homepage', 'is_limited_edition', 'created_at')
+    list_display = ('name', 'brand', 'category', 'gold_weight_grams', 'has_diamonds', 'get_display_price', 'stock_status', 'is_active', 'show_on_homepage')
+    list_filter = ('brand', 'category', 'has_diamonds', 'diamond_type', 'stock_status', 'is_active', 'is_featured', 'show_on_homepage', 'is_limited_edition', 'created_at')
     search_fields = ('name', 'description', 'sku', 'model_number')
     prepopulated_fields = {'slug': ('name',)}
-    readonly_fields = ('created_at', 'updated_at', 'sku')
-    list_editable = ('price', 'stock_status', 'is_active', 'show_on_homepage')
-    inlines = [ProductImageInline, ProductCustomizationInline, WatchSpecificationInline, JewelrySpecificationInline]
+    readonly_fields = ('created_at', 'updated_at', 'sku', 'get_display_price')
+    list_editable = ('stock_status', 'is_active', 'show_on_homepage')
+    inlines = [ProductImageInline, ProductCustomizationInline, ProductDiamondOptionInline, WatchSpecificationInline, JewelrySpecificationInline]
+    
+    def get_display_price(self, obj):
+        """Show calculated price based on gold weight"""
+        return f"${obj.display_price:,.2f}"
+    get_display_price.short_description = 'Calculated Price'
+    get_display_price.admin_order_field = 'gold_weight_grams'
     
     fieldsets = (
         (None, {
             'fields': ('name', 'slug', 'brand', 'category', 'description', 'short_description', 'image', 'image_alt')
         }),
-        ('Pricing', {
-            'fields': ('price', 'original_price', 'cost_price')
+        ('Gold & Diamond Specifications', {
+            'fields': ('gold_weight_grams', 'has_diamonds', 'diamond_type'),
+            'description': 'Gold weight in grams. Price is automatically calculated: (gold_weight × $75/gram) + $7,000 work price'
+        }),
+        ('Pricing (Calculated)', {
+            'fields': ('get_display_price',),
+            'description': 'Price is calculated from gold weight. Base formula: (gold_weight_grams × $75) + $7,000. Customers add diamonds on top of this.'
         }),
         ('Inventory', {
             'fields': ('stock_status', 'stock_quantity', 'low_stock_threshold')
@@ -497,4 +515,115 @@ class HeroSectionAdmin(admin.ModelAdmin):
         # If setting this hero as active, deactivate all others
         if obj.is_active:
             HeroSection.objects.exclude(pk=obj.pk).update(is_active=False)
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(ShippingAddress)
+class ShippingAddressAdmin(admin.ModelAdmin):
+    list_display = ('user', 'label', 'full_name', 'city', 'country', 'is_default', 'created_at')
+    list_filter = ('is_default', 'country', 'created_at')
+    search_fields = ('user__username', 'user__email', 'label', 'first_name', 'last_name', 'address', 'city')
+    readonly_fields = ('created_at', 'updated_at')
+    list_editable = ('is_default',)
+    
+    fieldsets = (
+        (None, {
+            'fields': ('user', 'label', 'is_default')
+        }),
+        ('Recipient', {
+            'fields': ('first_name', 'last_name')
+        }),
+        ('Address', {
+            'fields': ('address', 'city', 'zip_code', 'country')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
+    full_name.short_description = 'Full Name'
+
+
+@admin.register(GoldPrice)
+class GoldPriceAdmin(admin.ModelAdmin):
+    list_display = ('price_per_gram', 'markup_percentage', 'final_price_display', 'is_active', 'updated_at')
+    list_filter = ('is_active', 'created_at')
+    readonly_fields = ('created_at', 'updated_at')
+    list_editable = ('is_active',)
+    
+    fieldsets = (
+        (None, {
+            'fields': ('price_per_gram', 'markup_percentage', 'is_active')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def final_price_display(self, obj):
+        final_price = obj.price_per_gram + (obj.price_per_gram * obj.markup_percentage / 100)
+        return f"${final_price:.2f}/gram"
+    final_price_display.short_description = 'Final Price (with markup)'
+    
+    def save_model(self, request, obj, form, change):
+        # If setting this as active, deactivate all others
+        if obj.is_active:
+            GoldPrice.objects.exclude(pk=obj.pk).update(is_active=False)
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(DiamondPrice)
+class DiamondPriceAdmin(admin.ModelAdmin):
+    list_display = ('diamond_type', 'size_category', 'carats_info', 'price_per_unit', 'is_active')
+    list_filter = ('diamond_type', 'is_active', 'size_category')
+    search_fields = ('diamond_type', 'size_category')
+    readonly_fields = ('created_at', 'updated_at')
+    list_editable = ('is_active',)
+    
+    fieldsets = (
+        (None, {
+            'fields': ('diamond_type', 'size_category', 'carats_info')
+        }),
+        ('Pricing', {
+            'fields': ('price_per_unit', 'is_active'),
+            'description': 'Price per unit. User enters quantity (can be decimal like 2.27). Total = price_per_unit × user_quantity'
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(WorkPrice)
+class WorkPriceAdmin(admin.ModelAdmin):
+    list_display = ('price', 'is_active', 'description_short', 'updated_at')
+    list_filter = ('is_active', 'created_at')
+    readonly_fields = ('created_at', 'updated_at')
+    list_editable = ('is_active',)
+    
+    fieldsets = (
+        (None, {
+            'fields': ('price', 'is_active', 'description')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def description_short(self, obj):
+        if obj.description:
+            return obj.description[:50] + '...' if len(obj.description) > 50 else obj.description
+        return '-'
+    description_short.short_description = 'Description'
+    
+    def save_model(self, request, obj, form, change):
+        # If setting this as active, deactivate all others
+        if obj.is_active:
+            WorkPrice.objects.exclude(pk=obj.pk).update(is_active=False)
         super().save_model(request, obj, form, change)

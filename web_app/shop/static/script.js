@@ -22,6 +22,7 @@ class TelegramAuth {
             this.isAuthenticated = true;
             this.isTelegramUser = true;
             this.authenticationAttempted = true;
+            this.updateUI();
             console.log('Authentication successful from storage!');
             return;
         }
@@ -29,7 +30,9 @@ class TelegramAuth {
         // First check if running in Telegram Web App
         if (!window.Telegram || !window.Telegram.WebApp) {
             console.log('Not running in Telegram Web App');
-            this.showAccessDenied('Not running in Telegram Web App');
+            // Don't show access denied immediately, user might be in development mode
+            // The middleware will handle access control server-side
+            this.authenticationAttempted = true;
             return;
         }
 
@@ -277,6 +280,33 @@ class TelegramAuth {
         }));
     }
 
+    // Method for other parts of the app to wait for authentication to complete
+    waitForAuth() {
+        return new Promise((resolve) => {
+            if (this.authenticationAttempted) {
+                resolve({
+                    isAuthenticated: this.isAuthenticated,
+                    user: this.user,
+                    isTelegramUser: this.isTelegramUser
+                });
+            } else {
+                // Listen for auth completion
+                const checkAuth = () => {
+                    if (this.authenticationAttempted) {
+                        resolve({
+                            isAuthenticated: this.isAuthenticated,
+                            user: this.user,
+                            isTelegramUser: this.isTelegramUser
+                        });
+                    } else {
+                        setTimeout(checkAuth, 100);
+                    }
+                };
+                checkAuth();
+            }
+        });
+    }
+
     async getUserInfo() {
         if (!this.isAuthenticated) return null;
         
@@ -294,6 +324,24 @@ class TelegramAuth {
 // Initialize authentication when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.telegramAuth = new TelegramAuth();
+    
+    // Make it easy for pages to wait for auth
+    window.waitForAuth = () => {
+        if (window.telegramAuth) {
+            return window.telegramAuth.waitForAuth();
+        }
+        return Promise.resolve({ isAuthenticated: false, user: null, isTelegramUser: false });
+    };
+    
+    // Helper function to check if user is authenticated
+    window.isUserAuthenticated = () => {
+        return window.telegramAuth && window.telegramAuth.isAuthenticated;
+    };
+    
+    // Helper function to get current user
+    window.getCurrentUser = () => {
+        return window.telegramAuth ? window.telegramAuth.user : null;
+    };
 });
 
 
@@ -1017,10 +1065,35 @@ const FavoritesManager = {
               <h3 class="text-lg font-semibold text-luxury-black">${item.name}</h3>
               <p class="text-sm text-luxury-gray-dark">${item.brand}</p>
             </div>
-            <p class="text-xl font-bold text-luxury-gold mb-3">$${item.price.toLocaleString()}</p>
+            <p class="text-xl font-bold text-luxury-gold mb-2">$${item.price.toLocaleString()}</p>
+            
+            
+            ${item.customization ? `
+              <div class="mb-3 space-y-1">
+                <div class="flex items-center gap-1 text-xs text-luxury-gray-dark">
+                  <span class="inline-block px-2 py-0.5 rounded-full bg-luxury-gray-light text-luxury-black font-medium">
+                    ${item.customization.diamond_type ? item.customization.diamond_type.charAt(0).toUpperCase() + item.customization.diamond_type.slice(1) : 'Natural'} Diamonds
+                  </span>
+                </div>
+                ${item.customization.gold_weight ? `
+                  <div class="text-xs text-luxury-gray-dark">
+                    <span class="font-semibold">Gold:</span> ${item.customization.gold_weight}g
+                  </div>
+                ` : ''}
+                ${item.customization.diamond_quantities && Object.keys(item.customization.diamond_quantities).length > 0 ? `
+                  <div class="text-xs text-luxury-gray-dark">
+                    <span class="font-semibold">Diamonds:</span> 
+                    ${Object.entries(item.customization.diamond_quantities).map(([size, qty]) => 
+                      qty > 0 ? `${size.replace(/_/g, ' ')}: ${qty}` : ''
+                    ).filter(Boolean).join(', ')}
+                  </div>
+                ` : ''}
+              </div>
+            ` : ''}
+            
             <div class="flex gap-2">
-              <button class="flex-1 bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold py-2 px-4 rounded-lg border border-luxury-gold hover:border-luxury-gold-dark transition-all duration-200 add-to-cart-btn"
-                      data-id="${item.id}" data-name="${item.name}" data-price="${item.price}" data-image="${item.image}" data-brand="${item.brand}">
+              <button class="flex-1 bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold py-2 px-4 rounded-lg border border-luxury-gold hover:border-luxury-gold-dark transition-all duration-200 add-to-cart-from-favorites"
+                      data-item='${JSON.stringify(item).replace(/'/g, "&#39;")}'>
                 Add to Cart
               </button>
               <button class="px-4 py-2 border-2 border-luxury-gray rounded-lg hover:bg-luxury-gray/10 hover:border-luxury-gray-dark transition-all duration-200 view-details-btn"
@@ -1250,19 +1323,23 @@ const CartManager = {
     }
   },
 
+  // DEPRECATED: Old cart listeners (DO NOT USE - causes duplicate add-to-cart calls)
+  // This method is kept for compatibility but does nothing
+  // New add-to-cart listeners are attached in the DOMContentLoaded handler below
   attachCartListeners() {
+    console.log('⚠️ [SCRIPT.JS] CartManager.attachCartListeners() called but doing nothing (deprecated)');
     // Attach event listeners to all "Add to Cart" buttons
-    const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
-    
-    addToCartButtons.forEach(button => {
-      // Remove any existing event listeners to prevent duplicates
-      button.removeEventListener('click', this.handleAddToCart);
-      
-      // Add new event listener
-      button.addEventListener('click', this.handleAddToCart.bind(this));
-    });
-    
-    console.log(`Attached cart listeners to ${addToCartButtons.length} buttons`);
+    // const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+    //
+    // addToCartButtons.forEach(button => {
+    //   // Remove any existing event listeners to prevent duplicates
+    //   button.removeEventListener('click', this.handleAddToCart);
+    //   
+    //   // Add new event listener
+    //   button.addEventListener('click', this.handleAddToCart.bind(this));
+    // });
+    //
+    // console.log(`Attached cart listeners to ${addToCartButtons.length} buttons`);
   },
 
   async handleAddToCart(event) {
@@ -1356,83 +1433,174 @@ document.addEventListener("DOMContentLoaded", () => {
   // Load favorites using FavoritesManager
   FavoritesManager.loadFavorites();
 
-  // Attach cart listeners after a short delay to ensure DOM is ready
-  setTimeout(() => {
-    CartManager.attachCartListeners();
-  }, 100);
+  // Note: Cart listeners are now attached in the separate DOMContentLoaded block below
+  // using the new API-based approach instead of CartManager
 });
 
 // Add to cart buttons (for catalog.html and other pages)
 document.addEventListener("DOMContentLoaded", () => {
+  console.log('🎯 [SCRIPT.JS] DOMContentLoaded - Setting up add-to-cart listeners');
+  const allAddToCartButtons = document.querySelectorAll(".add-to-cart");
+  console.log(`🎯 [SCRIPT.JS] Found ${allAddToCartButtons.length} add-to-cart buttons`);
+  
   document.querySelectorAll(".add-to-cart").forEach(btn => {
     // Skip the watch detail page add-to-cart button as it has its own handler
     if (btn.classList.contains('product-detail-add-to-cart')) {
+      console.log('⏭️ [SCRIPT.JS] Skipping product-detail-add-to-cart button');
       return;
     }
     
-    btn.addEventListener("click", (e) => {
+    console.log(`🎯 [SCRIPT.JS] Attaching listener to button for: ${btn.dataset.name || 'unknown'}`);
+    
+    // Add a flag to prevent double-adding
+    let isAdding = false;
+    
+    btn.addEventListener("click", async (e) => {
+      console.log('🔵 [SCRIPT.JS] Add to cart button clicked');
       e.preventDefault();
-      console.log("Add to Cart button clicked!"); // Debugging
+      e.stopPropagation();
       
-      // Get data from button attributes first
-      let productId = btn.dataset.id || btn.getAttribute('data-id');
-      let productName = btn.dataset.name || btn.getAttribute('data-name');
-      let productPrice = parseFloat(btn.dataset.price || btn.getAttribute('data-price'));
-      let productImage = btn.dataset.image || btn.getAttribute('data-image');
-      let productBrand = btn.dataset.brand || btn.getAttribute('data-brand');
-      let quantity = 1;
-
-      // If data attributes are missing, try to extract from DOM
-      if (!productId || !productName || isNaN(productPrice)) {
-        const productElement = btn.closest("div.rounded-lg.border.bg-card.text-card-foreground.shadow-sm.group.cursor-pointer.overflow-hidden.transition-all.duration-300.hover\\:shadow-card.hover\\:-translate-y-1");
-        
-        if (productElement) {
-          const nameEl = productElement.querySelector("h3.font-semibold.text-luxury-black.mb-2");
-          const priceEl = productElement.querySelector("p.text-xl.font-bold.text-luxury-black");
-          const brandEl = productElement.querySelector("span.text-sm.text-luxury-gold.font-medium");
-          const imageEl = productElement.querySelector("img");
-
-          productName = productName || (nameEl ? nameEl.textContent.trim() : "Unknown Product");
-          productPrice = isNaN(productPrice) ? (priceEl ? parseFloat(priceEl.textContent.replace(/[^0-9.]/g, '')) : 0) : productPrice;
-          productBrand = productBrand || (brandEl ? brandEl.textContent.trim() : "Unknown Brand");
-          productImage = productImage || (imageEl ? imageEl.src : './assets/hero-watch-D40AmJ87.jpg');
-          productId = productId || `${productBrand.replace(/\s/g, '-').toLowerCase()}-${productName.replace(/\s/g, '-').toLowerCase()}`;
-        }
+      // Prevent double-clicking
+      if (isAdding || btn.disabled) {
+        console.log('🔴 [SCRIPT.JS] Button already processing or disabled, skipping');
+        return;
       }
+      
+      isAdding = true;
+      console.log('🟢 [SCRIPT.JS] Processing add to cart...');
+      
+      // Get data from button attributes
+      const productId = btn.dataset.id || btn.getAttribute('data-id');
+      const productName = btn.dataset.name || btn.getAttribute('data-name');
+      const productPrice = parseFloat(btn.dataset.price || btn.getAttribute('data-price'));
+      
+      console.log('📦 [SCRIPT.JS] Product data:', { productId, productName, productPrice });
 
-      // Set default image if still missing
-      if (!productImage) {
-        productImage = './assets/hero-watch-D40AmJ87.jpg';
-      }
-
-      // Create full product name with brand if available
-      const fullProductName = productBrand && productBrand !== "Unknown Brand" ? 
-        `${productBrand} ${productName}` : productName;
-
-      console.log("Final product data:", {
-        id: productId,
-        name: fullProductName,
-        price: productPrice,
-        qty: quantity,
-        image: productImage
-      });
-
-      // Validate data before adding to cart
+      // Validate data
       if (!productId || !productName || isNaN(productPrice) || productPrice <= 0) {
-        console.error("Invalid product data:", { productId, productName, productPrice, quantity, productImage });
+        console.error("Invalid product data:", { productId, productName, productPrice });
         alert("Error: Invalid product data. Cannot add to cart.");
+        isAdding = false;
         return;
       }
 
-      CartManager.addToCart({ 
-        id: productId, 
-        name: fullProductName, 
-        price: productPrice, 
-        qty: quantity, 
-        image: productImage 
-      });
+      // Disable button during request
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+
+      try {
+        // Get CSRF token
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
+        
+        console.log('🌐 [SCRIPT.JS] Making API call to /api/add-to-cart/');
+        const response = await fetch('/api/add-to-cart/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken,
+            'X-Request-Source': 'SCRIPT.JS-CATALOG-HANDLER'  // 🔍 DEBUG: Identify request source
+          },
+          body: JSON.stringify({
+            product_id: productId,
+            quantity: 1,
+            customization: null,
+            customization_price: 0,
+            unit_price: productPrice
+          })
+        });
+        console.log('✅ [SCRIPT.JS] API response received:', response.status);
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Show success message
+          if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.showPopup({
+              title: 'Success',
+              message: `Added ${productName} to cart!`,
+              buttons: [{type: 'ok'}]
+            });
+          } else {
+            // Visual feedback
+            btn.innerHTML = '✓ Added!';
+            btn.classList.add('bg-green-500');
+            setTimeout(() => {
+              btn.innerHTML = originalText;
+              btn.classList.remove('bg-green-500');
+            }, 2000);
+          }
+
+          // Update cart count
+          updateCartCount();
+        } else {
+          throw new Error(data.error || 'Failed to add to cart');
+        }
+      } catch (error) {
+        console.error('Error adding to cart:', error);
+        if (window.Telegram && window.Telegram.WebApp) {
+          window.Telegram.WebApp.showPopup({
+            title: 'Error',
+            message: error.message || 'Failed to add to cart',
+            buttons: [{type: 'ok'}]
+          });
+        } else {
+          alert(error.message || 'Failed to add to cart');
+        }
+      } finally {
+        btn.disabled = false;
+        isAdding = false;
+        if (btn.innerHTML.includes('animate-spin')) {
+          btn.innerHTML = originalText;
+        }
+      }
     });
   });
+  
+  // Helper function to get CSRF cookie
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  
+  // Helper function to update cart count
+  function updateCartCount() {
+    console.log('🔄 [SCRIPT.JS] Updating cart count...');
+    fetch('/api/get-cart/')
+      .then(r => r.json())
+      .then(data => {
+        console.log('🔄 [SCRIPT.JS] Cart data received:', data);
+        if (data.success) {
+          const cartCountElements = document.querySelectorAll('.cart-item-count');
+          console.log(`🔄 [SCRIPT.JS] Found ${cartCountElements.length} cart count elements`);
+          
+          cartCountElements.forEach(element => {
+            element.textContent = data.cart_item_count || 0;
+            // Show badge if there are items
+            if (data.cart_item_count > 0) {
+              element.style.display = 'flex';
+              element.style.visibility = 'visible';
+              console.log(`✅ [SCRIPT.JS] Updated cart count to: ${data.cart_item_count}`);
+            } else {
+              element.style.display = 'none';
+              element.style.visibility = 'visible';
+              console.log('✅ [SCRIPT.JS] Cart is empty, hiding badge');
+            }
+          });
+        }
+      })
+      .catch(err => console.error('❌ [SCRIPT.JS] Failed to update cart count:', err));
+  }
 });
 
 // Event listener for clearing the cart on cart.html
@@ -1571,27 +1739,103 @@ function handleFavoriteClick(e) {
   e.preventDefault();
   e.stopPropagation();
   
+  console.log('💖 [SCRIPT.JS] Favorite button clicked');
+  
   const button = e.currentTarget;
   const watchData = {
     id: button.dataset.id,
     name: button.dataset.name,
-    price: button.dataset.price,
+    price: parseFloat(button.dataset.price),
     image: button.dataset.image,
     brand: button.dataset.brand
   };
   
   if (!watchData.id) {
-    console.error("Watch data is incomplete:", watchData);
+    console.error("❌ [SCRIPT.JS] Watch data is incomplete:", watchData);
     return;
   }
+  
+  console.log('📦 [SCRIPT.JS] Watch data:', watchData);
   
   const wasToggled = FavoritesManager.toggleFavorite(watchData);
   
   if (wasToggled) {
     const isNowFavorited = FavoritesManager.isInFavorites(watchData.id);
-    console.log(isNowFavorited ? "Added to favorites:" : "Removed from favorites:", watchData.name);
+    console.log(isNowFavorited ? "✅ [SCRIPT.JS] Added to favorites:" : "💔 [SCRIPT.JS] Removed from favorites:", watchData.name);
+    
+    // Show toast notification
+    if (typeof Toaster !== 'undefined') {
+      Toaster.create({
+        text: isNowFavorited ? 'Added to favorites!' : 'Removed from favorites',
+        duration: 2000
+      });
+    }
   }
 }
+
+// -------------------- ADD TO CART FROM FAVORITES --------------------
+
+// Handle add to cart from favorites with customization
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('add-to-cart-from-favorites') || 
+      e.target.closest('.add-to-cart-from-favorites')) {
+    
+    const button = e.target.classList.contains('add-to-cart-from-favorites') 
+      ? e.target 
+      : e.target.closest('.add-to-cart-from-favorites');
+    
+    console.log('🛒 [FAVORITES] Add to cart clicked');
+    
+    try {
+      const itemData = JSON.parse(button.dataset.item);
+      console.log('📦 [FAVORITES] Item data:', itemData);
+      
+      // Prepare the data to send to the backend
+      const cartData = {
+        product_id: itemData.id,
+        quantity: 1,
+        unit_price: itemData.price
+      };
+      
+      // Add customization if available
+      if (itemData.customization) {
+        cartData.customization = itemData.customization;
+        cartData.customization_price = itemData.price; // The price already includes customization
+        console.log('✨ [FAVORITES] Including customization:', itemData.customization);
+      }
+      
+      console.log('📤 [FAVORITES] Sending to cart:', cartData);
+      
+      // Use ServerCartManager if available, otherwise use CartManager
+      if (typeof ServerCartManager !== 'undefined') {
+        ServerCartManager.addToCart(cartData)
+          .then(() => {
+            console.log('✅ [FAVORITES] Added to cart successfully');
+            if (typeof Toaster !== 'undefined') {
+              Toaster.create({
+                text: 'Added to cart!',
+                duration: 2000
+              });
+            }
+          })
+          .catch(err => {
+            console.error('❌ [FAVORITES] Failed to add to cart:', err);
+            if (typeof Toaster !== 'undefined') {
+              Toaster.create({
+                text: 'Failed to add to cart',
+                duration: 2000
+              });
+            }
+          });
+      } else {
+        console.error('❌ [FAVORITES] ServerCartManager not available');
+      }
+      
+    } catch (error) {
+      console.error('❌ [FAVORITES] Error parsing item data:', error);
+    }
+  }
+});
 
 // Initialize favorites when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
@@ -1627,8 +1871,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }, 200);
   
-  // Initialize quantity controls if on watch page
-  initializeQuantityControls();
+  // Initialize quantity controls if on watch page (with delay to ensure DOM is ready)
+  setTimeout(() => {
+    initializeQuantityControls();
+  }, 300);
   
   // Initialize customization controls if on watch page
   initializeCustomizationControls();
@@ -1654,33 +1900,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Initialize quantity controls
 function initializeQuantityControls() {
-  if (!window.location.pathname.endsWith('watch.html')) return;
+  console.log('🔢 [SCRIPT.JS] initializeQuantityControls called');
+  console.log('🔢 [SCRIPT.JS] Current pathname:', window.location.pathname);
+  
+  // Check if we're on a product detail page (URL pattern: /watch/product-slug/)
+  if (!window.location.pathname.includes('/watch/')) {
+    console.log('⏭️ [SCRIPT.JS] Not on watch page, skipping quantity controls');
+    return;
+  }
   
   const minusBtn = document.getElementById('quantity-minus');
   const plusBtn = document.getElementById('quantity-plus');
   const quantityDisplay = document.getElementById('quantity-display');
   
-  if (!minusBtn || !plusBtn || !quantityDisplay) return;
+  console.log('🔢 [SCRIPT.JS] Found elements:', { minusBtn: !!minusBtn, plusBtn: !!plusBtn, quantityDisplay: !!quantityDisplay });
   
-  let currentQuantity = 1;
+  if (!minusBtn || !plusBtn || !quantityDisplay) {
+    console.log('❌ [SCRIPT.JS] Missing quantity control elements');
+    return;
+  }
+  
+  console.log('✅ [SCRIPT.JS] Initializing quantity controls');
+  
+  // Remove any existing event listeners by cloning the elements
+  const newMinusBtn = minusBtn.cloneNode(true);
+  const newPlusBtn = plusBtn.cloneNode(true);
+  minusBtn.parentNode.replaceChild(newMinusBtn, minusBtn);
+  plusBtn.parentNode.replaceChild(newPlusBtn, plusBtn);
+  
+  let currentQuantity = parseInt(quantityDisplay.textContent) || 1;
+  console.log('🔢 [SCRIPT.JS] Initial quantity:', currentQuantity);
   
   // Minus button
-  minusBtn.addEventListener('click', () => {
+  newMinusBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('➖ [SCRIPT.JS] Minus button clicked, current:', currentQuantity);
     if (currentQuantity > 1) {
       currentQuantity--;
       quantityDisplay.textContent = currentQuantity;
+      console.log('🔢 [SCRIPT.JS] Quantity decreased to:', currentQuantity);
       updateAddToCartPrice();
+    } else {
+      console.log('⚠️ [SCRIPT.JS] Cannot decrease below 1');
     }
   });
   
   // Plus button
-  plusBtn.addEventListener('click', () => {
+  newPlusBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('➕ [SCRIPT.JS] Plus button clicked, current:', currentQuantity);
     if (currentQuantity < 99) { // Limit to 99
       currentQuantity++;
       quantityDisplay.textContent = currentQuantity;
+      console.log('🔢 [SCRIPT.JS] Quantity increased to:', currentQuantity);
       updateAddToCartPrice();
+    } else {
+      console.log('⚠️ [SCRIPT.JS] Cannot increase above 99');
     }
   });
+  
+  console.log('✅ [SCRIPT.JS] Quantity controls initialized successfully');
   
   // Update Add to Cart button price
   function updateAddToCartPrice() {
@@ -1923,8 +2204,8 @@ function initializeCustomizationControls() {
 
 // Load watch details based on URL parameter
 function loadWatchDetails() {
-  // Check if we're on the watch page
-  if (!window.location.pathname.endsWith('watch.html')) return;
+  // Check if we're on a product detail page (URL pattern: /watch/product-slug/)
+  if (!window.location.pathname.includes('/watch/')) return;
   
   // Get watch ID from URL parameter
   const urlParams = new URLSearchParams(window.location.search);

@@ -127,10 +127,46 @@
         }
 
         const itemsHtml = items.map(item => {
-          const customizationHtml = item.customization_data ? 
-            Object.entries(JSON.parse(item.customization_data))
-              .map(([key, value]) => `<span class="text-sm text-luxury-gray-dark">${key}: ${value}</span>`)
-              .join('<br>') : '';
+          // Format diamond specifications nicely
+          let customizationHtml = '';
+          if (item.customization_data) {
+            const customData = typeof item.customization_data === 'string' ? 
+              JSON.parse(item.customization_data) : item.customization_data;
+            
+            if (customData.diamond_type && customData.diamond_quantities) {
+              const diamondType = customData.diamond_type === 'natural' ? 'Natural' : 'Lab';
+              customizationHtml += `<div class="text-sm text-luxury-gray-dark mb-1"><strong>Diamond Type:</strong> ${diamondType}</div>`;
+              
+              const sizeLabels = {
+                'under_5': 'Under 5mm',
+                '5_to_7': '5-7mm', 
+                '8_to_12': '8-12mm',
+                '13_to_17': '13-17mm'
+              };
+              
+              customizationHtml += '<div class="text-sm text-luxury-gray-dark"><strong>Diamond Quantities:</strong></div>';
+              for (const [size, qty] of Object.entries(customData.diamond_quantities)) {
+                if (qty > 0) {
+                  customizationHtml += `<div class="text-sm text-luxury-gray-dark ml-2">• ${sizeLabels[size]}: ${qty}</div>`;
+                }
+              }
+              
+              if (customData.gold_price) {
+                customizationHtml += `<div class="text-sm text-luxury-gray-dark mt-1"><strong>Gold:</strong> $${parseFloat(customData.gold_price).toFixed(2)}</div>`;
+              }
+              if (customData.diamond_price) {
+                customizationHtml += `<div class="text-sm text-luxury-gray-dark"><strong>Diamonds:</strong> $${parseFloat(customData.diamond_price).toFixed(2)}</div>`;
+              }
+              if (customData.work_price) {
+                customizationHtml += `<div class="text-sm text-luxury-gray-dark"><strong>Work:</strong> $${parseFloat(customData.work_price).toFixed(2)}</div>`;
+              }
+            } else {
+              // Fallback for other customization types
+              customizationHtml = Object.entries(customData)
+                .map(([key, value]) => `<span class="text-sm text-luxury-gray-dark">${key}: ${value}</span>`)
+                .join('<br>');
+            }
+          }
 
           return `
             <div class="cart-item bg-luxury-white rounded-lg shadow-sm p-4 mb-4" data-item-id="${item.id}">
