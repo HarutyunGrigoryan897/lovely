@@ -73,19 +73,85 @@ async def home_callback(query: CallbackQuery):
 # -------------------- ADMIN FLOW --------------------
 @dp.callback_query(F.data.startswith("approve:"))
 async def approve_user_callback(callback: CallbackQuery):
+    """First step: Show level selection buttons (user not approved yet)"""
     telegram_id = int(callback.data.split(":")[1])
-    success = await update_user_status(telegram_id, approve=True)
-
-    if success:
-        await callback.message.delete()
-        await callback.message.answer("✅ User approved successfully.")
-        await callback.bot.send_message(
-            chat_id=telegram_id,
-            text="🎉 Your profile has been approved! You can start shopping now.",
-            reply_markup=full_kb
+    
+    # Get user info to display
+    from utils import get_user_info
+    user_info = await get_user_info(telegram_id)
+    
+    if user_info:
+        # Show level selection buttons to admin
+        from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+        level_selection_kb = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="👤 User", callback_data=f"setlevel:USER:{telegram_id}")],
+                [InlineKeyboardButton(text="💼 Dealer", callback_data=f"setlevel:DEALER:{telegram_id}")],
+                [InlineKeyboardButton(text="⭐ VIP", callback_data=f"setlevel:VIP:{telegram_id}")],
+                [InlineKeyboardButton(text="🤝 Partner", callback_data=f"setlevel:PARTNER:{telegram_id}")],
+                [InlineKeyboardButton(text="❌ Cancel", callback_data=f"reject:{telegram_id}")]
+            ]
         )
+        
+        await callback.message.edit_text(
+            f"📋 Approving user:\n"
+            f"👤 {user_info.get('first_name', '')} {user_info.get('last_name', '')}\n"
+            f"🆔 Telegram ID: {user_info.get('telegram_id')}\n"
+            f"🔗 Username: @{user_info.get('username', 'N/A')}\n\n"
+            "Please select the user level:",
+            reply_markup=level_selection_kb
+        )
+        await callback.answer()
     else:
-        await callback.message.answer("❌ Failed to approve user.")
+        await callback.message.answer("❌ Failed to fetch user information.")
+        await callback.answer()
+
+
+@dp.callback_query(F.data.startswith("setlevel:"))
+async def set_level_callback(callback: CallbackQuery):
+    """Handle user level selection and approve user"""
+    from utils import set_user_level, update_user_status
+    
+    parts = callback.data.split(":")
+    level_name = parts[1]
+    telegram_id = int(parts[2])
+    
+    # First, set the user level
+    result = await set_user_level(telegram_id, level_name)
+    
+    if result:
+        # Now approve the user
+        approval_success = await update_user_status(telegram_id, approve=True)
+        
+        if approval_success:
+            level_display = {
+                'USER': '👤 User',
+                'DEALER': '💼 Dealer',
+                'VIP': '⭐ VIP',
+                'PARTNER': '🤝 Partner'
+            }.get(level_name, level_name)
+            
+            await callback.message.edit_text(
+                f"✅ User approved successfully!\n"
+                f"📊 Level set to: {level_display}\n"
+                f"💰 Price multiplier: {result.get('multiplier', 'N/A')}"
+            )
+            
+            # Notify the user
+            await callback.bot.send_message(
+                chat_id=telegram_id,
+                text=f"🎉 Your profile has been approved!\n\n"
+                     f"📊 Your level: {level_display}\n"
+                     f"You can start shopping now!",
+                reply_markup=full_kb
+            )
+            await callback.answer("✅ User approved and level set!")
+        else:
+            await callback.message.answer("⚠️ Level was set but failed to approve user.")
+            await callback.answer()
+    else:
+        await callback.message.answer("❌ Failed to set user level.")
+        await callback.answer()
 
 
 @dp.callback_query(F.data.startswith("reject:"))
@@ -94,11 +160,66 @@ async def reject_user_callback(callback: CallbackQuery):
     success = await update_user_status(telegram_id, approve=False)
 
     if success:
-        await callback.message.delete()
-        await callback.message.answer("❌ User rejected.")
+        await callback.message.edit_text("❌ User registration rejected.")
         await callback.bot.send_message(
             chat_id=telegram_id,
             text="⚠️ Your registration request was rejected by the admin."
         )
+        await callback.answer("User rejected")
     else:
         await callback.message.answer("❌ Failed to reject user.")
+        await callback.answer()
+
+
+# -------------------- ORDER MANAGEMENT FLOW --------------------
+@dp.callback_query(F.data.startswith("order_approve:"))
+async def approve_order_callback(callback: CallbackQuery):
+    """Handle order approval"""
+    order_id = int(callback.data.split(":")[1])
+    
+    try:
+        # Here you can add logic to update order status in Django
+        # For now, just update the message
+        await callback.message.edit_text(
+            f"✅ Order #{order_id} has been ACCEPTED!\n\n"
+            f"The customer will be notified and the order will be processed.\n"
+            f"📦 Please prepare the items for shipping.\n\n"
+            f"✨ Order accepted by: @{callback.from_user.username or callback.from_user.first_name}"
+        )
+        await callback.answer("✅ Order accepted successfully!")
+    except Exception as e:
+        await callback.answer(f"❌ Error: {str(e)}", show_alert=True)
+
+
+@dp.callback_query(F.data.startswith("order_reject:"))
+async def reject_order_callback(callback: CallbackQuery):
+    """Handle order rejection"""
+    order_id = int(callback.data.split(":")[1])
+    
+    try:
+        # Here you can add logic to update order status in Django
+        await callback.message.edit_text(
+            f"❌ Order #{order_id} has been DECLINED!\n\n"
+            f"⚠️ The customer will need to be notified about the cancellation.\n"
+            f"Please provide a reason for rejection if necessary.\n\n"
+            f"🚫 Order declined by: @{callback.from_user.username or callback.from_user.first_name}"
+        )
+        await callback.answer("Order declined")
+    except Exception as e:
+        await callback.answer(f"❌ Error: {str(e)}", show_alert=True)
+
+
+@dp.callback_query(F.data.startswith("order_view:"))
+async def view_order_callback(callback: CallbackQuery):
+    """Handle view order details request"""
+    order_id = int(callback.data.split(":")[1])
+    
+    try:
+        # For now, just acknowledge the callback
+        # You can add logic to fetch more details from Django API
+        await callback.answer(
+            f"📋 Order #{order_id} - Full details available in admin panel",
+            show_alert=True
+        )
+    except Exception as e:
+        await callback.answer(f"❌ Error: {str(e)}", show_alert=True)

@@ -75,3 +75,15 @@ async def update_user_status(telegram_id: int, approve: bool):
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=headers) as response:
             return response.status == 200
+
+async def set_user_level(telegram_id: int, level_name: str):
+    """Set user level (USER, DEALER, VIP, PARTNER)"""
+    url = f"{API_URL}api/auth/user-set-level/{telegram_id}/"
+    headers = {"Authorization": f"Bearer {API_SECRET}", "Content-Type": "application/json"}
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, json={"level_name": level_name}, headers=headers) as response:
+            if response.status == 200:
+                return await response.json()
+            else:
+                logging.error(f"Failed to set user level: {response.status} {await response.text()}")
+                return None
