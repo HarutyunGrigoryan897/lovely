@@ -1790,25 +1790,25 @@ document.addEventListener('click', function(e) {
       const itemData = JSON.parse(button.dataset.item);
       console.log('📦 [FAVORITES] Item data:', itemData);
       
-      // Prepare the data to send to the backend
-      const cartData = {
-        product_id: itemData.id,
-        quantity: 1,
-        unit_price: itemData.price
+      // Prepare the product data in the format ServerCartManager expects
+      const productData = {
+        id: itemData.id,  // This should be the slug
+        qty: 1,
+        price: itemData.price
       };
       
       // Add customization if available
       if (itemData.customization) {
-        cartData.customization = itemData.customization;
-        cartData.customization_price = itemData.price; // The price already includes customization
+        productData.customization = itemData.customization;
+        productData.customization_price = itemData.price; // The price already includes customization
         console.log('✨ [FAVORITES] Including customization:', itemData.customization);
       }
       
-      console.log('📤 [FAVORITES] Sending to cart:', cartData);
+      console.log('📤 [FAVORITES] Sending to cart:', productData);
       
       // Use ServerCartManager if available, otherwise use CartManager
       if (typeof ServerCartManager !== 'undefined') {
-        ServerCartManager.addToCart(cartData)
+        ServerCartManager.addToCart(productData)
           .then(() => {
             console.log('✅ [FAVORITES] Added to cart successfully');
             if (typeof Toaster !== 'undefined') {

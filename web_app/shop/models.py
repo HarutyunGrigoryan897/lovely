@@ -284,8 +284,23 @@ class Product(models.Model):
                 counter += 1
             self.slug = slug
         
+        # Auto-generate SKU only if not manually provided
         if not self.sku:
-            self.sku = f"{self.brand.name[:3].upper()}-{self.id or 'NEW'}-{slugify(self.name)[:10].upper()}"
+            # First save to get ID if creating new product
+            if not self.id:
+                super().save(*args, **kwargs)
+            
+            # Generate SKU with actual ID
+            base_sku = f"{self.brand.name[:3].upper()}-{self.id}-{slugify(self.name)[:10].upper()}"
+            
+            # Ensure SKU is unique (shouldn't happen but just in case)
+            sku = base_sku
+            counter = 1
+            while Product.objects.filter(sku=sku).exclude(id=self.id).exists():
+                sku = f"{base_sku}-{counter}"
+                counter += 1
+            
+            self.sku = sku
         
         super().save(*args, **kwargs)
 
@@ -310,16 +325,31 @@ class Product(models.Model):
             return self.gold_weight_grams * gold_price_per_gram
         return Decimal('0.00')
     
-    @property
-    def display_price(self):
+    def get_display_price(self, user=None):
         """
         PRIMARY PRICE - Always calculated from gold + work
         This is the base price without diamonds (minimum price for the item)
         There is no static price field - everything is calculated
+        Applies user level multiplier if user is provided
         """
         gold_price = self.calculate_gold_price()
         work_price = WorkPrice.get_current_price()
-        return gold_price + work_price
+        base_price = gold_price + work_price
+        
+        # Apply user level multiplier
+        if user and hasattr(user, 'get_price_multiplier'):
+            multiplier = user.get_price_multiplier()
+            return base_price * multiplier
+        
+        return base_price
+    
+    @property
+    def display_price(self):
+        """
+        Backward compatibility - returns base price without user multiplier
+        Use get_display_price(user) for user-specific pricing
+        """
+        return self.get_display_price()
     
     @property
     def base_price(self):
@@ -331,10 +361,11 @@ class Product(models.Model):
         """Backward compatibility - returns calculated price"""
         return self.display_price
 
-    def calculate_base_price(self, diamond_quantities=None):
+    def calculate_base_price(self, diamond_quantities=None, user=None):
         """
         Calculate total price: gold + diamonds + work
         diamond_quantities: dict like {'under_5': 10, '5_to_7': 5, ...} - user enters quantities
+        user: User object to apply level multiplier
         """
         # Gold price
         gold_price = self.calculate_gold_price()
@@ -358,8 +389,17 @@ class Product(models.Model):
         # Work price
         work_price = WorkPrice.get_current_price()
         
-        # Total
+        # Total before multiplier
         total = gold_price + diamond_price + work_price
+        
+        # Apply user level multiplier
+        if user and hasattr(user, 'get_price_multiplier'):
+            multiplier = user.get_price_multiplier()
+            gold_price = gold_price * multiplier
+            diamond_price = diamond_price * multiplier
+            work_price = work_price * multiplier
+            total = total * multiplier
+        
         return {
             'gold_price': gold_price,
             'diamond_price': diamond_price,
@@ -712,12 +752,15 @@ class CartItem(models.Model):
     def save(self, *args, **kwargs):
         # Store the current product price when adding to cart
         if not self.unit_price:
-            self.unit_price = self.product.display_price
+            # Apply user level multiplier when saving price
+            user = self.cart.user
+            self.unit_price = self.product.get_display_price(user)
         super().save(*args, **kwargs)
 
     @property
     def total_price(self):
         """Total price for this cart item including customizations"""
+        # Unit price already includes user multiplier from save()
         return (self.unit_price + self.customization_price) * self.quantity
 
     @property
@@ -777,19 +820,19 @@ class Order(models.Model):
     
     # Customer information (in case user updates their profile later)
     customer_email = models.EmailField()
-    customer_first_name = models.CharField(max_length=100, blank=True)
-    customer_last_name = models.CharField(max_length=100, blank=True)
+    customer_first_name = models.CharField(max_length=100, blank=True, default='')
+    customer_last_name = models.CharField(max_length=100, blank=True, default='')
     
     # Reference to shipping address (for new orders)
     shipping_address_ref = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
     
     # Shipping information snapshot (kept for historical orders)
-    shipping_first_name = models.CharField(max_length=100, blank=True)
-    shipping_last_name = models.CharField(max_length=100, blank=True)
-    shipping_address = models.CharField(max_length=255, blank=True)
-    shipping_city = models.CharField(max_length=100, blank=True)
-    shipping_zip_code = models.CharField(max_length=20, blank=True)
-    shipping_country = models.CharField(max_length=100, blank=True)
+    shipping_first_name = models.CharField(max_length=100, blank=True, default='')
+    shipping_last_name = models.CharField(max_length=100, blank=True, default='')
+    shipping_address = models.CharField(max_length=255, blank=True, default='')
+    shipping_city = models.CharField(max_length=100, blank=True, default='')
+    shipping_zip_code = models.CharField(max_length=20, blank=True, default='')
+    shipping_country = models.CharField(max_length=100, blank=True, default='')
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)

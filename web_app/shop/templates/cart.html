@@ -16,10 +16,10 @@
     <meta content="summary_large_image" name="twitter:card">
     <meta content="@lovable_dev" name="twitter:site">
     <meta content="https://lovable.dev/opengraph-image-p98pqg.png" name="twitter:image">
-  <script type="text/javascript" src="{% static 'script.js' %}"></script>
-  <script type="text/javascript" src="{% static 'cart.js' %}"></script>
+  <script type="text/javascript" src="{% static 'script.js' %}?v=202501161200"></script>
+  <script type="text/javascript" src="{% static 'cart.js' %}?v=202501161200"></script>
 
-  <link href="{% static 'index.css' %}" rel="stylesheet">
+  <link href="{% static 'index.css' %}?v=202501161200" rel="stylesheet">
   <link href="{% static 'sonner-toaster.css' %}" rel="stylesheet">
   </head>
   <body>
@@ -65,32 +65,91 @@
     
     <script>
       // Initialize the cart system when page loads
-      document.addEventListener('DOMContentLoaded', function() {
-        window.cartManager = new ServerCartManager();
-        loadCartPage();
+      document.addEventListener('DOMContentLoaded', async function() {
+        console.log('🚀 Cart page loading...');
+        try {
+          window.cartManager = ServerCartManager || {};
+        } catch(e) {
+          console.log('CartManager not loaded, creating basic one');
+          window.cartManager = {
+            updateQuantity: async function(itemId, qty) {
+              const response = await fetch('/api/update-cart-item/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+                body: JSON.stringify({item_id: itemId, quantity: qty})
+              });
+              return response.json();
+            },
+            removeFromCart: async function(itemId) {
+              const response = await fetch('/api/remove-from-cart/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+                body: JSON.stringify({item_id: itemId})
+              });
+              return response.json();
+            },
+            clearCart: async function() {
+              const response = await fetch('/api/clear-cart/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')}
+              });
+              return response.json();
+            }
+          };
+        }
+        await loadCartPage();
       });
 
       async function loadCartPage() {
+        console.log('📦 Loading cart data...');
         try {
-          const cartData = await window.cartManager.loadCart();
-          renderCartItems(cartData.items);
-          renderCartSummary(cartData);
+          // Load cart data directly
+          const response = await fetch('/api/get-cart/', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin'
+          });
+          
+          console.log('📡 Response status:', response.status);
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log('✅ Cart data received:', data);
+            if (data.success) {
+              renderCartItems(data.cart.items);
+              renderCartSummary(data.cart);
+            } else {
+              console.error('❌ API returned error:', data.error);
+              showError('Failed to load cart');
+            }
+          } else {
+            console.error('❌ Response not OK:', response.status);
+            showError('Failed to load cart');
+          }
         } catch (error) {
-          console.error('Error loading cart:', error);
-          const container = document.querySelector('.cart-items-container');
-          container.innerHTML = `
-            <div class="text-center py-8">
-              <div class="text-red-500 mb-2">Error loading cart</div>
-              <button onclick="location.reload()" class="bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black px-4 py-2 rounded">
-                Retry
-              </button>
-            </div>
-          `;
+          console.error('❌ Error loading cart:', error);
+          showError('Error loading cart: ' + error.message);
         }
+      }
+      
+      function showError(message) {
+        const container = document.querySelector('.cart-items-container');
+        container.innerHTML = `
+          <div class="text-center py-8">
+            <div class="text-red-500 mb-2">${message}</div>
+            <button onclick="location.reload()" class="bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black px-4 py-2 rounded">
+              Retry
+            </button>
+          </div>
+        `;
       }
 
       function renderCartItems(items) {
         const container = document.querySelector('.cart-items-container');
+        
+        console.log('🛒 renderCartItems called with items:', items);
         
         if (!items || items.length === 0) {
           container.innerHTML = `
@@ -128,14 +187,18 @@
 
         const itemsHtml = items.map(item => {
           // Format diamond specifications nicely
+          console.log('🔍 Processing item:', item);
+          console.log('🔍 Customization data:', item.customization_data);
+          
           let customizationHtml = '';
           if (item.customization_data) {
             const customData = typeof item.customization_data === 'string' ? 
               JSON.parse(item.customization_data) : item.customization_data;
             
+            console.log('🔍 Parsed customData:', customData);
+            
             if (customData.diamond_type && customData.diamond_quantities) {
               const diamondType = customData.diamond_type === 'natural' ? 'Natural' : 'Lab';
-              customizationHtml += `<div class="text-sm text-luxury-gray-dark mb-1"><strong>Diamond Type:</strong> ${diamondType}</div>`;
               
               const sizeLabels = {
                 'under_5': 'Under 5mm',
@@ -144,53 +207,81 @@
                 '13_to_17': '13-17mm'
               };
               
-              customizationHtml += '<div class="text-sm text-luxury-gray-dark"><strong>Diamond Quantities:</strong></div>';
+              // Build quantities string
+              let quantitiesStr = '';
               for (const [size, qty] of Object.entries(customData.diamond_quantities)) {
                 if (qty > 0) {
-                  customizationHtml += `<div class="text-sm text-luxury-gray-dark ml-2">• ${sizeLabels[size]}: ${qty}</div>`;
+                  quantitiesStr += `${sizeLabels[size]}: ${qty}, `;
+                }
+              }
+              quantitiesStr = quantitiesStr.slice(0, -2); // Remove last comma
+              
+              // Build all specifications in compact format
+              let specs = `${diamondType}`;
+              
+              // Add quantities inline
+              for (const [size, qty] of Object.entries(customData.diamond_quantities)) {
+                if (qty > 0) {
+                  const shortSize = size === 'under_5' ? 'Under 5mm' : 
+                                   size === '5_to_7' ? '5-7mm' : 
+                                   size === '8_to_12' ? '8-12mm' : '13-17mm';
+                  specs += `  •  ${shortSize}: ${qty}`;
                 }
               }
               
               if (customData.gold_price) {
-                customizationHtml += `<div class="text-sm text-luxury-gray-dark mt-1"><strong>Gold:</strong> $${parseFloat(customData.gold_price).toFixed(2)}</div>`;
+                specs += `<br>Gold: $${parseFloat(customData.gold_price).toFixed(0)}`;
               }
               if (customData.diamond_price) {
-                customizationHtml += `<div class="text-sm text-luxury-gray-dark"><strong>Diamonds:</strong> $${parseFloat(customData.diamond_price).toFixed(2)}</div>`;
+                specs += `  •  Diamonds: $${parseFloat(customData.diamond_price).toFixed(0)}`;
               }
               if (customData.work_price) {
-                customizationHtml += `<div class="text-sm text-luxury-gray-dark"><strong>Work:</strong> $${parseFloat(customData.work_price).toFixed(2)}</div>`;
+                specs += `  •  Work: $${parseFloat(customData.work_price).toFixed(0)}`;
               }
+              
+              customizationHtml = `
+                <div class="mt-2 px-3 py-2 rounded text-xs" style="background-color: #fafafa; border-left: 2px solid #d4af37; line-height: 1.5; color: #6b7280;">
+                  ${specs}
+                </div>
+              `;
             } else {
               // Fallback for other customization types
-              customizationHtml = Object.entries(customData)
-                .map(([key, value]) => `<span class="text-sm text-luxury-gray-dark">${key}: ${value}</span>`)
-                .join('<br>');
+              const entries = Object.entries(customData)
+                .filter(([key, value]) => !['gold_price', 'diamond_price', 'work_price'].includes(key))
+                .map(([key, value]) => `<div><strong>${key}:</strong> ${value}</div>`)
+                .join('');
+              if (entries) {
+                customizationHtml = `<div class="mt-2 p-3 bg-gray-100 rounded-lg text-xs" style="background-color: #f3f4f6;">${entries}</div>`;
+              }
             }
           }
 
           return `
-            <div class="cart-item bg-luxury-white rounded-lg shadow-sm p-4 mb-4" data-item-id="${item.id}">
-              <div class="flex items-center space-x-4">
-                <img src="${item.product.image_url || '{% static "hero-watch-D40AmJ87.jpg" %}'}" 
-                     alt="${item.product.name}" 
-                     class="w-16 h-16 object-cover rounded">
-                <div class="flex-1">
-                  <h3 class="font-semibold text-luxury-black">${item.product.name}</h3>
-                  <div class="text-luxury-gray-dark">${customizationHtml}</div>
-                  <div class="text-lg font-bold text-luxury-gold">$${item.price}</div>
+            <div class="cart-item bg-luxury-white rounded-lg shadow-sm p-3 mb-3" data-item-id="${item.id}" style="background-color: #ffffff;">
+              <div class="flex items-start space-x-4">
+                <div class="flex-shrink-0">
+                  <img src="${item.product.image_url || '{% static "hero-watch-D40AmJ87.jpg" %}'}" 
+                       alt="${item.product.name}" 
+                       class="w-16 h-16 object-cover rounded">
                 </div>
-                <div class="flex items-center space-x-2">
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-luxury-black text-sm leading-tight">${item.product.name}</h3>
+                  <p class="text-xs text-luxury-gray-dark mt-1">${item.product.brand}</p>
+                  <div class="text-base font-bold text-luxury-gold mt-2">$${item.price}</div>
+                </div>
+                <div class="flex items-center space-x-1 flex-shrink-0">
                   <button onclick="updateItemQuantity(${item.id}, ${item.quantity - 1})" 
-                          class="w-8 h-8 bg-luxury-gray-light hover:bg-luxury-gray rounded text-luxury-black">-</button>
-                  <span class="w-12 text-center">${item.quantity}</span>
+                          class="w-7 h-7 rounded text-luxury-black font-semibold text-sm" 
+                          style="background-color: #f3f4f6;">-</button>
+                  <span class="w-8 text-center font-medium text-sm">${item.quantity}</span>
                   <button onclick="updateItemQuantity(${item.id}, ${item.quantity + 1})" 
-                          class="w-8 h-8 bg-luxury-gray-light hover:bg-luxury-gray rounded text-luxury-black">+</button>
+                          class="w-7 h-7 rounded text-luxury-black font-semibold text-sm" 
+                          style="background-color: #f3f4f6;">+</button>
                   <button onclick="removeItem(${item.id})" 
-                          class="ml-2 text-red-500 hover:text-red-700">
-                    ×
-                  </button>
+                          class="ml-1 text-red-500 hover:text-red-700 font-bold text-lg w-7 h-7 flex items-center justify-center">×</button>
                 </div>
               </div>
+              ${customizationHtml}
             </div>
           `;
         }).join('');
@@ -298,6 +389,7 @@
         }
       }
       
+            
       // Helper function to get cookie value
       function getCookie(name) {
         let cookieValue = null;
@@ -313,6 +405,16 @@
         }
         return cookieValue;
       }
+      
+      // Toast notification function
+      function showToast(message, type = 'info') {
+        console.log(`Toast: ${message} (${type})`);
+        alert(message); // Simple fallback, can be improved with a proper toast library
+      }
+    </script>
+  </body>
+</html>
+```
     </script>
   </body>
 </html>

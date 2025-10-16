@@ -83,3 +83,36 @@ class RejectUserView(APIView):
             return Response({"detail": "User rejected successfully."})
         except CustomUser.DoesNotExist:
             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class SetUserLevelView(APIView):
+    authentication_classes = [BotAuthentication]
+    
+    def post(self, request, telegram_id):
+        """Set user level after approval"""
+        from authorization.models import UserLevel
+        
+        try:
+            user = CustomUser.objects.get(telegram_id=telegram_id)
+            level_name = request.data.get('level_name')
+            
+            if not level_name:
+                return Response({"detail": "level_name is required."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Get the user level
+            try:
+                user_level = UserLevel.objects.get(name=level_name, is_active=True)
+            except UserLevel.DoesNotExist:
+                return Response({"detail": f"User level '{level_name}' not found."}, status=status.HTTP_404_NOT_FOUND)
+            
+            # Set the user level
+            user.user_level = user_level
+            user.save()
+            
+            return Response({
+                "detail": "User level set successfully.",
+                "level": user_level.get_name_display(),
+                "multiplier": str(user_level.multiplier)
+            })
+        except CustomUser.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)

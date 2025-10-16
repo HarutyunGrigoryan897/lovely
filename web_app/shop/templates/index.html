@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -118,7 +119,7 @@
                       <button class="absolute top-3 right-3 p-2 rounded-full transition-colors duration-200 bg-luxury-white/90 text-luxury-gray-dark hover:text-red-500 favorite-button" 
                               data-id="{{ product.slug }}" 
                               data-name="{{ product.name }}" 
-                              data-price="{{ product.display_price }}" 
+                              data-price="{% user_price product %}" 
                               data-image="{% if product.image %}{{ product.image.url }}{% else %}{% static 'watch-1-L_BZsghZ.jpg' %}{% endif %}" 
                               data-brand="{{ product.brand.name }}" 
                               onclick="event.preventDefault(); event.stopPropagation();">
@@ -149,11 +150,11 @@
                       </div>
                     </div>
                     <h3 class="font-semibold text-luxury-black mb-2 group-hover:text-luxury-gold transition-colors duration-200">{{ product.name }}</h3>
-                    <p class="text-xl font-bold text-luxury-black">${{ product.display_price|floatformat:0 }}</p>
+                    <p class="text-xl font-bold text-luxury-black">${{ product|user_price_filter:request|floatformat:0 }}</p>
                     <button class="add-to-cart mt-4 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-4 py-2 bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold w-full"
                             data-id="{{ product.slug }}"
                             data-name="{{ product.name }}"
-                            data-price="{{ product.display_price }}"
+                            data-price="{% user_price product %}"
                             data-image="{% if product.image %}{{ product.image.url }}{% else %}{% static 'watch-1-L_BZsghZ.jpg' %}{% endif %}"
                             data-brand="{{ product.brand.name }}">
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart mr-2 h-5 w-5">

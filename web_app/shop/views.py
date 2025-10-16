@@ -106,6 +106,9 @@ def product_detail(request, slug):
     """Individual product detail page"""
     product = get_object_or_404(Product, slug=slug, is_active=True)
     
+    # Get authenticated user for price calculations
+    user = request.user if request.user.is_authenticated else None
+    
     # Get specifications based on product type
     watch_specs = None
     jewelry_specs = None
@@ -137,6 +140,45 @@ def product_detail(request, slug):
         is_active=True
     ).exclude(id=product.id).select_related('brand', 'category')[:4]
     
+    # Pre-calculate initial pricing with user multiplier
+    initial_pricing = None
+    gold_rate = None
+    work_rate = None
+    
+    if product.gold_weight_grams or product.has_diamonds:
+        # Get default diamond quantities from diamond options
+        diamond_quantities = {}
+        for option in product.diamond_options.all():
+            diamond_quantities[option.size_category] = 0  # Start with 0 for user to configure
+        
+        # Calculate initial pricing (without diamonds, just gold + work)
+        initial_pricing = product.calculate_base_price(diamond_quantities, user=user)
+        
+        # Get rates for display (already includes user multiplier)
+        if product.gold_weight_grams:
+            from .models import GoldPrice
+            base_gold_rate = GoldPrice.get_current_price()
+            # Apply user multiplier to the rate
+            if user and hasattr(user, 'get_price_multiplier'):
+                multiplier = user.get_price_multiplier()
+                gold_rate = float(base_gold_rate * multiplier)
+            else:
+                gold_rate = float(base_gold_rate * Decimal('1.8'))  # Default multiplier
+        
+        # Get work price with multiplier
+        from .models import WorkPrice
+        base_work_price = WorkPrice.get_current_price()
+        if user and hasattr(user, 'get_price_multiplier'):
+            multiplier = user.get_price_multiplier()
+            work_rate = float(base_work_price * multiplier)
+        else:
+            work_rate = float(base_work_price * Decimal('1.8'))  # Default multiplier
+    
+    # Get user's price multiplier for frontend
+    user_multiplier = 1.8  # Default
+    if user and hasattr(user, 'get_price_multiplier'):
+        user_multiplier = float(user.get_price_multiplier())
+    
     context = {
         'product': product,
         'additional_images': additional_images,
@@ -144,6 +186,11 @@ def product_detail(request, slug):
         'jewelry_specs': jewelry_specs,
         'customization_groups': customization_groups,
         'related_products': related_products,
+        'initial_pricing': initial_pricing,
+        'gold_rate': gold_rate,
+        'work_rate': work_rate,
+        'user_multiplier': user_multiplier,
+        'user_price': product.get_display_price(user),  # Pre-calculated user-specific price
     }
     return render(request, 'watch.html', context)
 
@@ -669,13 +716,13 @@ def process_checkout(request):
             total_amount=total_amount,
             total_items=total_items,
             customer_email=data.get('customer_email', user.email),
-            customer_first_name=user.first_name,
-            customer_last_name=user.last_name,
+            customer_first_name=user.first_name or '',
+            customer_last_name=user.last_name or '',
             # Reference to the shipping address
             shipping_address_ref=shipping_address,
             # Snapshot of shipping information
-            shipping_first_name=shipping_address.first_name,
-            shipping_last_name=shipping_address.last_name,
+            shipping_first_name=shipping_address.first_name or '',
+            shipping_last_name=shipping_address.last_name or '',
             shipping_address=shipping_address.address,
             shipping_city=shipping_address.city,
             shipping_zip_code=shipping_address.zip_code,
@@ -916,8 +963,9 @@ def calculate_product_price(request, product_slug):
         original_type = product.diamond_type
         product.diamond_type = diamond_type
         
-        # Calculate price breakdown
-        pricing = product.calculate_base_price(diamond_quantities)
+        # Calculate price breakdown with user multiplier
+        user = request.user if request.user.is_authenticated else None
+        pricing = product.calculate_base_price(diamond_quantities, user=user)
         
         # Restore original type
         product.diamond_type = original_type
@@ -963,8 +1011,9 @@ def get_product_details(request, product_slug):
                 'max_quantity': option.max_quantity,
             })
         
-        # Calculate default price
-        pricing = product.calculate_base_price(diamond_quantities) if product.has_diamonds else None
+        # Calculate default price with user multiplier
+        user = request.user if request.user.is_authenticated else None
+        pricing = product.calculate_base_price(diamond_quantities, user=user) if product.has_diamonds else None
         
         return JsonResponse({
             'success': True,
@@ -1010,3 +1059,127 @@ def get_diamond_prices(request):
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
+
+# -------------------- ORDER MANAGEMENT API (for Telegram Bot) --------------------
+from authorization.bot_authentication import BotAuthentication
+from rest_framework.decorators import api_view, authentication_classes
+from rest_framework.response import Response
+from rest_framework import status as http_status
+
+@api_view(['POST'])
+@authentication_classes([BotAuthentication])
+def update_order_status(request, order_id):
+    """Update order status (for admin/bot use)"""
+    try:
+        order = Order.objects.get(id=order_id)
+        new_status = request.data.get('status')
+        
+        if new_status not in dict(Order.ORDER_STATUS_CHOICES):
+            return Response({
+                'success': False,
+                'error': 'Invalid status'
+            }, status=http_status.HTTP_400_BAD_REQUEST)
+        
+        order.status = new_status
+        order.save()
+        
+        return Response({
+            'success': True,
+            'order_id': order.id,
+            'order_number': order.order_number,
+            'status': order.status,
+            'status_display': order.get_status_display()
+        })
+    except Order.DoesNotExist:
+        return Response({
+            'success': False,
+            'error': 'Order not found'
+        }, status=http_status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=http_status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@authentication_classes([BotAuthentication])
+def get_order_details(request, order_id):
+    """Get detailed order information (for admin/bot use)"""
+    try:
+        order = Order.objects.select_related('user', 'shipping_address_ref').prefetch_related(
+            'items__product__brand',
+            'items__product__category',
+            'items__product__watch_specs'
+        ).get(id=order_id)
+        
+        # Build order items data
+        items_data = []
+        for item in order.items.all():
+            product = item.product
+            item_info = {
+                'id': item.id,
+                'product_name': product.name,
+                'brand': product.brand.name,
+                'quantity': item.quantity,
+                'price': float(item.price),
+                'total': float(item.total_price),
+                'sku': product.sku,
+                'model_number': product.model_number,
+                'customization_data': item.customization_data,
+            }
+            
+            # Add watch specs if available
+            if hasattr(product, 'watch_specs') and product.watch_specs:
+                watch = product.watch_specs
+                item_info['watch_specs'] = {
+                    'case_material': watch.get_case_material_display() if watch.case_material else None,
+                    'case_size': watch.case_size,
+                    'movement': watch.get_movement_display() if watch.movement else None,
+                    'dial_color': watch.dial_color,
+                    'water_resistance': watch.water_resistance,
+                }
+            
+            items_data.append(item_info)
+        
+        order_data = {
+            'id': order.id,
+            'order_number': order.order_number,
+            'status': order.status,
+            'status_display': order.get_status_display(),
+            'total_amount': float(order.total_amount),
+            'total_items': order.total_items,
+            'customer_email': order.customer_email,
+            'customer_first_name': order.customer_first_name,
+            'customer_last_name': order.customer_last_name,
+            'shipping_address': {
+                'first_name': order.shipping_first_name,
+                'last_name': order.shipping_last_name,
+                'address': order.shipping_address,
+                'city': order.shipping_city,
+                'zip_code': order.shipping_zip_code,
+                'country': order.shipping_country,
+            },
+            'items': items_data,
+            'created_at': order.created_at.isoformat(),
+            'user': {
+                'id': order.user.id,
+                'username': order.user.username,
+                'telegram_id': order.user.telegram_id,
+            }
+        }
+        
+        return Response({
+            'success': True,
+            'order': order_data
+        })
+    except Order.DoesNotExist:
+        return Response({
+            'success': False,
+            'error': 'Order not found'
+        }, status=http_status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=http_status.HTTP_500_INTERNAL_SERVER_ERROR)

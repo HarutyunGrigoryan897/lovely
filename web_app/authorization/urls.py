@@ -1,6 +1,6 @@
 from django.urls import path
 from authorization.views import (CustomUserCreateView, CustomUserRetrieveView, CheckAdminView,
-                                 AdminListView, ApproveUserView, RejectUserView)
+                                 AdminListView, ApproveUserView, RejectUserView, SetUserLevelView)
 from authorization.telegram_auth import TelegramWebAppAuthView, CheckAuthStatusView, UserInfoView
 
 urlpatterns = [
@@ -10,6 +10,7 @@ urlpatterns = [
     path("all-admins/", AdminListView.as_view(), name="all-admins"),
     path("user-approve/<int:telegram_id>/", ApproveUserView.as_view(), name="approve-user"),
     path("user-reject/<int:telegram_id>/", RejectUserView.as_view(), name="reject-user"),
+    path("user-set-level/<int:telegram_id>/", SetUserLevelView.as_view(), name="set-user-level"),
     
     # Telegram Web App Authentication
     path("telegram-auth/", TelegramWebAppAuthView.as_view(), name="telegram-auth"),

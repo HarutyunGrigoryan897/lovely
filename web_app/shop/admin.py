@@ -127,7 +127,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ('brand', 'category', 'has_diamonds', 'diamond_type', 'stock_status', 'is_active', 'is_featured', 'show_on_homepage', 'is_limited_edition', 'created_at')
     search_fields = ('name', 'description', 'sku', 'model_number')
     prepopulated_fields = {'slug': ('name',)}
-    readonly_fields = ('created_at', 'updated_at', 'sku', 'get_display_price')
+    readonly_fields = ('created_at', 'updated_at', 'get_display_price')
     list_editable = ('stock_status', 'is_active', 'show_on_homepage')
     inlines = [ProductImageInline, ProductCustomizationInline, ProductDiamondOptionInline, WatchSpecificationInline, JewelrySpecificationInline]
     
@@ -153,7 +153,8 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('stock_status', 'stock_quantity', 'low_stock_threshold')
         }),
         ('Product Details', {
-            'fields': ('sku', 'model_number', 'year_released')
+            'fields': ('sku', 'model_number', 'year_released'),
+            'description': 'SKU can be set manually or will be auto-generated if left empty (Format: BRD-ID-NAME)'
         }),
         ('Ratings & Reviews', {
             'fields': ('rating_stars', 'review_count')

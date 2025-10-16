@@ -37,6 +37,8 @@ const ServerCartManager = {
       this.cart = { items: [], total_items: 0, total_price: 0, item_count: 0 };
       this.updateCartUI();
     }
+    
+    return this.cart;
   },
 
   async addToCart(product) {
@@ -221,10 +223,10 @@ const ServerCartManager = {
       }
     });
 
-    // Update cart page if we're on it
-    if (window.location.pathname.includes('/cart/')) {
-      this.renderCartPage();
-    }
+    // Don't auto-render cart page here - let cart.html handle it
+    // if (window.location.pathname.includes('/cart/')) {
+    //   this.renderCartPage();
+    // }
   },
 
   renderCartPage() {
@@ -253,22 +255,81 @@ const ServerCartManager = {
     }
 
     // Render cart items
-    const cartHTML = this.cart.items.map(item => `
+    const cartHTML = this.cart.items.map(item => {
+      console.log('🛒 Rendering cart item:', item);
+      console.log('🛒 Customization data:', item.customization_data);
+      
+      // Format diamond specifications nicely
+      let customizationHtml = '';
+      if (item.customization_data) {
+        const customData = typeof item.customization_data === 'string' ? 
+          JSON.parse(item.customization_data) : item.customization_data;
+        
+        console.log('🛒 Parsed customData:', customData);
+        console.log('🛒 Has diamond_type?', customData.diamond_type);
+        console.log('🛒 Has diamond_quantities?', customData.diamond_quantities);
+        
+        if (customData.diamond_type && customData.diamond_quantities) {
+          const diamondType = customData.diamond_type === 'natural' ? 'Natural' : 'Lab';
+          customizationHtml = `
+            <div class="mt-2 p-2 bg-gray-50 rounded text-xs">
+              <div class="mb-1"><span class="font-semibold">Diamond Type:</span> ${diamondType}</div>
+              <div class="font-semibold mb-1">Quantities:</div>
+          `;
+          
+          const sizeLabels = {
+            'under_5': 'Under 5mm',
+            '5_to_7': '5-7mm', 
+            '8_to_12': '8-12mm',
+            '13_to_17': '13-17mm'
+          };
+          
+          for (const [size, qty] of Object.entries(customData.diamond_quantities)) {
+            if (qty > 0) {
+              customizationHtml += `<div class="ml-2">• ${sizeLabels[size]}: ${qty}</div>`;
+            }
+          }
+          
+          customizationHtml += '<div class="mt-2 space-y-1">';
+          if (customData.gold_price) {
+            customizationHtml += `<div><span class="font-semibold">Gold:</span> $${parseFloat(customData.gold_price).toFixed(2)}</div>`;
+          }
+          if (customData.diamond_price) {
+            customizationHtml += `<div><span class="font-semibold">Diamonds:</span> $${parseFloat(customData.diamond_price).toFixed(2)}</div>`;
+          }
+          if (customData.work_price) {
+            customizationHtml += `<div><span class="font-semibold">Work:</span> $${parseFloat(customData.work_price).toFixed(2)}</div>`;
+          }
+          customizationHtml += '</div></div>';
+        } else {
+          // Fallback for other customization types
+          const entries = Object.entries(customData)
+            .filter(([key, value]) => !['gold_price', 'diamond_price', 'work_price'].includes(key))
+            .map(([key, value]) => `<div class="text-xs"><span class="font-semibold">${key}:</span> ${value}</div>`)
+            .join('');
+          if (entries) {
+            customizationHtml = `<div class="mt-2 p-2 bg-gray-50 rounded text-xs">${entries}</div>`;
+          }
+        }
+      }
+      
+      return `
       <div class="flex items-center gap-4 p-4 border border-luxury-gray rounded-lg mb-4" data-item-id="${item.id}">
-        <div class="w-20 h-20 bg-luxury-gray rounded-lg overflow-hidden">
-          <img src="${item.product.image || '/static/hero-watch-D40AmJ87.jpg'}" alt="${item.product.name}" class="w-full h-full object-cover">
+        <div class="w-20 h-20 bg-luxury-gray rounded-lg overflow-hidden flex-shrink-0">
+          <img src="${item.product.image_url || item.product.image || '/static/hero-watch-D40AmJ87.jpg'}" alt="${item.product.name}" class="w-full h-full object-cover">
         </div>
-        <div class="flex-1">
-          <h3 class="font-semibold text-luxury-black">${item.product.name}</h3>
-          <p class="text-sm text-luxury-gray-dark">${item.product.brand}</p>
-          <p class="text-lg font-bold text-luxury-gold">$${item.total_price.toFixed(2)}</p>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-luxury-black text-sm">${item.product.name}</h3>
+          <p class="text-xs text-luxury-gray-dark">${item.product.brand}</p>
+          ${customizationHtml}
+          <p class="text-base font-bold text-luxury-gold mt-2">$${item.total_price.toFixed(2)}</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-shrink-0">
           <button class="quantity-btn minus-btn w-8 h-8 rounded-full border border-luxury-gray flex items-center justify-center text-luxury-gray-dark hover:text-luxury-black hover:border-luxury-gold transition-colors" data-item-id="${item.id}" data-action="decrease">-</button>
-          <span class="quantity-display w-8 text-center font-medium">${item.quantity}</span>
+          <span class="quantity-display w-8 text-center font-medium text-sm">${item.quantity}</span>
           <button class="quantity-btn plus-btn w-8 h-8 rounded-full border border-luxury-gray flex items-center justify-center text-luxury-gray-dark hover:text-luxury-black hover:border-luxury-gold transition-colors" data-item-id="${item.id}" data-action="increase">+</button>
         </div>
-        <button class="remove-btn text-red-500 hover:text-red-700 p-2 transition-colors" data-item-id="${item.id}">
+        <button class="remove-btn text-red-500 hover:text-red-700 p-2 transition-colors flex-shrink-0" data-item-id="${item.id}">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18"></path>
             <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
@@ -276,7 +337,8 @@ const ServerCartManager = {
           </svg>
         </button>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     cartContainer.innerHTML = cartHTML;
 

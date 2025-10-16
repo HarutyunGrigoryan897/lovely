@@ -31,7 +31,7 @@ ALLOWED_HOSTS = ["*"]
 
 # CSRF settings for ngrok and other development tunnels
 CSRF_TRUSTED_ORIGINS = [
-    'https://0aa1873109e3.ngrok-free.app',
+    'https://1acfd8ac85d3.ngrok-free.app',
     'http://127.0.0.1:8000',
     'http://localhost:8000',
 ]
