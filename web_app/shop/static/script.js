@@ -24,6 +24,8 @@ class TelegramAuth {
             this.authenticationAttempted = true;
             this.updateUI();
             console.log('Authentication successful from storage!');
+            // Clear the reload flag if it exists
+            sessionStorage.removeItem('auth_reloaded');
             return;
         }
         
@@ -63,8 +65,6 @@ class TelegramAuth {
             this.showAccessDenied('Authentication failed');
         } else {
             console.log('Authentication successful!');
-            // Store successful authentication
-            this.storeAuth();
         }
     }
     
@@ -236,6 +236,23 @@ class TelegramAuth {
                 this.isAuthenticated = true;
                 this.isTelegramUser = true;
                 console.log('Telegram authentication successful:', this.user);
+                
+                // Store successful authentication
+                this.storeAuth();
+                
+                // Reload the page to get user-specific prices from server
+                // Only reload if not already reloaded (check if we came from a reload)
+                const hasReloaded = sessionStorage.getItem('auth_reloaded');
+                if (!hasReloaded) {
+                    console.log('Reloading page to fetch user-specific prices...');
+                    sessionStorage.setItem('auth_reloaded', 'true');
+                    window.location.reload();
+                    return;
+                }
+                
+                // Clear the reload flag for next navigation
+                sessionStorage.removeItem('auth_reloaded');
+                
                 this.updateUI();
             } else {
                 console.error('Telegram authentication failed:', data.error);

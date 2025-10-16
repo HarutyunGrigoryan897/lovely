@@ -25,7 +25,7 @@ class GoldPrice(models.Model):
 
     @classmethod
     def get_current_price(cls):
-        """Get the current active gold price"""
+        """Get the current active gold price (base price, no user multiplier)"""
         active_price = cls.objects.filter(is_active=True).first()
         if active_price:
             # Apply markup
@@ -33,6 +33,21 @@ class GoldPrice(models.Model):
             markup = base_price * (active_price.markup_percentage / 100)
             return base_price + markup
         return Decimal('0.00')
+    
+    @classmethod
+    def get_price_for_user(cls, user=None):
+        """Get gold price with user level multiplier applied"""
+        from authorization.models import UserLevelMultiplier
+        
+        base_price = cls.get_current_price()
+        
+        if user and user.is_authenticated and hasattr(user, 'get_price_multiplier'):
+            multiplier = Decimal(str(user.get_price_multiplier()))
+        else:
+            # Use default multiplier from UserLevelMultiplier model
+            multiplier = Decimal(str(UserLevelMultiplier.get_default_multiplier()))
+        
+        return base_price * multiplier
 
 
 class DiamondPrice(models.Model):
@@ -66,6 +81,18 @@ class DiamondPrice(models.Model):
     def __str__(self):
         return f"{self.get_diamond_type_display()} - {self.get_size_category_display()} - ${self.price_per_unit}/unit"
 
+    def get_price_per_unit_for_user(self, user=None):
+        """Get price per unit multiplied by user's level multiplier"""
+        from authorization.models import CustomUser, UserLevelMultiplier
+        
+        if user and isinstance(user, CustomUser) and user.is_authenticated:
+            multiplier = user.get_price_multiplier()
+        else:
+            # Use default multiplier from UserLevelMultiplier model
+            multiplier = UserLevelMultiplier.get_default_multiplier()
+        
+        return self.price_per_unit * Decimal(str(multiplier))
+
     def calculate_price_for_quantity(self, quantity):
         """Calculate total price: price_per_unit × quantity"""
         if quantity > 0:
@@ -91,9 +118,24 @@ class WorkPrice(models.Model):
 
     @classmethod
     def get_current_price(cls):
-        """Get the current active work price"""
+        """Get the current active work price (base price, no user multiplier)"""
         active_price = cls.objects.filter(is_active=True).first()
         return active_price.price if active_price else Decimal('7000.00')
+    
+    @classmethod
+    def get_price_for_user(cls, user=None):
+        """Get work price with user level multiplier applied"""
+        from authorization.models import UserLevelMultiplier
+        
+        base_price = cls.get_current_price()
+        
+        if user and user.is_authenticated and hasattr(user, 'get_price_multiplier'):
+            multiplier = Decimal(str(user.get_price_multiplier()))
+        else:
+            # Use default multiplier from UserLevelMultiplier model
+            multiplier = Decimal(str(UserLevelMultiplier.get_default_multiplier()))
+        
+        return base_price * multiplier
 
 
 class ShippingAddress(models.Model):
@@ -316,10 +358,29 @@ class Product(models.Model):
         PRIMARY PRICE - Always calculated from gold + work
         This is the base price without diamonds (minimum price for the item)
         There is no static price field - everything is calculated
+        NOTE: This returns BASE price without user multiplier
+        Use get_display_price_for_user(user) for user-specific pricing
         """
         gold_price = self.calculate_gold_price()
         work_price = WorkPrice.get_current_price()
         return gold_price + work_price
+    
+    def get_display_price_for_user(self, user=None):
+        """
+        Get display price with user level multiplier applied
+        This is what should be shown to users
+        """
+        from authorization.models import UserLevelMultiplier
+        
+        base = self.display_price
+        
+        if user and user.is_authenticated and hasattr(user, 'get_price_multiplier'):
+            multiplier = Decimal(str(user.get_price_multiplier()))
+        else:
+            # Use default multiplier from UserLevelMultiplier model
+            multiplier = Decimal(str(UserLevelMultiplier.get_default_multiplier()))
+        
+        return base * multiplier
     
     @property
     def base_price(self):
@@ -365,6 +426,37 @@ class Product(models.Model):
             'diamond_price': diamond_price,
             'work_price': work_price,
             'total_price': total
+        }
+    
+    def get_user_price(self, user=None, diamond_quantities=None):
+        """
+        Calculate price with user level multiplier applied to ALL components
+        Returns the final price that the user will pay with breakdown
+        """
+        from authorization.models import UserLevelMultiplier
+        
+        pricing = self.calculate_base_price(diamond_quantities)
+        
+        # Get user multiplier
+        if user and user.is_authenticated and hasattr(user, 'get_price_multiplier'):
+            multiplier = Decimal(str(user.get_price_multiplier()))
+        else:
+            # Use default multiplier from UserLevelMultiplier model
+            multiplier = Decimal(str(UserLevelMultiplier.get_default_multiplier()))
+        
+        # Apply multiplier to EACH component
+        gold_price_user = pricing['gold_price'] * multiplier
+        diamond_price_user = pricing['diamond_price'] * multiplier
+        work_price_user = pricing['work_price'] * multiplier
+        final_price = pricing['total_price'] * multiplier
+        
+        return {
+            'gold_price': gold_price_user,
+            'diamond_price': diamond_price_user,
+            'work_price': work_price_user,
+            'base_total': pricing['total_price'],  # Base without multiplier
+            'multiplier': multiplier,
+            'final_price': final_price
         }
 
 

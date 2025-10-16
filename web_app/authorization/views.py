@@ -66,8 +66,50 @@ class ApproveUserView(APIView):
         try:
             user = CustomUser.objects.get(telegram_id=telegram_id)
             user.approved = True
+            
+            # Set default user level if provided
+            user_level = request.data.get('user_level', 'user')
+            if user_level in dict(CustomUser.USER_LEVEL_CHOICES).keys():
+                user.user_level = user_level
+            
             user.save()
-            return Response({"detail": "User approved successfully."})
+            return Response({
+                "detail": "User approved successfully.",
+                "user_level": user.user_level
+            })
+        except CustomUser.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class SetUserLevelView(APIView):
+    """Set user level (User/Dealer/VIP/Partner)"""
+    authentication_classes = [BotAuthentication]
+    
+    def post(self, request, telegram_id):
+        try:
+            user = CustomUser.objects.get(telegram_id=telegram_id)
+            user_level = request.data.get('user_level')
+            
+            if not user_level:
+                return Response(
+                    {"detail": "user_level is required."}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            if user_level not in dict(CustomUser.USER_LEVEL_CHOICES).keys():
+                return Response(
+                    {"detail": f"Invalid user_level. Must be one of: {', '.join(dict(CustomUser.USER_LEVEL_CHOICES).keys())}"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            user.user_level = user_level
+            user.save()
+            
+            return Response({
+                "detail": "User level updated successfully.",
+                "user_level": user.user_level,
+                "price_multiplier": user.get_price_multiplier()
+            })
         except CustomUser.DoesNotExist:
             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 

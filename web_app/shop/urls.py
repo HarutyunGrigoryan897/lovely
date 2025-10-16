@@ -45,4 +45,8 @@ urlpatterns = [
     path('api/product/<slug:product_slug>/calculate-price/', views.calculate_product_price, name='calculate_product_price'),
     path('api/product/<slug:product_slug>/details/', views.get_product_details, name='get_product_details'),
     path('api/get-diamond-prices/', views.get_diamond_prices, name='get_diamond_prices'),
+    
+    # Debug endpoint
+    path('api/debug/current-user/', views.debug_current_user, name='debug_current_user'),
 ]
+

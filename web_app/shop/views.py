@@ -12,10 +12,17 @@ from .models import Product, Category, Brand, WatchSpecification, JewelrySpecifi
 
 def index(request):
     """Homepage with featured products"""
-    featured_products = Product.objects.filter(
+    products = Product.objects.filter(
         is_active=True, 
         show_on_homepage=True
     ).select_related('brand', 'category')[:8]
+    
+    # Add user-specific prices to products
+    featured_products = []
+    for product in products:
+        product.user_display_price = product.get_display_price_for_user(request.user)
+        featured_products.append(product)
+    
     categories = Category.objects.filter(is_active=True, parent=None).order_by('sort_order')
     brands = Brand.objects.filter(is_active=True, show_on_homepage=True)[:6]
     hero_section = HeroSection.get_active_hero()
@@ -85,12 +92,22 @@ def catalog(request, category_slug=None, brand_slug=None):
     categories = Category.objects.filter(is_active=True, parent=None).order_by('sort_order')
     brands = Brand.objects.filter(is_active=True).order_by('name')
     
-    # Get all products for JavaScript filtering (without pagination)
-    all_products = Product.objects.filter(is_active=True).select_related('brand', 'category').order_by('name')
+    # Get all products for JavaScript filtering (without pagination) and add user prices
+    all_products_query = Product.objects.filter(is_active=True).select_related('brand', 'category').order_by('name')
+    all_products = []
+    for product in all_products_query:
+        product.user_display_price = product.get_display_price_for_user(request.user)
+        all_products.append(product)
+    
+    # Add user prices to paginated products
+    products_with_prices = []
+    for product in page_obj.object_list:
+        product.user_display_price = product.get_display_price_for_user(request.user)
+        products_with_prices.append(product)
     
     context = {
         'page_obj': page_obj,
-        'products': page_obj.object_list,
+        'products': products_with_prices,
         'all_products': all_products,  # For JavaScript filtering
         'categories': categories,
         'brands': brands,
@@ -137,6 +154,15 @@ def product_detail(request, slug):
         is_active=True
     ).exclude(id=product.id).select_related('brand', 'category')[:4]
     
+    # Add user-specific display prices for related products
+    for related_product in related_products:
+        related_product.user_display_price = related_product.get_display_price_for_user(request.user)
+    
+    # Get user-specific gold price per gram
+    from .models import GoldPrice, WorkPrice
+    user_gold_price_per_gram = GoldPrice.get_price_for_user(request.user)
+    user_work_price = WorkPrice.get_price_for_user(request.user)
+    
     context = {
         'product': product,
         'additional_images': additional_images,
@@ -144,6 +170,9 @@ def product_detail(request, slug):
         'jewelry_specs': jewelry_specs,
         'customization_groups': customization_groups,
         'related_products': related_products,
+        'user_display_price': product.get_display_price_for_user(request.user),
+        'user_gold_price_per_gram': user_gold_price_per_gram,
+        'user_work_price': user_work_price,
     }
     return render(request, 'watch.html', context)
 
@@ -340,9 +369,9 @@ def add_to_cart_api(request):
         if product.stock_status == 'out_of_stock':
             return JsonResponse({'success': False, 'error': 'Product is out of stock'}, status=400)
         
-        # Use provided unit price (calculated from frontend) or product's display price
+        # Use provided unit price (calculated from frontend) or product's display price with user multiplier
         if unit_price is None:
-            unit_price = product.display_price
+            unit_price = product.get_display_price_for_user(request.user)
         else:
             unit_price = Decimal(str(unit_price))
         
@@ -916,8 +945,8 @@ def calculate_product_price(request, product_slug):
         original_type = product.diamond_type
         product.diamond_type = diamond_type
         
-        # Calculate price breakdown
-        pricing = product.calculate_base_price(diamond_quantities)
+        # Calculate price breakdown with user multiplier applied to ALL components
+        pricing = product.get_user_price(request.user, diamond_quantities)
         
         # Restore original type
         product.diamond_type = original_type
@@ -925,10 +954,10 @@ def calculate_product_price(request, product_slug):
         return JsonResponse({
             'success': True,
             'pricing': {
-                'gold_price': float(pricing['gold_price']),
-                'diamond_price': float(pricing['diamond_price']),
-                'work_price': float(pricing['work_price']),
-                'total_price': float(pricing['total_price']),
+                'gold_price': float(pricing['gold_price']),  # Already multiplied
+                'diamond_price': float(pricing['diamond_price']),  # Already multiplied
+                'work_price': float(pricing['work_price']),  # Already multiplied
+                'total_price': float(pricing['final_price']),  # Already multiplied
             },
             'product': {
                 'name': product.name,
@@ -963,8 +992,8 @@ def get_product_details(request, product_slug):
                 'max_quantity': option.max_quantity,
             })
         
-        # Calculate default price
-        pricing = product.calculate_base_price(diamond_quantities) if product.has_diamonds else None
+        # Calculate default price with user multiplier applied to ALL components
+        pricing = product.get_user_price(request.user, diamond_quantities) if product.has_diamonds else None
         
         return JsonResponse({
             'success': True,
@@ -981,10 +1010,10 @@ def get_product_details(request, product_slug):
             },
             'diamond_options': diamond_options,
             'pricing': {
-                'gold_price': float(pricing['gold_price']) if pricing else 0,
-                'diamond_price': float(pricing['diamond_price']) if pricing else 0,
-                'work_price': float(pricing['work_price']) if pricing else 0,
-                'total_price': float(pricing['total_price']) if pricing else 0,
+                'gold_price': float(pricing['gold_price']) if pricing else 0,  # Already multiplied
+                'diamond_price': float(pricing['diamond_price']) if pricing else 0,  # Already multiplied
+                'work_price': float(pricing['work_price']) if pricing else 0,  # Already multiplied
+                'total_price': float(pricing['final_price']) if pricing else 0,  # Already multiplied
             } if pricing else None,
         })
     except Exception as e:
@@ -992,7 +1021,7 @@ def get_product_details(request, product_slug):
 
 
 def get_diamond_prices(request):
-    """Get all diamond prices for both natural and lab diamonds"""
+    """Get all diamond prices for both natural and lab diamonds with user-specific multipliers"""
     from .models import DiamondPrice
     try:
         prices = {
@@ -1001,7 +1030,9 @@ def get_diamond_prices(request):
         }
         
         for dp in DiamondPrice.objects.filter(is_active=True):
-            prices[dp.diamond_type][dp.size_category] = float(dp.price_per_unit)
+            # Get user-specific price per unit
+            user_price = dp.get_price_per_unit_for_user(request.user)
+            prices[dp.diamond_type][dp.size_category] = float(user_price)
         
         return JsonResponse({
             'success': True,
@@ -1009,4 +1040,32 @@ def get_diamond_prices(request):
         })
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def debug_current_user(request):
+    """Debug endpoint to check current user and their pricing"""
+    from django.http import JsonResponse
+    from .models import GoldPrice
+    
+    if request.user.is_authenticated:
+        user_info = {
+            'authenticated': True,
+            'username': request.user.username,
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+            'telegram_id': str(request.user.telegram_id) if request.user.telegram_id else None,
+            'user_level': request.user.user_level,
+            'price_multiplier': float(request.user.get_price_multiplier()),
+            'gold_price_per_gram': str(GoldPrice.get_price_for_user(request.user)),
+            'session_key': request.session.session_key,
+        }
+    else:
+        user_info = {
+            'authenticated': False,
+            'message': 'User is not logged in (AnonymousUser)',
+            'gold_price_per_gram': str(GoldPrice.get_price_for_user(request.user)),
+            'session_key': request.session.session_key,
+        }
+    
+    return JsonResponse(user_info)
 

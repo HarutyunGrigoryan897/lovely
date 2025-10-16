@@ -62,7 +62,7 @@
                 </svg>
               </button>
               <h1 class="font-semibold text-luxury-black">{{ product.category.name }} Details</h1>
-              <button id="favorite-btn-detail" class="p-2 rounded-full transition-colors duration-200 text-luxury-gray-dark hover:text-red-500" data-id="{{ product.slug }}" data-name="{{ product.name }}" data-price="{{ product.display_price }}" data-image="{% if product.image %}{{ product.image.url }}{% else %}{% static 'watch-1-L_BZsghZ.jpg' %}{% endif %}" data-brand="{{ product.brand.name }}">
+              <button id="favorite-btn-detail" class="p-2 rounded-full transition-colors duration-200 text-luxury-gray-dark hover:text-red-500" data-id="{{ product.slug }}" data-name="{{ product.name }}" data-price="{{ user_display_price }}" data-image="{% if product.image %}{{ product.image.url }}{% else %}{% static 'watch-1-L_BZsghZ.jpg' %}{% endif %}" data-brand="{{ product.brand.name }}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart">
                   <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
                 </svg>
@@ -159,10 +159,10 @@
                     <span class="text-luxury-gray-dark text-sm">({{ product.review_count }} reviews)</span>
                   </div>
                   {% if product.gold_weight_grams > 0 %}
-                  <p class="text-3xl font-bold text-luxury-black" id="top-price">${{ product.display_price|floatformat:0 }}</p>
+                  <p class="text-3xl font-bold text-luxury-black" id="top-price">${{ user_display_price|floatformat:0 }}</p>
                   <p class="text-sm text-luxury-gray-dark">Base price (Gold + Work). Add diamonds below to customize.</p>
                   {% else %}
-                  <p class="text-3xl font-bold text-luxury-black">${{ product.display_price|floatformat:0 }}</p>
+                  <p class="text-3xl font-bold text-luxury-black">${{ user_display_price|floatformat:0 }}</p>
                   {% endif %}
                 </div>
 
@@ -263,7 +263,7 @@
                     <div class="bg-amber-50 rounded-lg p-3 border border-amber-200">
                       <div class="flex justify-between items-center mb-2">
                         <span class="text-sm font-medium text-luxury-black">Gold</span>
-                        <span class="text-xs text-luxury-gray-dark">{{ product.gold_weight_grams }}g × $<span id="gold-rate">75.00</span>/g</span>
+                        <span class="text-xs text-luxury-gray-dark">{{ product.gold_weight_grams }}g × $<span id="gold-rate">{{ user_gold_price_per_gram|floatformat:2 }}</span>/g</span>
                       </div>
                       <div class="flex justify-between items-center">
                         <span class="text-luxury-gray-dark text-sm">Gold Price:</span>
@@ -315,7 +315,7 @@
                     {% endif %}
                     <div class="flex justify-between text-sm">
                       <span>Work Price:</span>
-                      <span id="work-price" class="font-semibold">$7,000.00</span>
+                      <span id="work-price" class="font-semibold">${{ user_work_price|floatformat:2 }}</span>
                     </div>
                     <div class="border-t border-white/20 pt-2 mt-2">
                       <div class="flex justify-between items-center">
@@ -354,7 +354,7 @@
                     <div class="bg-luxury-gray/10 rounded-lg p-4 border border-luxury-gray">
                       <div class="flex justify-between items-center">
                         <span class="text-luxury-gray-dark">Base Price:</span>
-                        <span class="font-semibold text-luxury-black" id="base-price">${{ product.display_price|floatformat:0 }}</span>
+                        <span class="font-semibold text-luxury-black" id="base-price">${{ user_display_price|floatformat:0 }}</span>
                       </div>
                       <div class="flex justify-between items-center mt-2">
                         <span class="text-luxury-gray-dark">Customization:</span>
@@ -363,7 +363,7 @@
                       <hr class="my-2 border-luxury-gray">
                       <div class="flex justify-between items-center">
                         <span class="text-lg font-bold text-luxury-black">Total Price:</span>
-                        <span class="text-xl font-bold text-luxury-gold" id="total-price">${{ product.display_price|floatformat:0 }}</span>
+                        <span class="text-xl font-bold text-luxury-gold" id="total-price">${{ user_display_price|floatformat:0 }}</span>
                       </div>
                     </div>
                   </div>
@@ -392,7 +392,7 @@
                 </div>
 
                 <!-- Add to Cart Button -->
-                <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-11 rounded-md px-8 w-full bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold py-3 transition-all duration-300 hover:scale-105 add-to-cart product-detail-add-to-cart" data-id="{{ product.slug }}" data-name="{{ product.name }}" data-price="{{ product.display_price }}" data-image="{% if product.image %}{{ product.image.url }}{% else %}{% static 'watch-1-L_BZsghZ.jpg' %}{% endif %}" data-brand="{{ product.brand.name }}">
+                <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-11 rounded-md px-8 w-full bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold py-3 transition-all duration-300 hover:scale-105 add-to-cart product-detail-add-to-cart" data-id="{{ product.slug }}" data-name="{{ product.name }}" data-price="{{ user_display_price }}" data-image="{% if product.image %}{{ product.image.url }}{% else %}{% static 'watch-1-L_BZsghZ.jpg' %}{% endif %}" data-brand="{{ product.brand.name }}">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart">
                     <circle cx="8" cy="21" r="1"></circle>
                     <circle cx="19" cy="21" r="1"></circle>
