@@ -37,7 +37,6 @@ async def create_user_in_django(user_data: dict):
     headers = {"Authorization": f"Bearer {API_SECRET}"}
     async with aiohttp.ClientSession() as session:
         try:
-            print(headers)
             url = f"{API_URL}api/auth/users/"
             async with session.post(url, json=user_data, headers=headers) as resp:
                 if resp.status == 201:
@@ -87,3 +86,45 @@ async def set_user_level(telegram_id: int, level_name: str):
             else:
                 logging.error(f"Failed to set user level: {response.status} {await response.text()}")
                 return None
+            
+async def get_waiting_approved_users():
+    headers = {"Authorization": f"Bearer {API_SECRET}"}
+    url = f"{API_URL}api/auth/waiting-approved-users/"
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(url, headers=headers) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    if isinstance(data, list):
+                        return data
+                    else:
+                        logging.warning("Unexpected data format from Django API")
+                        return []
+                else:
+                    error_text = await resp.text()
+                    logging.error(f"Django API error {resp.status}: {error_text}")
+                    return []
+        except Exception as e:
+            logging.error(f"Request to Django failed: {e}")
+            return []
+        
+async def get_waiting_status_users():
+    headers = {"Authorization": f"Bearer {API_SECRET}"}
+    url = f"{API_URL}api/auth/waiting-status-users/"
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(url, headers=headers) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    if isinstance(data, list):
+                        return data
+                    else:
+                        logging.warning("Unexpected data format from Django API")
+                        return []
+                else:
+                    error_text = await resp.text()
+                    logging.error(f"Django API error {resp.status}: {error_text}")
+                    return []
+        except Exception as e:
+            logging.error(f"Request to Django failed: {e}")
+            return []

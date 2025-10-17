@@ -1,8 +1,10 @@
 from loader import dp, bot
 from aiogram import types, F
 from aiogram.types import Message, CallbackQuery
-from inline_keyboards import profile_about_kb, home_kb, full_kb
-from utils import get_user_info, update_user_status
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+from inline_keyboards import profile_about_kb, home_kb, full_kb, admin_info_kb
+from utils import get_user_info, update_user_status, get_waiting_approved_users, get_waiting_status_users
 
 # -------------------- USER FLOW --------------------
 @dp.callback_query(lambda c: c.data == "about")
@@ -77,12 +79,10 @@ async def approve_user_callback(callback: CallbackQuery):
     telegram_id = int(callback.data.split(":")[1])
     
     # Get user info to display
-    from utils import get_user_info
     user_info = await get_user_info(telegram_id)
     
     if user_info:
         # Show level selection buttons to admin
-        from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
         level_selection_kb = InlineKeyboardMarkup(
             inline_keyboard=[
                 [InlineKeyboardButton(text="👤 User", callback_data=f"setlevel:USER:{telegram_id}")],
@@ -92,8 +92,7 @@ async def approve_user_callback(callback: CallbackQuery):
                 [InlineKeyboardButton(text="❌ Cancel", callback_data=f"reject:{telegram_id}")]
             ]
         )
-        
-        await callback.message.edit_text(
+        await callback.message.answer(
             f"📋 Approving user:\n"
             f"👤 {user_info.get('first_name', '')} {user_info.get('last_name', '')}\n"
             f"🆔 Telegram ID: {user_info.get('telegram_id')}\n"
@@ -101,6 +100,7 @@ async def approve_user_callback(callback: CallbackQuery):
             "Please select the user level:",
             reply_markup=level_selection_kb
         )
+        await callback.message.delete()
         await callback.answer()
     else:
         await callback.message.answer("❌ Failed to fetch user information.")
@@ -131,11 +131,13 @@ async def set_level_callback(callback: CallbackQuery):
                 'PARTNER': '🤝 Partner'
             }.get(level_name, level_name)
             
-            await callback.message.edit_text(
-                f"✅ User approved successfully!\n"
+            await callback.message.answer(
+                f"✅ User with Telegram ID:{telegram_id}\n approved successfully!\n\n"
                 f"📊 Level set to: {level_display}\n"
-                f"💰 Price multiplier: {result.get('multiplier', 'N/A')}"
+                f"💰 Price multiplier: {result.get('multiplier', 'N/A')}",
+                reply_markup=admin_info_kb
             )
+            await callback.message.delete()
             
             # Notify the user
             await callback.bot.send_message(
@@ -223,3 +225,63 @@ async def view_order_callback(callback: CallbackQuery):
         )
     except Exception as e:
         await callback.answer(f"❌ Error: {str(e)}", show_alert=True)
+
+@dp.callback_query(lambda c: c.data == "admin_waiting_approve")
+async def admin_waiting_approve_callback(callback: CallbackQuery):
+    data = await get_waiting_approved_users()
+    if data:
+        for user in data:
+            notify_text = (
+                f"👤 {user.get('first_name')} {user.get('last_name')}\n"
+                f"🆔 Telegram ID: {user.get('telegram_id')}\n"
+                f"🔗 Username: @{user.get('username')}\n"
+            )
+            try:
+                profile_approved_kb = InlineKeyboardMarkup(
+                        inline_keyboard=[
+                            [InlineKeyboardButton(text="✅ Approve", callback_data=f"approve:{user.get('telegram_id')}")],
+                            [InlineKeyboardButton(text="❌ Reject", callback_data=f"reject:{user.get('telegram_id')}")]
+                        ]
+                    )
+                await callback.message.answer(
+                    text=notify_text,
+                    reply_markup=profile_approved_kb
+                )
+            except Exception as e:
+                await callback.answer("❌ Something went wrong. Try again later.")
+        await callback.answer()
+    else:
+        await callback.message.answer("🌟 There all users are approved", reply_markup=admin_info_kb)
+        await callback.answer()
+    await callback.message.delete()
+
+@dp.callback_query(lambda c: c.data == "admin_waiting_status_set")
+async def admin_waiting_status_callback(callback: CallbackQuery):
+    data = await get_waiting_status_users()
+    if data:
+        for user in data:
+            try:
+                level_selection_kb = InlineKeyboardMarkup(
+                    inline_keyboard=[
+                        [InlineKeyboardButton(text="👤 User", callback_data=f"setlevel:USER:{user.get('telegram_id')}")],
+                        [InlineKeyboardButton(text="💼 Dealer", callback_data=f"setlevel:DEALER:{user.get('telegram_id')}")],
+                        [InlineKeyboardButton(text="⭐ VIP", callback_data=f"setlevel:VIP:{user.get('telegram_id')}")],
+                        [InlineKeyboardButton(text="🤝 Partner", callback_data=f"setlevel:PARTNER:{user.get('telegram_id')}")],
+                        [InlineKeyboardButton(text="❌ Cancel", callback_data=f"reject:{user.get('telegram_id')}")]
+                    ]
+                )
+                await callback.message.answer(
+                    f"📋 Approving user:\n"
+                    f"👤 {user.get('first_name', '')} {user.get('last_name', '')}\n"
+                    f"🆔 Telegram ID: {user.get('telegram_id')}\n"
+                    f"🔗 Username: @{user.get('username', 'N/A')}\n\n"
+                    "Please select the user level:",
+                    reply_markup=level_selection_kb
+                )
+            except Exception as e:
+                await callback.answer("❌ Something went wrong. Try again later.")
+        await callback.answer()
+    else:
+        await callback.message.answer("🌟 All users have status", reply_markup=admin_info_kb)
+        await callback.answer()
+    await callback.message.delete()

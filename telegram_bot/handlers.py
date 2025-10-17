@@ -2,7 +2,7 @@ import logging
 from aiogram.types import Message
 from aiogram.filters import Command
 from utils import create_user_in_django, check_is_admin, get_admins_from_django
-from inline_keyboards import profile_about_kb, home_kb, full_kb
+from inline_keyboards import profile_about_kb, home_kb, full_kb, admin_info_kb
 from loader import dp, bot
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -17,7 +17,8 @@ async def handle_admin_start(message: Message, user):
         f"Your Telegram ID: {user.id}\n"
         "You have admin privileges."
     )
-    await message.answer(text)
+    await message.answer(text, reply_markup=admin_info_kb)
+    await message.delete()
 
 
 # -------------------- USER FLOW --------------------

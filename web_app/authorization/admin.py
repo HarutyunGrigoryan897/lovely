@@ -37,7 +37,7 @@ class CustomUserAdmin(UserAdmin):
     list_filter = ('is_staff', 'is_superuser', 'user_level', 'approved')
     search_fields = ('username', 'first_name', 'last_name', 'telegram_id')
     ordering = ('username',)
-    readonly_fields = ('telegram_id',)
+    # readonly_fields = ('telegram_id',)
 
     fieldsets = (
         (None, {
