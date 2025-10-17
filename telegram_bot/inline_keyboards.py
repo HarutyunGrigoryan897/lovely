@@ -28,6 +28,9 @@ full_kb = InlineKeyboardMarkup(
 admin_info_kb = InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text="🙋‍♂️ Waiting Approve", callback_data="admin_waiting_approve")],
-        [InlineKeyboardButton(text="🤷‍♂️ Waiting Status Set", callback_data="admin_waiting_status_set")]
+        [InlineKeyboardButton(text="🤷‍♂️ Waiting Status Set", callback_data="admin_waiting_status_set")],
+        [InlineKeyboardButton(text="📦 Order Waiting Confirm", callback_data="order_waiting_confirm")],
+        [InlineKeyboardButton(text="🚢 Order Waiting Shiping", callback_data="admin_waiting_shipping")],
+        [InlineKeyboardButton(text="💼 Last 10 Shipped Orders", callback_data="last_10_orders")]
     ]
 )

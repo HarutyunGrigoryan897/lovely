@@ -149,3 +149,108 @@ async def order_confirm(order_id):
         except Exception as e:
             logging.error(f"Request to Django failed: {e}")
             return []
+        
+async def order_reject(order_id):
+    headers = {"Authorization": f"Bearer {API_SECRET}"}
+    url = f"{API_URL}api/auth/order-reject/{order_id}/"
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(url, headers=headers) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    if data:
+                        return data
+                    else:
+                        logging.warning("Unexpected data format from Django API")
+                        return []
+                else:
+                    error_text = await resp.text()
+                    logging.error(f"Django API error {resp.status}: {error_text}")
+                    return []
+        except Exception as e:
+            logging.error(f"Request to Django failed: {e}")
+            return []
+        
+async def order_delivered(order_id):
+    headers = {"Authorization": f"Bearer {API_SECRET}"}
+    url = f"{API_URL}api/auth/order-delivered/{order_id}/"
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(url, headers=headers) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    if data:
+                        return data
+                    else:
+                        logging.warning("Unexpected data format from Django API")
+                        return []
+                else:
+                    error_text = await resp.text()
+                    logging.error(f"Django API error {resp.status}: {error_text}")
+                    return []
+        except Exception as e:
+            logging.error(f"Request to Django failed: {e}")
+            return []
+        
+async def last_10_orders():
+    headers = {"Authorization": f"Bearer {API_SECRET}"}
+    url = f"{API_URL}api/auth/order-last-10/"
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(url, headers=headers) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    if data:
+                        return data
+                    else:
+                        logging.warning("Unexpected data format from Django API")
+                        return []
+                else:
+                    error_text = await resp.text()
+                    logging.error(f"Django API error {resp.status}: {error_text}")
+                    return []
+        except Exception as e:
+            logging.error(f"Request to Django failed: {e}")
+            return []
+
+async def get_waiting_confirm_orders():
+    headers = {"Authorization": f"Bearer {API_SECRET}"}
+    url = f"{API_URL}api/auth/waiting-confirm-orders/"
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(url, headers=headers) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    if isinstance(data, list):
+                        return data
+                    else:
+                        logging.warning("Unexpected data format from Django API")
+                        return []
+                else:
+                    error_text = await resp.text()
+                    logging.error(f"Django API error {resp.status}: {error_text}")
+                    return []
+        except Exception as e:
+            logging.error(f"Request to Django failed: {e}")
+            return []
+        
+async def get_waiting_shipping_orders():
+    headers = {"Authorization": f"Bearer {API_SECRET}"}
+    url = f"{API_URL}api/auth/waiting-shipping-orders/"
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(url, headers=headers) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    if isinstance(data, list):
+                        return data
+                    else:
+                        logging.warning("Unexpected data format from Django API")
+                        return []
+                else:
+                    error_text = await resp.text()
+                    logging.error(f"Django API error {resp.status}: {error_text}")
+                    return []
+        except Exception as e:
+            logging.error(f"Request to Django failed: {e}")
+            return []

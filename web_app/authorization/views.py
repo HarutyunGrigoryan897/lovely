@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from authorization.models import CustomUser
 from shop.models import Order
-from authorization.serializers import CustomUserSerializer, CustomUserInfoSerializer
+from authorization.serializers import CustomUserSerializer, CustomUserInfoSerializer, OrderSerializer
 from authorization.bot_authentication import BotAuthentication
 
 from django.shortcuts import get_object_or_404
@@ -130,14 +130,13 @@ class WaitingStatusUsersListView(generics.ListAPIView):
     serializer_class = CustomUserSerializer
     authentication_classes = [BotAuthentication]
 
+
+#Orders
+
 class OrderConfirmedView(APIView):
     authentication_classes = [BotAuthentication]
 
     def get(self, request, order_id, *args, **kwargs):
-        print("------------------------\n")
-        print(order_id)
-        print("------------------------\n")
-
         product = get_object_or_404(Order, id=order_id)
         product.status = "confirmed"
         product.save()
@@ -150,3 +149,51 @@ class OrderConfirmedView(APIView):
                 "total_price": product.total_amount,
             }
         }, status=status.HTTP_200_OK)
+
+class OrderRejectedView(APIView):
+    authentication_classes = [BotAuthentication]
+
+    def get(self, request, order_id, *args, **kwargs):
+        product = get_object_or_404(Order, id=order_id)
+        product.status = "cancelled"
+        product.save()
+
+        return Response({
+            "order": {
+                "user_telegram_id": product.user.telegram_id,
+                "order_number": product.order_number,
+                "status": product.status,
+            }
+        }, status=status.HTTP_200_OK)
+    
+class OrderDeliveredView(APIView):
+    authentication_classes = [BotAuthentication]
+
+    def get(self, request, order_id, *args, **kwargs):
+        product = get_object_or_404(Order, id=order_id)
+        product.status = "delivered"
+        product.save()
+
+        return Response({
+            "order": {
+                "user_telegram_id": product.user.telegram_id,
+                "order_number": product.order_number,
+                "status": product.status,
+                "total_price": product.total_amount,
+            }
+        }, status=status.HTTP_200_OK)
+    
+class WaitingConfirmOrdersListView(generics.ListAPIView):
+    queryset = Order.objects.filter(status="pending").prefetch_related("items__product__brand")
+    serializer_class = OrderSerializer
+    authentication_classes = [BotAuthentication]
+
+class WaitingShippingOrdersListView(generics.ListAPIView):
+    queryset = Order.objects.filter(status="confirmed").prefetch_related("items__product__brand")
+    serializer_class = OrderSerializer
+    authentication_classes = [BotAuthentication]
+
+class OrderHistoryView(generics.ListAPIView):
+    queryset = Order.objects.filter(status="delivered").prefetch_related("items__product__brand")
+    serializer_class = OrderSerializer
+    authentication_classes = [BotAuthentication]

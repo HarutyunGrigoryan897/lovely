@@ -1,3 +1,4 @@
+import asyncio
 from loader import dp, bot
 from aiogram import types, F
 from aiogram.types import Message, CallbackQuery
@@ -5,7 +6,8 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from inline_keyboards import profile_about_kb, home_kb, full_kb, admin_info_kb
 from utils import (get_user_info, update_user_status, get_waiting_approved_users, 
-                   get_waiting_status_users, order_confirm)
+                   get_waiting_status_users, order_confirm, get_waiting_confirm_orders,
+                   get_waiting_shipping_orders, order_reject, order_delivered, last_10_orders)
 
 # -------------------- USER FLOW --------------------
 @dp.callback_query(lambda c: c.data == "about")
@@ -183,17 +185,17 @@ async def approve_order_callback(callback: CallbackQuery):
         data = await order_confirm(order_id)
         # Here you can add logic to update order status in Django
         # For now, just update the message
+        order_number = data["order"]["order_number"]
+        order_price = data["order"]["total_price"]
         if data:
             await callback.message.edit_text(
-                f"✅ Order #{order_id} has been ACCEPTED!\n\n"
+                f"✅ Order #{order_number} has been ACCEPTED!\n\n"
                 f"The customer will be notified and the order will be processed.\n"
                 f"📦 Please prepare the items for shipping.\n\n"
                 f"✨ Order accepted by: @{callback.from_user.username or callback.from_user.first_name}",
                 reply_markup=admin_info_kb
             )
             await callback.answer("✅ Order accepted successfully!")
-            order_number = data["order"]["order_number"]
-            order_price = data["order"]["total_price"]
             user_message = f"Your {order_number} order has been confirmed:\n💰Total price {order_price}$"
             await bot.send_message(chat_id=data["order"]["user_telegram_id"], text=user_message, reply_markup=full_kb)
         else:
@@ -210,14 +212,40 @@ async def reject_order_callback(callback: CallbackQuery):
     order_id = int(callback.data.split(":")[1])
     
     try:
+        data = await order_reject(order_id)
+        order_number = data["order"]["order_number"]
+
         # Here you can add logic to update order status in Django
         await callback.message.edit_text(
-            f"❌ Order #{order_id} has been DECLINED!\n\n"
-            f"⚠️ The customer will need to be notified about the cancellation.\n"
-            f"Please provide a reason for rejection if necessary.\n\n"
+            f"❌ Order #{order_number} has been DECLINED!\n\n"
+            f"The customer will need to be notified about the cancellation.\n"
             f"🚫 Order declined by: @{callback.from_user.username or callback.from_user.first_name}"
         )
-        await callback.answer("Order declined")
+        await callback.answer("❌ Order declined")
+        user_message = f"❌ Your {order_number} order has been rejected:\nContact Support for more information"
+        await bot.send_message(chat_id=data["order"]["user_telegram_id"], text=user_message, reply_markup=full_kb)
+    except Exception as e:
+        await callback.answer(f"❌ Error: {str(e)}", show_alert=True)
+    
+@dp.callback_query(F.data.startswith("order_delivered:"))
+async def delivered_order_callback(callback: CallbackQuery):
+    """Handle order rejection"""
+    order_id = int(callback.data.split(":")[1])
+    
+    try:
+        data = await order_delivered(order_id)
+        # Here you can add logic to update order status in Django
+        order_number = data["order"]["order_number"]
+        order_price = data["order"]["total_price"]
+        await callback.message.edit_text(
+            f"✈️ Order #{order_number} mark as delivered!\n\n"
+            f"The customer will be notified.\n"
+            f"✨ Order mark as delivered by: @{callback.from_user.username or callback.from_user.first_name}"
+        )
+        await callback.answer("✈️ Order mark as delivered!")
+
+        user_message = f"✈️ Your {order_number} order has been delivered!\n💰Total price {order_price}$\n\nThanks for choosing us😍"
+        await bot.send_message(chat_id=data["order"]["user_telegram_id"], text=user_message, reply_markup=full_kb)
     except Exception as e:
         await callback.answer(f"❌ Error: {str(e)}", show_alert=True)
 
@@ -294,5 +322,93 @@ async def admin_waiting_status_callback(callback: CallbackQuery):
         await callback.answer()
     else:
         await callback.message.answer("🌟 All users have status", reply_markup=admin_info_kb)
+        await callback.answer()
+    await callback.message.delete()
+
+@dp.callback_query(lambda c: c.data == "order_waiting_confirm")
+async def order_waiting_confirm_callback(callback: CallbackQuery):
+    data = await get_waiting_confirm_orders()
+    if data:
+        await callback.message.answer(text=f"You have {len(data)} unconfirmed orders.")
+        for order in data:
+            await asyncio.sleep(1)
+            try:
+                # print(order)
+                text = order.get("formatted_text")
+                if text:
+                    order_kb = InlineKeyboardMarkup(
+                        inline_keyboard=[
+                            [InlineKeyboardButton(text="✅ Accept Order", callback_data=f"order_approve:{order.get('id')}")],
+                            [InlineKeyboardButton(text="❌ Decline Order", callback_data=f"order_reject:{order.get('id')}")],
+                            # [InlineKeyboardButton(text="📋 View Order Details", callback_data=f"order_reject:{order.get('id')}")]
+                        ]
+                    )
+                    await callback.message.answer(
+                        text=text,
+                        reply_markup=order_kb
+                    )
+                    
+            except Exception as e:
+                await callback.answer("❌ Something went wrong. Try again later.")
+        await callback.answer()
+        await asyncio.sleep(1)
+        await callback.message.answer(text="Continue working...", reply_markup=admin_info_kb)
+    else:
+        await callback.message.answer("🌟 All orders are confirm", reply_markup=admin_info_kb)
+        await callback.answer()
+    await callback.message.delete()
+
+@dp.callback_query(lambda c: c.data == "admin_waiting_shipping")
+async def order_waiting_shipping_callback(callback: CallbackQuery):
+    data = await get_waiting_shipping_orders()
+    if data:
+        await callback.message.answer(text=f"You have {len(data)} orders waiting shipping.")
+        for order in data:
+            await asyncio.sleep(1)
+            try:
+                # print(order)
+                text = order.get("formatted_text")
+                if text:
+                    order_kb = InlineKeyboardMarkup(
+                        inline_keyboard=[
+                            [InlineKeyboardButton(text="🏎 Delivered", callback_data=f"order_delivered:{order.get('id')}")],
+                        ]
+                    )
+                    await callback.message.answer(
+                        text=text,
+                        reply_markup=order_kb
+                    )
+                    
+            except Exception as e:
+                await callback.answer("❌ Something went wrong. Try again later.")
+        await callback.answer()
+        await asyncio.sleep(1)
+        await callback.message.answer(text="Continue working...", reply_markup=admin_info_kb)
+    else:
+        await callback.message.answer("🌟 All orders are shipped", reply_markup=admin_info_kb)
+        await callback.answer()
+    await callback.message.delete()
+
+@dp.callback_query(lambda c: c.data == "last_10_orders")
+async def last_10_orders_callback(callback: CallbackQuery):
+    data = await last_10_orders()
+    if data:
+        for order in data:
+            await asyncio.sleep(1)
+            try:
+                # print(order)
+                text = order.get("formatted_text")
+                if text:
+                    await callback.message.answer(
+                        text="\n".join(text.split('\n')[:-1]),
+                    )
+                    
+            except Exception as e:
+                await callback.answer("❌ Something went wrong. Try again later.")
+        await callback.answer()
+        await asyncio.sleep(1)
+        await callback.message.answer(text="Continue working...", reply_markup=admin_info_kb)
+    else:
+        await callback.message.answer("🌟 You have no shipped orders", reply_markup=admin_info_kb)
         await callback.answer()
     await callback.message.delete()
