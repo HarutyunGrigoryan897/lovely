@@ -239,10 +239,6 @@ class Product(models.Model):
         help_text="Type of diamonds used"
     )
     
-    # Ratings and reviews
-    rating_stars = models.PositiveIntegerField(default=5, validators=[MinValueValidator(1), MaxValueValidator(5)])
-    review_count = models.PositiveIntegerField(default=0)
-    
     # SEO
     meta_title = models.CharField(max_length=60, blank=True)
     meta_description = models.CharField(max_length=160, blank=True)
@@ -645,37 +641,6 @@ class ProductCustomization(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.get_customization_type_display()}: {self.name}"
-
-
-class Review(models.Model):
-    """Product reviews"""
-    RATING_CHOICES = [
-        (1, '1 Star'),
-        (2, '2 Stars'),
-        (3, '3 Stars'),
-        (4, '4 Stars'),
-        (5, '5 Stars'),
-    ]
-
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
-    customer_name = models.CharField(max_length=100)
-    customer_email = models.EmailField()
-    rating = models.PositiveIntegerField(choices=RATING_CHOICES)
-    title = models.CharField(max_length=200)
-    comment = models.TextField()
-    is_verified_purchase = models.BooleanField(default=False)
-    is_approved = models.BooleanField(default=False)
-    helpful_count = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['-created_at']
-        verbose_name = 'Product Review'
-        verbose_name_plural = 'Product Reviews'
-
-    def __str__(self):
-        return f"{self.customer_name} - {self.product.name} ({self.rating} stars)"
 
 
 class Cart(models.Model):

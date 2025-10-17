@@ -167,7 +167,7 @@
                 
                 <div class="space-y-3">
                   <a href="{% url 'shop:catalog' %}" 
-                     class="inline-flex items-center px-6 py-2.5 bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
+                     class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-4 py-2 bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold">
                     Browse Collection
                   </a>
                   
@@ -358,34 +358,11 @@
 
       async function placeOrder() {
         try {
-          // Get CSRF token
-          const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
-                           document.querySelector('meta[name=csrf-token]')?.content ||
-                           getCookie('csrftoken') || '';
-          
-          // Create order from cart items
-          const response = await fetch('/api/create-order/', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': csrfToken
-            }
-          });
-          
-          const data = await response.json();
-          
-          if (data.success) {
-            // Show success message
-            showToast(`Order ${data.order_number} placed successfully!`, 'success');
-            
-            // Redirect to order confirmation page
-            window.location.href = "{% url 'shop:order_confirmation' %}";
-          } else {
-            showToast(data.error || 'Failed to place order', 'error');
-          }
+          // Redirect to shipping page where user can select shipping address and enter email
+          window.location.href = "{% url 'shop:shipping' %}";
         } catch (error) {
-          console.error('Error placing order:', error);
-          showToast('Error placing order', 'error');
+          console.error('Error redirecting to shipping:', error);
+          showToast('Error proceeding to shipping', 'error');
         }
       }
       

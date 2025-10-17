@@ -4,13 +4,13 @@
   <head>
     <meta charset="UTF-8">
     <meta content="width=device-width,initial-scale=1" name="viewport">
-    <title>Order Confirmation - Teluxe | Luxury Watch Collection</title>
-    <meta content="Order confirmation for your luxury watch purchase from Teluxe." name="description">
-    <meta content="luxury watches, order confirmation, premium timepieces" name="keywords">
+    <title>Order Placed - Teluxe | Luxury Watch Collection</title>
+    <meta content="Order placed successfully for your luxury watch purchase from Teluxe." name="description">
+    <meta content="luxury watches, order placed, premium timepieces" name="keywords">
     <meta content="Teluxe" name="author">
     <meta name="csrf-token" content="{{ csrf_token }}">
-    <meta content="Order Confirmation - Teluxe" property="og:title">
-    <meta content="Your luxury watch order has been confirmed" property="og:description">
+    <meta content="Order Placed - Teluxe" property="og:title">
+    <meta content="Your luxury watch order has been placed successfully" property="og:description">
     <meta content="website" property="og:type">
     <meta content="https://lovable.dev/opengraph-image-p98pqg.png" property="og:image">
     <meta content="summary_large_image" name="twitter:card">
@@ -37,7 +37,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
               </button>
-              <h1 class="text-xl font-bold text-luxury-black">Order Confirmation</h1>
+              <h1 class="text-xl font-bold text-luxury-black">Order Placed</h1>
               <div class="w-10 h-10"></div> <!-- Spacer for centering -->
             </div>
           </div>
@@ -52,7 +52,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
               </div>
-              <h2 class="text-3xl font-bold text-luxury-black mb-4">Order Confirmed!</h2>
+              <h2 class="text-3xl font-bold text-luxury-black mb-4">Order Placed!</h2>
               <p class="text-luxury-gray-dark text-lg mb-8">Thank you for your purchase. Your luxury timepiece order has been successfully placed.</p>
               
               <!-- Order Details Card -->
@@ -166,7 +166,7 @@
               <h3 class="text-xl font-bold text-luxury-black">Order Status</h3>
               <div class="bg-luxury-white rounded-lg border border-luxury-gray p-6 shadow-lg">
                 <div class="space-y-6" id="order-status-timeline">
-                  <!-- Status 1: Order Confirmed -->
+                  <!-- Status 1: Order Placed -->
                   <div class="flex items-center space-x-4">
                     <div class="w-8 h-8 bg-luxury-gold rounded-full flex items-center justify-center flex-shrink-0">
                       <svg class="w-4 h-4 text-luxury-black" fill="currentColor" viewBox="0 0 20 20">
@@ -174,46 +174,31 @@
                       </svg>
                     </div>
                     <div class="flex-1">
-                      <h4 class="font-semibold text-luxury-black">Order Confirmed</h4>
-                      <p class="text-sm text-luxury-gray-dark">Your order has been received and confirmed</p>
+                      <h4 class="font-semibold text-luxury-black">Order Placed</h4>
+                      <p class="text-sm text-luxury-gray-dark">Your order has been received</p>
                     </div>
-                    <span class="text-sm text-luxury-gray-dark">Just now</span>
                   </div>
                   
-                  <!-- Status 2: Processing -->
+                  <!-- Status 2: Confirmed -->
                   <div class="flex items-center space-x-4">
                     <div class="w-8 h-8 bg-luxury-gray rounded-full flex items-center justify-center flex-shrink-0">
                       <div class="w-2 h-2 bg-luxury-white rounded-full"></div>
                     </div>
                     <div class="flex-1">
-                      <h4 class="font-semibold text-luxury-gray-dark">Processing</h4>
-                      <p class="text-sm text-luxury-gray-dark">We're preparing your order</p>
+                      <h4 class="font-semibold text-luxury-gray-dark">Confirmed</h4>
+                      <p class="text-sm text-luxury-gray-dark">Your order will be confirmed</p>
                     </div>
-                    <span class="text-sm text-luxury-gray-dark">1-2 days</span>
                   </div>
                   
-                  <!-- Status 3: Shipped -->
-                  <div class="flex items-center space-x-4">
-                    <div class="w-8 h-8 bg-luxury-gray rounded-full flex items-center justify-center flex-shrink-0">
-                      <div class="w-2 h-2 bg-luxury-white rounded-full"></div>
-                    </div>
-                    <div class="flex-1">
-                      <h4 class="font-semibold text-luxury-gray-dark">Shipped</h4>
-                      <p class="text-sm text-luxury-gray-dark">Your order is on its way</p>
-                    </div>
-                    <span class="text-sm text-luxury-gray-dark">3-5 days</span>
-                  </div>
-                  
-                  <!-- Status 4: Delivered -->
+                  <!-- Status 3: Delivered -->
                   <div class="flex items-center space-x-4">
                     <div class="w-8 h-8 bg-luxury-gray rounded-full flex items-center justify-center flex-shrink-0">
                       <div class="w-2 h-2 bg-luxury-white rounded-full"></div>
                     </div>
                     <div class="flex-1">
                       <h4 class="font-semibold text-luxury-gray-dark">Delivered</h4>
-                      <p class="text-sm text-luxury-gray-dark">Your luxury timepiece has arrived</p>
+                      <p class="text-sm text-luxury-gray-dark">Your luxury timepiece will be delivered</p>
                     </div>
-                    <span class="text-sm text-luxury-gray-dark">5-7 days</span>
                   </div>
                 </div>
               </div>

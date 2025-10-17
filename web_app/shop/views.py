@@ -95,8 +95,6 @@ def catalog(request, category_slug=None, brand_slug=None):
         products = products.order_by('-price')
     elif sort_by == 'newest':
         products = products.order_by('-created_at')
-    elif sort_by == 'rating':
-        products = products.order_by('-rating_stars')
     else:
         products = products.order_by('name')
     
@@ -223,6 +221,13 @@ def cart(request):
     """Shopping cart page"""
     context = {}
     return render(request, 'cart.html', context)
+
+
+@login_required
+def shipping(request):
+    """Shipping information page"""
+    context = {}
+    return render(request, 'shipping.html', context)
 
 
 def favorites(request):

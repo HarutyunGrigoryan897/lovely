@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from .models import (
     Brand, Category, Product, ProductImage, WatchSpecification,
-    JewelrySpecification, ProductCustomization, Review, Cart, CartItem,
+    JewelrySpecification, ProductCustomization, Cart, CartItem,
     Order, OrderItem, HeroSection, ShippingAddress, GoldPrice, DiamondPrice, 
     WorkPrice, ProductDiamondOption
 )
@@ -146,9 +146,6 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('sku', 'model_number', 'year_released'),
             'description': 'SKU can be set manually or will be auto-generated if left empty (Format: BRD-ID-NAME)'
         }),
-        ('Ratings & Reviews', {
-            'fields': ('rating_stars', 'review_count')
-        }),
         ('SEO', {
             'fields': ('meta_title', 'meta_description', 'meta_keywords'),
             'classes': ('collapse',)
@@ -256,31 +253,6 @@ class ProductCustomizationAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-
-
-@admin.register(Review)
-class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('product', 'customer_name', 'rating', 'title', 'is_verified_purchase', 'is_approved', 'created_at')
-    list_filter = ('rating', 'is_verified_purchase', 'is_approved', 'created_at')
-    search_fields = ('product__name', 'customer_name', 'title', 'comment')
-    list_editable = ('is_approved',)
-    readonly_fields = ('created_at', 'updated_at')
-    
-    fieldsets = (
-        (None, {
-            'fields': ('product', 'customer_name', 'customer_email', 'rating', 'title', 'comment')
-        }),
-        ('Status', {
-            'fields': ('is_verified_purchase', 'is_approved', 'helpful_count')
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('product')
 
 
 class CartItemInline(admin.TabularInline):
