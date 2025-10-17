@@ -24,3 +24,10 @@ full_kb = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="ℹ️ About our service", callback_data="about")]
     ]
 )
+
+admin_info_kb = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="🙋‍♂️ Waiting Approve", callback_data="admin_waiting_approve")],
+        [InlineKeyboardButton(text="🤷‍♂️ Waiting Status Set", callback_data="admin_waiting_status_set")]
+    ]
+)

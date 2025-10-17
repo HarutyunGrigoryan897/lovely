@@ -116,3 +116,13 @@ class SetUserLevelView(APIView):
             })
         except CustomUser.DoesNotExist:
             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+class WaitingApprovedUsersListView(generics.ListAPIView):
+    queryset = CustomUser.objects.filter(approved=False)
+    serializer_class = CustomUserSerializer
+    authentication_classes = [BotAuthentication]
+
+class WaitingStatusUsersListView(generics.ListAPIView):
+    queryset = CustomUser.objects.filter(user_level=None).exclude(is_superuser = True)
+    serializer_class = CustomUserSerializer
+    authentication_classes = [BotAuthentication]

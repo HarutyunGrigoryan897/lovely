@@ -141,7 +141,7 @@ def send_order_message(order):
     status_display = order.get_status_display() if hasattr(order, 'get_status_display') else order.status
     
     text = (
-        f"🎉 ═══════════════════════════\n"
+        f"═══════════════════════════\n"
         f"        🆕 NEW ORDER RECEIVED\n"
         f"═══════════════════════════\n\n"
         f"📋 ORDER DETAILS\n"
