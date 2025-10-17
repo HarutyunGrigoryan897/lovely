@@ -13,10 +13,7 @@ from .scraper import should_update_gold_price, update_gold_price_sync
 
 logger = logging.getLogger(__name__)
 
-
-def index(request):
-    """Homepage with featured products"""
-    # Check if gold price needs updating (every 1 minute) - runs silently in background
+def webapptelegram(request, page):
     if should_update_gold_price():
         logger.info("Gold price update needed. Starting scraping process...")
         success, message = update_gold_price_sync()
@@ -24,6 +21,20 @@ def index(request):
             logger.info(f"Gold price update successful")
         else:
             logger.error(f"Gold price update failed")
+    return redirect(f"shop:{page}")
+
+
+
+def index(request):
+    """Homepage with featured products"""
+    # Check if gold price needs updating (every 1 minute) - runs silently in background
+    # if should_update_gold_price():
+    #     logger.info("Gold price update needed. Starting scraping process...")
+    #     success, message = update_gold_price_sync()
+    #     if success:
+    #         logger.info(f"Gold price update successful")
+    #     else:
+    #         logger.error(f"Gold price update failed")
     
     featured_products = Product.objects.filter(
         is_active=True, 

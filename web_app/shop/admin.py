@@ -10,36 +10,30 @@ from .models import (
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
-    list_display = ('name', 'country', 'founded_year', 'is_active', 'show_on_homepage', 'created_at')
-    list_filter = ('is_active', 'show_on_homepage', 'country', 'created_at')
+    list_display = ('name', 'country', 'founded_year', 'is_active', 'show_on_homepage')
+    list_filter = ('is_active', 'show_on_homepage', 'country')
     search_fields = ('name', 'description')
     prepopulated_fields = {'slug': ('name',)}
-    readonly_fields = ('created_at', 'updated_at')
     list_editable = ('is_active', 'show_on_homepage')
     fieldsets = (
         (None, {
             'fields': ('name', 'slug', 'description', 'logo')
         }),
         ('Details', {
-            'fields': ('founded_year', 'country', 'website')
+            'fields': ('founded_year', 'country')
         }),
         ('Status', {
             'fields': ('is_active', 'show_on_homepage')
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
         }),
     )
 
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'parent', 'is_active', 'sort_order', 'created_at')
-    list_filter = ('is_active', 'parent', 'created_at')
+    list_display = ('name', 'parent', 'is_active', 'sort_order')
+    list_filter = ('is_active', 'parent')
     search_fields = ('name', 'description')
     prepopulated_fields = {'slug': ('name',)}
-    readonly_fields = ('created_at', 'updated_at')
     list_editable = ('sort_order', 'is_active')
     
     fieldsets = (
@@ -48,10 +42,6 @@ class CategoryAdmin(admin.ModelAdmin):
         }),
         ('Settings', {
             'fields': ('is_active', 'sort_order')
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
         }),
     )
 

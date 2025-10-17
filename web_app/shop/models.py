@@ -133,11 +133,8 @@ class Brand(models.Model):
     logo = models.ImageField(upload_to='brands/', blank=True, null=True)
     founded_year = models.PositiveIntegerField(blank=True, null=True)
     country = models.CharField(max_length=50, blank=True)
-    website = models.URLField(blank=True)
     is_active = models.BooleanField(default=True)
     show_on_homepage = models.BooleanField(default=False, help_text="Display this brand on the homepage")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['name']
@@ -162,8 +159,6 @@ class Category(models.Model):
     parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='subcategories')
     is_active = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['sort_order', 'name']
@@ -806,8 +801,6 @@ class Order(models.Model):
     ORDER_STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
-        ('processing', 'Processing'),
-        ('shipped', 'Shipped'),
         ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled'),
     ]

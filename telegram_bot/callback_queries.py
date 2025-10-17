@@ -4,7 +4,8 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from inline_keyboards import profile_about_kb, home_kb, full_kb, admin_info_kb
-from utils import get_user_info, update_user_status, get_waiting_approved_users, get_waiting_status_users
+from utils import (get_user_info, update_user_status, get_waiting_approved_users, 
+                   get_waiting_status_users, order_confirm)
 
 # -------------------- USER FLOW --------------------
 @dp.callback_query(lambda c: c.data == "about")
@@ -143,7 +144,6 @@ async def set_level_callback(callback: CallbackQuery):
             await callback.bot.send_message(
                 chat_id=telegram_id,
                 text=f"🎉 Your profile has been approved!\n\n"
-                     f"📊 Your level: {level_display}\n"
                      f"You can start shopping now!",
                 reply_markup=full_kb
             )
@@ -180,15 +180,26 @@ async def approve_order_callback(callback: CallbackQuery):
     order_id = int(callback.data.split(":")[1])
     
     try:
+        data = await order_confirm(order_id)
         # Here you can add logic to update order status in Django
         # For now, just update the message
-        await callback.message.edit_text(
-            f"✅ Order #{order_id} has been ACCEPTED!\n\n"
-            f"The customer will be notified and the order will be processed.\n"
-            f"📦 Please prepare the items for shipping.\n\n"
-            f"✨ Order accepted by: @{callback.from_user.username or callback.from_user.first_name}"
-        )
-        await callback.answer("✅ Order accepted successfully!")
+        if data:
+            await callback.message.edit_text(
+                f"✅ Order #{order_id} has been ACCEPTED!\n\n"
+                f"The customer will be notified and the order will be processed.\n"
+                f"📦 Please prepare the items for shipping.\n\n"
+                f"✨ Order accepted by: @{callback.from_user.username or callback.from_user.first_name}",
+                reply_markup=admin_info_kb
+            )
+            await callback.answer("✅ Order accepted successfully!")
+            order_number = data["order"]["order_number"]
+            order_price = data["order"]["total_price"]
+            user_message = f"Your {order_number} order has been confirmed:\n💰Total price {order_price}$"
+            await bot.send_message(chat_id=data["order"]["user_telegram_id"], text=user_message, reply_markup=full_kb)
+        else:
+            await callback.message.answer("❌ Something went wrong. Try again later.")
+            await callback.answer()
+
     except Exception as e:
         await callback.answer(f"❌ Error: {str(e)}", show_alert=True)
 

@@ -128,3 +128,24 @@ async def get_waiting_status_users():
         except Exception as e:
             logging.error(f"Request to Django failed: {e}")
             return []
+        
+async def order_confirm(order_id):
+    headers = {"Authorization": f"Bearer {API_SECRET}"}
+    url = f"{API_URL}api/auth/order-confirm/{order_id}/"
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(url, headers=headers) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    if data:
+                        return data
+                    else:
+                        logging.warning("Unexpected data format from Django API")
+                        return []
+                else:
+                    error_text = await resp.text()
+                    logging.error(f"Django API error {resp.status}: {error_text}")
+                    return []
+        except Exception as e:
+            logging.error(f"Request to Django failed: {e}")
+            return []

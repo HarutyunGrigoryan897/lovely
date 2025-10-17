@@ -3,8 +3,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from authorization.models import CustomUser
+from shop.models import Order
 from authorization.serializers import CustomUserSerializer, CustomUserInfoSerializer
 from authorization.bot_authentication import BotAuthentication
+
+from django.shortcuts import get_object_or_404
 
 
 class CustomUserCreateView(generics.CreateAPIView):
@@ -126,3 +129,24 @@ class WaitingStatusUsersListView(generics.ListAPIView):
     queryset = CustomUser.objects.filter(user_level=None).exclude(is_superuser = True)
     serializer_class = CustomUserSerializer
     authentication_classes = [BotAuthentication]
+
+class OrderConfirmedView(APIView):
+    authentication_classes = [BotAuthentication]
+
+    def get(self, request, order_id, *args, **kwargs):
+        print("------------------------\n")
+        print(order_id)
+        print("------------------------\n")
+
+        product = get_object_or_404(Order, id=order_id)
+        product.status = "confirmed"
+        product.save()
+
+        return Response({
+            "order": {
+                "user_telegram_id": product.user.telegram_id,
+                "order_number": product.order_number,
+                "status": product.status,
+                "total_price": product.total_amount,
+            }
+        }, status=status.HTTP_200_OK)

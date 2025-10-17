@@ -5,6 +5,7 @@ app_name = 'shop'
 
 urlpatterns = [
     # Main pages
+    path('webapp_telegram/<str:page>/', views.webapptelegram, name="webapptelegram"),
     path('', views.index, name='index'),
     path('catalog/', views.catalog, name='catalog'),
     path('cart/', views.cart, name='cart'),

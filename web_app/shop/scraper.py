@@ -42,7 +42,7 @@ async def scrape_once(p, url):
     page = await browser.new_page()
     try:
         # Use "domcontentloaded" instead of full "load" for reliability
-        await page.goto(url, wait_until="domcontentloaded", timeout=60000)
+        await page.goto(url, wait_until="domcontentloaded", timeout=10000)
         logger.info("Waiting for WebSocket data (5s)...")
         await asyncio.sleep(5)
 
@@ -70,7 +70,7 @@ async def scrape_once(p, url):
         logger.info("Browser closed.")
 
 
-async def scrape_gold_price(max_retries=10):
+async def scrape_gold_price(max_retries=2):
     """Keep trying until price found or max retries reached"""
     url = "http://fyx9999.com/"
     
@@ -128,7 +128,7 @@ def should_update_gold_price():
     
     # Check if updated more than 1 minute ago
     time_since_update = timezone.now() - active_price.updated_at
-    needs_update = time_since_update > timedelta(minutes=1)
+    needs_update = time_since_update > timedelta(hours=1)
     
     if needs_update:
         logger.info(f"Gold price last updated {time_since_update.total_seconds() / 60:.1f} minutes ago. Update needed.")
@@ -147,7 +147,7 @@ def update_gold_price_sync():
     
     try:
         # Run async scraping
-        result = asyncio.run(scrape_gold_price(max_retries=10))
+        result = asyncio.run(scrape_gold_price(max_retries=3))
         
         if not result or not result.get('usd'):
             logger.error("Failed to scrape gold price")

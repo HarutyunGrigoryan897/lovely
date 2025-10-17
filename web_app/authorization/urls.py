@@ -1,7 +1,8 @@
 from django.urls import path
 from authorization.views import (CustomUserCreateView, CustomUserRetrieveView, CheckAdminView,
                                  AdminListView, ApproveUserView, RejectUserView, SetUserLevelView,
-                                 WaitingApprovedUsersListView, WaitingStatusUsersListView)
+                                 WaitingApprovedUsersListView, WaitingStatusUsersListView, 
+                                 OrderConfirmedView)
 from authorization.telegram_auth import TelegramWebAppAuthView, CheckAuthStatusView, UserInfoView
 
 urlpatterns = [
@@ -19,4 +20,7 @@ urlpatterns = [
     path("telegram-auth/", TelegramWebAppAuthView.as_view(), name="telegram-auth"),
     path("auth-status/", CheckAuthStatusView.as_view(), name="auth-status"), 
     path("user-profile/", UserInfoView.as_view(), name="user-profile"),
+
+    #orders
+    path("order-confirm/<int:order_id>/", OrderConfirmedView.as_view(), name="order-confirmed")
 ]
