@@ -4,7 +4,8 @@ from rest_framework.response import Response
 
 from authorization.models import CustomUser
 from shop.models import Order
-from authorization.serializers import CustomUserSerializer, CustomUserInfoSerializer, OrderSerializer
+from authorization.serializers import (CustomUserSerializer, CustomUserInfoSerializer, 
+                                       OrderSerializer, ShippingSerializer)
 from authorization.bot_authentication import BotAuthentication
 
 from django.shortcuts import get_object_or_404
@@ -190,7 +191,7 @@ class WaitingConfirmOrdersListView(generics.ListAPIView):
 
 class WaitingShippingOrdersListView(generics.ListAPIView):
     queryset = Order.objects.filter(status="confirmed").prefetch_related("items__product__brand")
-    serializer_class = OrderSerializer
+    serializer_class = ShippingSerializer
     authentication_classes = [BotAuthentication]
 
 class OrderHistoryView(generics.ListAPIView):
