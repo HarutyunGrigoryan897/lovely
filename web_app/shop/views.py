@@ -41,7 +41,7 @@ def index(request):
         show_on_homepage=True
     ).select_related('brand', 'category')[:8]
     categories = Category.objects.filter(is_active=True, parent=None).order_by('sort_order')
-    brands = Brand.objects.filter(is_active=True, show_on_homepage=True)[:6]
+    brands = Brand.objects.filter(show_on_homepage=True)[:6]
     hero_section = HeroSection.get_active_hero()
     
     context = {
@@ -66,14 +66,14 @@ def catalog(request, category_slug=None, brand_slug=None):
     # Filter by brand (support both URL parameter and GET parameter)
     selected_brand = None
     if brand_slug:
-        selected_brand = get_object_or_404(Brand, slug=brand_slug, is_active=True)
+        selected_brand = get_object_or_404(Brand, slug=brand_slug)
         products = products.filter(brand=selected_brand)
     else:
         # Check for brand filter in GET parameters (from homepage links)
         brand_param = request.GET.get('brand')
         if brand_param:
             try:
-                selected_brand = Brand.objects.get(slug=brand_param, is_active=True)
+                selected_brand = Brand.objects.get(slug=brand_param)
                 products = products.filter(brand=selected_brand)
             except Brand.DoesNotExist:
                 pass
@@ -105,7 +105,7 @@ def catalog(request, category_slug=None, brand_slug=None):
     
     # Get all categories and brands for filtering
     categories = Category.objects.filter(is_active=True, parent=None).order_by('sort_order')
-    brands = Brand.objects.filter(is_active=True).order_by('name')
+    brands = Brand.objects.all().order_by('name')
     
     # Get all products for JavaScript filtering (without pagination)
     all_products = Product.objects.filter(is_active=True).select_related('brand', 'category').order_by('name')
@@ -1069,24 +1069,24 @@ def get_product_details(request, product_slug):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
-def get_diamond_prices(request):
-    """Get all diamond prices for both natural and lab diamonds"""
-    from .models import DiamondPrice
-    try:
-        prices = {
-            'natural': {},
-            'lab': {}
-        }
+# def get_diamond_prices(request):
+#     """Get all diamond prices for both natural and lab diamonds"""
+#     from .models import DiamondPrice
+#     try:
+#         prices = {
+#             'natural': {},
+#             'lab': {}
+#         }
         
-        for dp in DiamondPrice.objects.filter(is_active=True):
-            prices[dp.diamond_type][dp.size_category] = float(dp.price_per_unit)
-        
-        return JsonResponse({
-            'success': True,
-            'prices': prices
-        })
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+#         for dp in DiamondPrice.objects.all():
+#             prices[dp.diamond_type][dp.size_category] = float(dp.price_per_unit)
+#         print(prices)
+#         return JsonResponse({
+#             'success': True,
+#             'prices': prices
+#         })
+#     except Exception as e:
+#         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
 # -------------------- ORDER MANAGEMENT API (for Telegram Bot) --------------------

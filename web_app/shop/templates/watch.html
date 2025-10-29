@@ -208,18 +208,6 @@
                         <p class="text-sm text-luxury-gray-dark">Gemstone</p>
                       </div>
                       {% endif %}
-                      {% if jewelry_specs.gemstone_carat %}
-                      <div class="text-center">
-                        <p class="font-semibold text-luxury-black">{{ jewelry_specs.gemstone_carat }} ct</p>
-                        <p class="text-sm text-luxury-gray-dark">Carat Weight</p>
-                      </div>
-                      {% endif %}
-                      {% if jewelry_specs.metal_weight %}
-                      <div class="text-center">
-                        <p class="font-semibold text-luxury-black">{{ jewelry_specs.metal_weight }}g</p>
-                        <p class="text-sm text-luxury-gray-dark">Weight</p>
-                      </div>
-                      {% endif %}
                       {% if jewelry_specs.chain_length %}
                       <div class="text-center">
                         <p class="font-semibold text-luxury-black">{{ jewelry_specs.chain_length }}</p>
@@ -241,27 +229,13 @@
                     Pricing Calculator
                   </h3>
                   
-                  <div class="space-y-4 mb-4">
-                    <!-- Gold Information -->
-                    {% if product.gold_weight_grams %}
-                    <div class="bg-amber-50 rounded-lg p-3 border border-amber-200">
-                      <div class="flex justify-between items-center mb-2">
-                        <span class="text-sm font-medium text-luxury-black">Gold</span>
-                        <span class="text-xs text-luxury-gray-dark">{{ product.gold_weight_grams }}g × $<span id="gold-rate">{% if gold_rate %}{{ gold_rate|floatformat:2 }}{% else %}0.00{% endif %}</span>/g</span>
-                      </div>
-                      <div class="flex justify-between items-center">
-                        <span class="text-luxury-gray-dark text-sm">Gold Price:</span>
-                        <span id="gold-price-display" class="font-bold text-amber-600">{% if initial_pricing %}${{ initial_pricing.gold_price|floatformat:2 }}{% else %}$0.00{% endif %}</span>
-                      </div>
-                    </div>
-                    {% endif %}
-                    
+                  <div class="space-y-4 mb-4">                    
                     <!-- Diamond Type Selector -->
                     {% if product.has_diamonds %}
                     <div class="space-y-3">
                       <label class="block text-sm font-medium text-luxury-black">Diamond Type:</label>
                       <div class="grid grid-cols-2 gap-2">
-                        <button type="button" class="diamond-type-btn px-4 py-2 rounded-lg border-2 transition-all" data-type="natural">
+                        <button type="button" class="diamond-type-btn px-4 py-2 rounded-lg border-2 transition-all border-luxury-gold bg-luxury-gold/10" data-type="natural">
                           <div class="text-sm font-semibold">Natural</div>
                           <div class="text-xs text-luxury-gray-dark">Premium Quality</div>
                         </button>
@@ -271,36 +245,12 @@
                         </button>
                       </div>
                     </div>
-                    
-                    <!-- Diamond Quantities -->
-                    <div class="space-y-3">
-                      <p class="text-sm font-medium text-luxury-black">Diamond Quantities:</p>
-                      <div id="diamond-options-container" class="space-y-2">
-                        <!-- Will be populated by JavaScript -->
-                      </div>
-                    </div>
                     {% endif %}
                   </div>
                   
                   <!-- Price Breakdown -->
                   <div class="bg-luxury-black text-white rounded-lg p-4 space-y-2">
                     <h4 class="font-semibold mb-3">Price Breakdown</h4>
-                    {% if product.gold_weight_grams %}
-                    <div class="flex justify-between text-sm">
-                      <span>Gold ({{ product.gold_weight_grams }}g):</span>
-                      <span id="gold-price" class="font-semibold">{% if initial_pricing %}${{ initial_pricing.gold_price|floatformat:2 }}{% else %}$0.00{% endif %}</span>
-                    </div>
-                    {% endif %}
-                    {% if product.has_diamonds %}
-                    <div class="flex justify-between text-sm">
-                      <span>Diamonds:</span>
-                      <span id="diamond-price" class="font-semibold">$0.00</span>
-                    </div>
-                    {% endif %}
-                    <div class="flex justify-between text-sm">
-                      <span>Work Price:</span>
-                      <span id="work-price" class="font-semibold">{% if work_rate %}${{ work_rate|floatformat:2 }}{% else %}$0.00{% endif %}</span>
-                    </div>
                     <div class="border-t border-white/20 pt-2 mt-2">
                       <div class="flex justify-between items-center">
                         <span class="font-bold text-lg">Total Price:</span>
@@ -600,89 +550,7 @@
             total_price: {% if initial_pricing %}{{ initial_pricing.total_price }}{% else %}0{% endif %}
         };
         
-        // Fetch diamond prices from database
-        async function fetchDiamondPrices() {
-            try {
-                const response = await fetch('/api/get-diamond-prices/');
-                if (response.ok) {
-                    const data = await response.json();
-                    diamondPrices = data.prices || {};
-                    // Apply user multiplier to all diamond prices
-                    for (let type in diamondPrices) {
-                        for (let size in diamondPrices[type]) {
-                            diamondPrices[type][size] = diamondPrices[type][size] * userMultiplier;
-                        }
-                    }
-                    createDiamondOptions();
-                }
-            } catch (error) {
-                console.error('Failed to fetch diamond prices:', error);
-                // Fallback to hardcoded prices if API fails (with user multiplier)
-                diamondPrices = {
-                    natural: { 
-                        under_5: 4000 * userMultiplier, 
-                        '5_to_7': 4500 * userMultiplier, 
-                        '8_to_12': 5000 * userMultiplier, 
-                        '13_to_17': 5500 * userMultiplier 
-                    },
-                    lab: { 
-                        under_5: 1500 * userMultiplier, 
-                        '5_to_7': 1500 * userMultiplier, 
-                        '8_to_12': 1500 * userMultiplier, 
-                        '13_to_17': 1500 * userMultiplier 
-                    }
-                };
-                createDiamondOptions();
-            }
-        }
-        
-        // Create diamond option inputs
-        function createDiamondOptions() {
-            const container = document.getElementById('diamond-options-container');
-            if (!container) return;
-            
-            const sizes = [
-                { key: 'under_5', label: 'Under 5', carats: '2.22' },
-                { key: '5_to_7', label: '5 to 7', carats: '3.57' },
-                { key: '8_to_12', label: '8 to 12', carats: '1.85' },
-                { key: '13_to_17', label: '13 to 17', carats: '0.16' }
-            ];
-            
-            container.innerHTML = sizes.map(size => {
-                const pricePerUnit = diamondPrices[selectedDiamondType]?.[size.key] || 0;
-                return `
-                    <div class="flex items-center justify-between bg-white rounded-xl p-4 border-2 border-luxury-gray/20 hover:border-luxury-gold/40 transition-all shadow-sm">
-                        <div class="flex-1">
-                            <p class="font-semibold text-luxury-black text-base">${size.label}</p>
-                            <p class="text-xs text-luxury-gray-dark">(${size.carats} carats)</p>
-                            <p class="text-sm text-luxury-gold font-bold mt-1">$${pricePerUnit.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}/unit</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="diamond-decrease w-9 h-9 rounded-lg bg-luxury-gray/60 hover:bg-luxury-gray text-luxury-black flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-sm" data-size="${size.key}">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
-                                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                                </svg>
-                            </button>
-                            <input type="text" 
-                                   inputmode="decimal"
-                                   class="diamond-quantity w-20 text-center border-2 border-luxury-gray/40 focus:border-luxury-gold rounded-lg px-2 py-1.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-luxury-gold/30 transition-all bg-white" 
-                                   data-size="${size.key}"
-                                   value="0.00"
-                                   placeholder="0.00">
-                            <button type="button" class="diamond-increase w-9 h-9 rounded-lg bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-md" data-size="${size.key}">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
-                                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            attachDiamondEventListeners();
-        }
-        
+
         // Calculate price
         async function calculatePrice() {
             const diamondQuantities = {};

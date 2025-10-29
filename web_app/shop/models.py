@@ -10,7 +10,6 @@ User = get_user_model()
 class GoldPrice(models.Model):
     """Gold price per gram configuration"""
     price_per_gram = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price per gram in USD")
-    markup_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=25.00, help_text="Markup percentage (default 25%)")
     is_active = models.BooleanField(default=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -30,8 +29,7 @@ class GoldPrice(models.Model):
         if active_price:
             # Apply markup
             base_price = active_price.price_per_gram
-            markup = base_price * (active_price.markup_percentage / 100)
-            return base_price + markup
+            return base_price
         return Decimal('0.00')
 
 
@@ -51,11 +49,7 @@ class DiamondPrice(models.Model):
     
     diamond_type = models.CharField(max_length=20, choices=DIAMOND_TYPE_CHOICES)
     size_category = models.CharField(max_length=20, choices=SIZE_CHOICES)
-    carats_info = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Reference carat size (display only)")
     price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Price per unit - will be multiplied by user's quantity")
-    is_active = models.BooleanField(default=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['diamond_type', 'size_category']
@@ -64,20 +58,12 @@ class DiamondPrice(models.Model):
         unique_together = ['diamond_type', 'size_category']
 
     def __str__(self):
-        return f"{self.get_diamond_type_display()} - {self.get_size_category_display()} - ${self.price_per_unit}/unit"
-
-    def calculate_price_for_quantity(self, quantity):
-        """Calculate total price: price_per_unit × quantity"""
-        if quantity > 0:
-            return self.price_per_unit * Decimal(str(quantity))
-        return Decimal('0.00')
+        return f"{self.diamond_type} ----- {self.size_category}"
 
 
 class WorkPrice(models.Model):
     """Work/labor price configuration"""
     price = models.DecimalField(max_digits=10, decimal_places=2, default=7000.00, help_text="Work price in USD")
-    is_active = models.BooleanField(default=True)
-    description = models.TextField(blank=True, help_text="Description of what this work price covers")
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -87,12 +73,12 @@ class WorkPrice(models.Model):
         verbose_name_plural = 'Work Prices'
 
     def __str__(self):
-        return f"Work Price: ${self.price} - {'Active' if self.is_active else 'Inactive'}"
+        return f"Work Price: ${self.price}"
 
     @classmethod
     def get_current_price(cls):
         """Get the current active work price"""
-        active_price = cls.objects.filter(is_active=True).first()
+        active_price = cls.objects.all().first()
         return active_price.price if active_price else Decimal('7000.00')
 
 
@@ -104,7 +90,7 @@ class ShippingAddress(models.Model):
     last_name = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
     city = models.CharField(max_length=100)
-    zip_code = models.CharField(max_length=20)
+    zip_code = models.CharField(max_length=20, blank=True, null=True)
     country = models.CharField(max_length=100)
     is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -131,9 +117,6 @@ class Brand(models.Model):
     slug = models.SlugField(max_length=100, unique=True, blank=True)
     description = models.TextField(blank=True)
     logo = models.ImageField(upload_to='brands/', blank=True, null=True)
-    founded_year = models.PositiveIntegerField(blank=True, null=True)
-    country = models.CharField(max_length=50, blank=True)
-    is_active = models.BooleanField(default=True)
     show_on_homepage = models.BooleanField(default=False, help_text="Display this brand on the homepage")
 
     class Meta:
@@ -207,7 +190,8 @@ class Product(models.Model):
         null=True,
         help_text='Internal cost tracking only'
     )
-    
+    markup_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=25.00, help_text="Markup percentage (default 25%)")
+
     # Images
     image = models.ImageField(upload_to='products/')
     image_alt = models.CharField(max_length=200, blank=True)
@@ -313,7 +297,8 @@ class Product(models.Model):
         """Calculate the price of gold in this product"""
         if self.gold_weight_grams > 0:
             gold_price_per_gram = GoldPrice.get_current_price()
-            return self.gold_weight_grams * gold_price_per_gram
+            gold_price = self.gold_weight_grams * gold_price_per_gram
+            return gold_price + (gold_price * self.markup_percentage / 100)
         return Decimal('0.00')
     
     def get_display_price(self, user=None):

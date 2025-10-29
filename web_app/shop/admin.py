@@ -10,20 +10,17 @@ from .models import (
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
-    list_display = ('name', 'country', 'founded_year', 'is_active', 'show_on_homepage')
-    list_filter = ('is_active', 'show_on_homepage', 'country')
+    list_display = ('name','show_on_homepage')
+    list_filter = ('show_on_homepage',)
     search_fields = ('name', 'description')
     prepopulated_fields = {'slug': ('name',)}
-    list_editable = ('is_active', 'show_on_homepage')
+    list_editable = ('show_on_homepage',)
     fieldsets = (
         (None, {
             'fields': ('name', 'slug', 'description', 'logo')
         }),
-        ('Details', {
-            'fields': ('founded_year', 'country')
-        }),
         ('Status', {
-            'fields': ('is_active', 'show_on_homepage')
+            'fields': ('show_on_homepage',)
         }),
     )
 
@@ -512,81 +509,49 @@ class ShippingAddressAdmin(admin.ModelAdmin):
 
 @admin.register(GoldPrice)
 class GoldPriceAdmin(admin.ModelAdmin):
-    list_display = ('price_per_gram', 'markup_percentage', 'final_price_display', 'is_active', 'updated_at')
+    list_display = ('price_per_gram', 'is_active', 'updated_at')
     list_filter = ('is_active', 'created_at')
     readonly_fields = ('created_at', 'updated_at')
     list_editable = ('is_active',)
     
     fieldsets = (
         (None, {
-            'fields': ('price_per_gram', 'markup_percentage', 'is_active')
+            'fields': ('price_per_gram', 'is_active')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )
-    
-    def final_price_display(self, obj):
-        final_price = obj.price_per_gram + (obj.price_per_gram * obj.markup_percentage / 100)
-        return f"${final_price:.2f}/gram"
-    final_price_display.short_description = 'Final Price (with markup)'
-    
-    def save_model(self, request, obj, form, change):
-        # If setting this as active, deactivate all others
-        if obj.is_active:
-            GoldPrice.objects.exclude(pk=obj.pk).update(is_active=False)
-        super().save_model(request, obj, form, change)
 
 
 @admin.register(DiamondPrice)
 class DiamondPriceAdmin(admin.ModelAdmin):
-    list_display = ('diamond_type', 'size_category', 'carats_info', 'price_per_unit', 'is_active')
-    list_filter = ('diamond_type', 'is_active', 'size_category')
+    list_display = ('diamond_type', 'size_category', 'price_per_unit')
+    list_filter = ('diamond_type', 'size_category')
     search_fields = ('diamond_type', 'size_category')
-    readonly_fields = ('created_at', 'updated_at')
-    list_editable = ('is_active',)
     
     fieldsets = (
         (None, {
-            'fields': ('diamond_type', 'size_category', 'carats_info')
+            'fields': ('diamond_type', 'size_category')
         }),
         ('Pricing', {
-            'fields': ('price_per_unit', 'is_active'),
-            'description': 'Price per unit. User enters quantity (can be decimal like 2.27). Total = price_per_unit × user_quantity'
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
+            'fields': ('price_per_unit',),
         }),
     )
 
 
 @admin.register(WorkPrice)
 class WorkPriceAdmin(admin.ModelAdmin):
-    list_display = ('price', 'is_active', 'description_short', 'updated_at')
-    list_filter = ('is_active', 'created_at')
+    list_display = ('price', 'updated_at')
+    list_filter = ('created_at',)
     readonly_fields = ('created_at', 'updated_at')
-    list_editable = ('is_active',)
     
     fieldsets = (
         (None, {
-            'fields': ('price', 'is_active', 'description')
+            'fields': ('price',)
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
         }),
     )
-    
-    def description_short(self, obj):
-        if obj.description:
-            return obj.description[:50] + '...' if len(obj.description) > 50 else obj.description
-        return '-'
-    description_short.short_description = 'Description'
-    
-    def save_model(self, request, obj, form, change):
-        # If setting this as active, deactivate all others
-        if obj.is_active:
-            WorkPrice.objects.exclude(pk=obj.pk).update(is_active=False)
-        super().save_model(request, obj, form, change)

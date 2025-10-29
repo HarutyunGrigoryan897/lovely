@@ -128,7 +128,7 @@ def should_update_gold_price():
     
     # Check if updated more than 1 minute ago
     time_since_update = timezone.now() - active_price.updated_at
-    needs_update = time_since_update > timedelta(hours=1)
+    needs_update = time_since_update > timedelta(hours=24)
     
     if needs_update:
         logger.info(f"Gold price last updated {time_since_update.total_seconds() / 60:.1f} minutes ago. Update needed.")
@@ -161,15 +161,14 @@ def update_gold_price_sync():
         
         if active_price:
             # Update existing price
-            active_price.price_per_gram = usd_price
+            active_price.price_per_gram = usd_price * 0.76
             active_price.save()
             logger.info(f"Updated gold price to ${usd_price}/gram")
             return True, ""
         else:
             # Create new active price
             GoldPrice.objects.create(
-                price_per_gram=usd_price,
-                markup_percentage=Decimal('25.00'),
+                price_per_gram=usd_price * 0.76,
                 is_active=True
             )
             logger.info(f"Created new gold price: ${usd_price}/gram")
