@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -143,10 +144,10 @@
                   <p class="text-lg text-luxury-gold font-medium mb-1">{{ product.brand.name }}</p>
                   <h2 class="text-2xl font-bold text-luxury-black mb-2">{{ product.name }}</h2>
                   {% if product.gold_weight_grams > 0 %}
-                  <p class="text-3xl font-bold text-luxury-black" id="top-price">${{ user_price|floatformat:0 }}</p>
+                  <p class="text-3xl font-bold text-luxury-black" id="top-price">${{ user_price|floatformat:2|intcomma }}</p>
                   <p class="text-sm text-luxury-gray-dark">Base price (Gold + Work). Add diamonds below to customize.</p>
                   {% else %}
-                  <p class="text-3xl font-bold text-luxury-black">${{ user_price|floatformat:0 }}</p>
+                  <p class="text-3xl font-bold text-luxury-black">${{ user_price|floatformat:2|intcomma }}</p>
                   {% endif %}
                 </div>
 
@@ -246,6 +247,26 @@
                       </div>
                     </div>
                     {% endif %}
+                    
+                    <!-- Size Selector -->
+                    {% if product_sizes %}
+                    <div class="space-y-3">
+                      <label class="block text-sm font-medium text-luxury-black">Size:</label>
+                      <div class="grid grid-cols-3 gap-2">
+                        {% for size in product_sizes %}
+                        <button type="button" class="size-btn px-4 py-2 rounded-lg border-2 transition-all {% if size.is_default or forloop.first %}border-luxury-gold bg-luxury-gold/10{% else %}border-luxury-gray{% endif %}" 
+                                data-size-id="{{ size.id }}" 
+                                data-size-label="{{ size.size_label }}"
+                                data-multiplier="{{ size.price_multiplier }}">
+                          <div class="text-sm font-semibold">{{ size.size_label }}</div>
+                          {% if size.price_multiplier != 1.0 %}
+                          <div class="text-xs text-luxury-gray-dark">×{{ size.price_multiplier }}</div>
+                          {% endif %}
+                        </button>
+                        {% endfor %}
+                      </div>
+                    </div>
+                    {% endif %}
                   </div>
                   
                   <!-- Price Breakdown -->
@@ -272,7 +293,7 @@
                       <div class="relative">
                         <select id="{{ customization_type }}" class="w-full appearance-none bg-luxury-white border border-luxury-gray rounded-lg px-4 py-3 pr-10 text-luxury-black focus:outline-none focus:ring-2 focus:ring-luxury-gold focus:border-luxury-gold transition-colors duration-200" data-customization-type="{{ customization_type }}">
                           {% for customization in customizations %}
-                          <option value="{{ customization.value }}" data-price="{{ customization.price_modifier }}">{{ customization.name }}{% if customization.price_modifier > 0 %} (+${{ customization.price_modifier|floatformat:0 }}){% endif %}</option>
+                          <option value="{{ customization.value }}" data-price="{{ customization.price_modifier }}">{{ customization.name }}{% if customization.price_modifier > 0 %} (+${{ customization.price_modifier|floatformat:0|intcomma }}){% endif %}</option>
                           {% endfor %}
                         </select>
                         <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
@@ -288,7 +309,7 @@
                     <div class="bg-luxury-gray/10 rounded-lg p-4 border border-luxury-gray">
                       <div class="flex justify-between items-center">
                         <span class="text-luxury-gray-dark">Base Price:</span>
-                        <span class="font-semibold text-luxury-black" id="base-price">${{ user_price|floatformat:0 }}</span>
+                        <span class="font-semibold text-luxury-black" id="base-price">${{ user_price|floatformat:2|intcomma }}</span>
                       </div>
                       <div class="flex justify-between items-center mt-2">
                         <span class="text-luxury-gray-dark">Customization:</span>
@@ -297,7 +318,7 @@
                       <hr class="my-2 border-luxury-gray">
                       <div class="flex justify-between items-center">
                         <span class="text-lg font-bold text-luxury-black">Total Price:</span>
-                        <span class="text-xl font-bold text-luxury-gold" id="total-price">${{ user_price|floatformat:0 }}</span>
+                        <span class="text-xl font-bold text-luxury-gold" id="total-price">${{ user_price|floatformat:2|intcomma }}</span>
                       </div>
                     </div>
                   </div>
@@ -332,7 +353,7 @@
                     <circle cx="19" cy="21" r="1"></circle>
                     <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57L20.99 7H5.12"></path>
                   </svg>
-                  <span id="add-to-cart-text">Add to Cart - ${{ user_price|floatformat:0 }}</span>
+                  <span id="add-to-cart-text">Add to Cart - ${{ user_price|floatformat:2|intcomma }}</span>
                 </button>
               </div>
             </div>
@@ -541,7 +562,8 @@
         {% if product.gold_weight_grams or product.has_diamonds %}
         const productSlug = '{{ product.slug }}';
         let selectedDiamondType = 'natural'; // Default
-        let diamondPrices = {}; // Will store prices from database
+        let selectedSizeMultiplier = {% if default_size %}{{ default_size.price_multiplier }}{% else %}1.0{% endif %}; // Default size multiplier
+        let selectedSizeLabel = '{% if default_size %}{{ default_size.size_label }}{% else %}Standard{% endif %}'; // Default size label
         const userMultiplier = {{ user_multiplier|default:1.8 }}; // User's price multiplier
         let currentPricing = { // Store current pricing for add to cart (initialized with server values)
             gold_price: {% if initial_pricing %}{{ initial_pricing.gold_price }}{% else %}0{% endif %},
@@ -553,17 +575,11 @@
 
         // Calculate price
         async function calculatePrice() {
-            const diamondQuantities = {};
-            document.querySelectorAll('.diamond-quantity').forEach(input => {
-                diamondQuantities[input.dataset.size] = parseFloat(input.value) || 0;
-            });
-            
             try {
                 const response = await fetch(`/api/product/${productSlug}/calculate-price/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        diamond_quantities: diamondQuantities,
                         diamond_type: selectedDiamondType
                     })
                 });
@@ -571,26 +587,35 @@
                 if (response.ok) {
                     const data = await response.json();
                     if (data.success) {
+                        // Apply size multiplier to all prices
+                        const sizeMultiplier = parseFloat(selectedSizeMultiplier);
+                        const adjustedPricing = {
+                            gold_price: data.pricing.gold_price * sizeMultiplier,
+                            diamond_price: data.pricing.diamond_price * sizeMultiplier,
+                            work_price: data.pricing.work_price * sizeMultiplier,
+                            total_price: data.pricing.total_price * sizeMultiplier
+                        };
+                        
                         // Store current pricing for add to cart
-                        currentPricing = data.pricing;
+                        currentPricing = adjustedPricing;
                         
                         const fmt = (val) => '$' + val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                        if (document.getElementById('gold-price')) document.getElementById('gold-price').textContent = fmt(data.pricing.gold_price);
-                        if (document.getElementById('gold-price-display')) document.getElementById('gold-price-display').textContent = fmt(data.pricing.gold_price);
-                        if (document.getElementById('diamond-price')) document.getElementById('diamond-price').textContent = fmt(data.pricing.diamond_price);
-                        if (document.getElementById('work-price')) document.getElementById('work-price').textContent = fmt(data.pricing.work_price);
-                        document.getElementById('total-price').textContent = fmt(data.pricing.total_price);
+                        if (document.getElementById('gold-price')) document.getElementById('gold-price').textContent = fmt(adjustedPricing.gold_price);
+                        if (document.getElementById('gold-price-display')) document.getElementById('gold-price-display').textContent = fmt(adjustedPricing.gold_price);
+                        if (document.getElementById('diamond-price')) document.getElementById('diamond-price').textContent = fmt(adjustedPricing.diamond_price);
+                        if (document.getElementById('work-price')) document.getElementById('work-price').textContent = fmt(adjustedPricing.work_price);
+                        document.getElementById('total-price').textContent = fmt(adjustedPricing.total_price);
                         
                         // Update top price display
                         const topPrice = document.getElementById('top-price');
                         if (topPrice) {
-                            topPrice.textContent = fmt(data.pricing.total_price);
+                            topPrice.textContent = fmt(adjustedPricing.total_price);
                         }
                         
                         // Update Add to Cart button text with calculated price
                         const addToCartText = document.getElementById('add-to-cart-text');
                         if (addToCartText) {
-                            addToCartText.textContent = `Add to Cart - ${fmt(data.pricing.total_price)}`;
+                            addToCartText.textContent = `Add to Cart - ${fmt(adjustedPricing.total_price)}`;
                         }
                     }
                 }
@@ -599,115 +624,45 @@
             }
         }
         
-        // Attach event listeners
+        // Attach event listeners for diamond type buttons
         function attachDiamondEventListeners() {
-            document.querySelectorAll('.diamond-quantity').forEach(input => {
-                // 🎯 FIX 3: Clear "0.00" when user focuses/clicks on input
-                input.addEventListener('focus', (e) => {
-                    if (e.target.value === '0.00' || parseFloat(e.target.value) === 0) {
-                        e.target.value = '';
-                    }
-                    e.target.select(); // Select all text for easy replacement
-                });
-                
-                // Format on focus out (blur)
-                input.addEventListener('blur', (e) => {
-                    let val = parseFloat(e.target.value) || 0;
-                    if (val < 0) val = 0;
-                    e.target.value = val.toFixed(2);
+            // Diamond type selector
+            document.querySelectorAll('.diamond-type-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    console.log('Diamond type button clicked:', this.dataset.type);
+                    selectedDiamondType = this.dataset.type;
+                    document.querySelectorAll('.diamond-type-btn').forEach(b => {
+                        b.classList.remove('border-luxury-gold', 'bg-luxury-gold/10');
+                        b.classList.add('border-luxury-gray');
+                    });
+                    this.classList.add('border-luxury-gold', 'bg-luxury-gold/10');
+                    this.classList.remove('border-luxury-gray');
                     calculatePrice();
-                    
-                    // 🎯 FIX 2: Dismiss keyboard on mobile when clicking outside
-                    // This happens automatically with blur, but we ensure the input loses focus
-                    e.target.blur();
-                });
-                
-                // 🎯 FIX 1: Real-time calculation as user types
-                input.addEventListener('input', (e) => {
-                    // Allow only numbers and decimal point
-                    let val = e.target.value.replace(/[^\d.]/g, '');
-                    
-                    // Prevent multiple decimal points
-                    const parts = val.split('.');
-                    if (parts.length > 2) {
-                        val = parts[0] + '.' + parts.slice(1).join('');
-                    }
-                    
-                    e.target.value = val;
-                    
-                    // 🎯 INSTANT CALCULATION: Update price as user types (with debounce)
-                    clearTimeout(e.target.calculateTimeout);
-                    e.target.calculateTimeout = setTimeout(() => {
-                        calculatePrice();
-                    }, 500); // Wait 500ms after user stops typing
-                });
-                
-                // Calculate immediately on enter key
-                input.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        clearTimeout(e.target.calculateTimeout); // Cancel debounce
-                        let val = parseFloat(e.target.value) || 0;
-                        if (val < 0) val = 0;
-                        e.target.value = val.toFixed(2);
-                        calculatePrice();
-                        e.target.blur(); // Dismiss keyboard
-                    }
                 });
             });
             
-            document.querySelectorAll('.diamond-decrease').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const input = document.querySelector(`.diamond-quantity[data-size="${btn.dataset.size}"]`);
-                    let val = parseFloat(input.value) || 0;
-                    if (val >= 0.1) { 
-                        input.value = (val - 0.1).toFixed(2); 
-                        calculatePrice(); 
-                    }
-                });
-            });
-            
-            document.querySelectorAll('.diamond-increase').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const input = document.querySelector(`.diamond-quantity[data-size="${btn.dataset.size}"]`);
-                    let val = parseFloat(input.value) || 0;
-                    input.value = (val + 0.1).toFixed(2);
+            // Size selector
+            document.querySelectorAll('.size-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    console.log('Size button clicked:', this.dataset.sizeLabel);
+                    selectedSizeMultiplier = this.dataset.multiplier;
+                    selectedSizeLabel = this.dataset.sizeLabel;
+                    document.querySelectorAll('.size-btn').forEach(b => {
+                        b.classList.remove('border-luxury-gold', 'bg-luxury-gold/10');
+                        b.classList.add('border-luxury-gray');
+                    });
+                    this.classList.add('border-luxury-gold', 'bg-luxury-gold/10');
+                    this.classList.remove('border-luxury-gray');
                     calculatePrice();
                 });
             });
         }
         
-        // Diamond type selector
-        document.querySelectorAll('.diamond-type-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                selectedDiamondType = this.dataset.type;
-                document.querySelectorAll('.diamond-type-btn').forEach(b => {
-                    b.classList.remove('border-luxury-gold', 'bg-luxury-gold/10');
-                    b.classList.add('border-luxury-gray');
-                });
-                this.classList.add('border-luxury-gold', 'bg-luxury-gold/10');
-                this.classList.remove('border-luxury-gray');
-                createDiamondOptions();
-                calculatePrice();
-            });
-        });
+        // Initialize event listeners
+        attachDiamondEventListeners();
         
-        // 🎯 FIX 2: Dismiss keyboard when clicking outside input fields (mobile UX improvement)
-        document.addEventListener('click', (e) => {
-            // Check if click is outside any diamond-quantity input
-            if (!e.target.closest('.diamond-quantity') && !e.target.closest('.diamond-increase') && !e.target.closest('.diamond-decrease')) {
-                // Blur any focused diamond quantity inputs to dismiss keyboard
-                document.querySelectorAll('.diamond-quantity:focus').forEach(input => {
-                    input.blur();
-                });
-            }
-        });
-        
-        // Initialize
+        // Calculate initial price
         {% if product.has_diamonds %}
-        fetchDiamondPrices().then(() => {
-            document.querySelector('.diamond-type-btn[data-type="natural"]').click();
-        });
-        {% else %}
         calculatePrice();
         {% endif %}
         {% endif %}
@@ -905,16 +860,6 @@
             
             const hasDynamicPricing = {{ product.gold_weight_grams|yesno:"true,false" }} || {{ product.has_diamonds|yesno:"true,false" }};
             
-            // Get diamond quantities
-            const diamondQuantities = {};
-            document.querySelectorAll('.diamond-quantity').forEach(input => {
-                const size = input.dataset.size;
-                const qty = parseFloat(input.value) || 0;
-                if (qty > 0) {
-                    diamondQuantities[size] = qty;
-                }
-            });
-            
             // Build watch data with customization
             const watchData = {
                 id: favoriteBtn.dataset.id,
@@ -927,7 +872,14 @@
                 // Add customization data if available
                 customization: hasDynamicPricing && typeof currentPricing !== 'undefined' && currentPricing.total_price ? {
                     diamond_type: typeof selectedDiamondType !== 'undefined' ? selectedDiamondType : 'natural',
-                    diamond_quantities: diamondQuantities,
+                    {% if product.has_diamonds %}
+                    diamond_size: '{{ product.diamond_size }}',
+                    diamond_carats: {{ product.diamond_carats|default:"0" }},
+                    {% endif %}
+                    {% if product_sizes %}
+                    size_label: typeof selectedSizeLabel !== 'undefined' ? selectedSizeLabel : '{% if default_size %}{{ default_size.size_label }}{% else %}Standard{% endif %}',
+                    size_multiplier: typeof selectedSizeMultiplier !== 'undefined' ? selectedSizeMultiplier : {% if default_size %}{{ default_size.price_multiplier }}{% else %}1.0{% endif %},
+                    {% endif %}
                     gold_weight: {{ product.gold_weight_grams|default:"0" }},
                     gold_price: currentPricing.gold_price,
                     diamond_price: currentPricing.diamond_price,

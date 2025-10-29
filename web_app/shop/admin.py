@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import (
-    Brand, Category, Product, ProductImage, WatchSpecification,
+    Brand, Category, Product, ProductImage, ProductSize, WatchSpecification,
     JewelrySpecification, ProductCustomization, Cart, CartItem,
     Order, OrderItem, HeroSection, ShippingAddress, GoldPrice, DiamondPrice, 
     WorkPrice, ProductDiamondOption
@@ -102,6 +102,13 @@ class JewelrySpecificationInline(admin.StackedInline):
     )
 
 
+class ProductSizeInline(admin.TabularInline):
+    model = ProductSize
+    extra = 1
+    fields = ('size_label', 'price_multiplier', 'is_default', 'is_available', 'sort_order')
+    list_editable = ('sort_order', 'is_available', 'is_default')
+
+
 class ProductDiamondOptionInline(admin.TabularInline):
     model = ProductDiamondOption
     extra = 0
@@ -110,18 +117,18 @@ class ProductDiamondOptionInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'brand', 'category', 'gold_weight_grams', 'has_diamonds', 'get_display_price', 'stock_status', 'is_active', 'show_on_homepage')
-    list_filter = ('brand', 'category', 'has_diamonds', 'diamond_type', 'stock_status', 'is_active', 'is_featured', 'show_on_homepage', 'is_limited_edition', 'created_at')
+    list_display = ('name', 'brand', 'category', 'gold_weight_grams', 'has_diamonds', 'diamond_size', 'diamond_carats', 'get_display_price', 'stock_status', 'is_active', 'show_on_homepage')
+    list_filter = ('brand', 'category', 'has_diamonds', 'diamond_size', 'stock_status', 'is_active', 'is_featured', 'show_on_homepage', 'is_limited_edition', 'created_at')
     search_fields = ('name', 'description', 'sku', 'model_number')
     prepopulated_fields = {'slug': ('name',)}
     readonly_fields = ('created_at', 'updated_at', 'get_display_price')
     list_editable = ('stock_status', 'is_active', 'show_on_homepage')
-    inlines = [ProductImageInline, ProductCustomizationInline, ProductDiamondOptionInline, WatchSpecificationInline, JewelrySpecificationInline]
+    inlines = [ProductImageInline, ProductSizeInline, ProductCustomizationInline, ProductDiamondOptionInline, WatchSpecificationInline, JewelrySpecificationInline]
     
     def get_display_price(self, obj):
         """Show calculated price based on gold weight"""
         return f"${obj.display_price:,.2f}"
-    get_display_price.short_description = 'Calculated Price'
+    get_display_price.short_description = 'Calculated Price (Base)'
     get_display_price.admin_order_field = 'gold_weight_grams'
     
     fieldsets = (
@@ -129,8 +136,8 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('name', 'slug', 'brand', 'category', 'description', 'short_description', 'image', 'image_alt')
         }),
         ('Gold & Diamond Specifications', {
-            'fields': ('gold_weight_grams', 'has_diamonds', 'diamond_type'),
-            'description': 'Gold weight in grams. Price is automatically calculated: (gold_weight × $75/gram) + $7,000 work price'
+            'fields': ('gold_weight_grams', 'has_diamonds', 'diamond_size', 'diamond_carats'),
+            'description': 'Gold weight in grams. If product has diamonds, select the size category and enter total carats. Customers will choose natural or lab when ordering.'
         }),
         ('Pricing (Calculated)', {
             'fields': ('get_display_price',),
@@ -167,6 +174,28 @@ class ProductImageAdmin(admin.ModelAdmin):
     search_fields = ('product__name', 'alt_text')
     list_editable = ('is_primary', 'sort_order')
     readonly_fields = ('created_at',)
+
+
+@admin.register(ProductSize)
+class ProductSizeAdmin(admin.ModelAdmin):
+    list_display = ('product', 'size_label', 'price_multiplier', 'is_default', 'is_available', 'sort_order')
+    list_filter = ('is_default', 'is_available', 'product__brand')
+    search_fields = ('product__name', 'size_label')
+    list_editable = ('price_multiplier', 'is_default', 'is_available', 'sort_order')
+    readonly_fields = ('created_at',)
+    
+    fieldsets = (
+        (None, {
+            'fields': ('product', 'size_label', 'price_multiplier')
+        }),
+        ('Settings', {
+            'fields': ('is_default', 'is_available', 'sort_order')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        }),
+    )
 
 
 @admin.register(WatchSpecification)

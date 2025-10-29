@@ -20,7 +20,7 @@ class GoldPrice(models.Model):
         verbose_name_plural = 'Gold Prices'
 
     def __str__(self):
-        return f"${self.price_per_gram}/gram (+{self.markup_percentage}% markup) - {'Active' if self.is_active else 'Inactive'}"
+        return f"${self.price_per_gram}/gram - {'Active' if self.is_active else 'Inactive'}"
 
     @classmethod
     def get_current_price(cls):
@@ -215,12 +215,25 @@ class Product(models.Model):
         help_text="Weight of gold in grams"
     )
     has_diamonds = models.BooleanField(default=False, help_text="Does this product include diamonds?")
-    diamond_type = models.CharField(
+    diamond_size = models.CharField(
         max_length=20,
-        choices=[('natural', 'Natural Diamond'), ('lab', 'Lab Diamond')],
+        choices=[
+            ('under_5', 'Under 5'),
+            ('5_to_7', '5 to 7'),
+            ('8_to_12', '8 to 12'),
+            ('13_to_17', '13 to 17'),
+        ],
         blank=True,
         null=True,
-        help_text="Type of diamonds used"
+        help_text="Size category of diamonds for this product"
+    )
+    diamond_carats = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        validators=[MinValueValidator(Decimal('0.00'))],
+        help_text="Total carats of diamonds in this product",
+        blank=True, null=True
     )
     
     # SEO
@@ -294,28 +307,64 @@ class Product(models.Model):
         return self.stock_quantity <= self.low_stock_threshold
 
     def calculate_gold_price(self):
-        """Calculate the price of gold in this product"""
+        """
+        Calculate the price of gold in this product
+        Formula: (gold_weight_grams * price_per_gram * 0.76) + markup_percentage
+        """
         if self.gold_weight_grams > 0:
             gold_price_per_gram = GoldPrice.get_current_price()
-            gold_price = self.gold_weight_grams * gold_price_per_gram
-            return gold_price + (gold_price * self.markup_percentage / 100)
+            # Apply standard 0.76 multiplier
+            base_gold_price = self.gold_weight_grams * gold_price_per_gram * Decimal('0.76')
+            # Add markup percentage
+            markup_amount = base_gold_price * (self.markup_percentage / Decimal('100'))
+            total_gold_price = base_gold_price + markup_amount
+            return total_gold_price
         return Decimal('0.00')
     
-    def get_display_price(self, user=None):
+    def get_display_price(self, user=None, size_multiplier=None, diamond_type=None):
         """
-        PRIMARY PRICE - Always calculated from gold + work
-        This is the base price without diamonds (minimum price for the item)
-        There is no static price field - everything is calculated
-        Applies user level multiplier if user is provided
+        PRIMARY PRICE - Always calculated from gold + work + diamonds (if applicable)
+        Formula: (gold_price + work_price + diamond_price) * size_multiplier * user_level_multiplier
+        
+        Args:
+            user: User object to apply level multiplier
+            size_multiplier: Decimal for size-based price adjustment (default 1.0)
+            diamond_type: 'natural' or 'lab' if product has diamonds
+        
+        Returns:
+            Decimal: Final calculated price
         """
+        # Calculate gold price (already includes 0.76 multiplier and markup)
         gold_price = self.calculate_gold_price()
+        
+        # Add work price
         work_price = WorkPrice.get_current_price()
-        base_price = gold_price + work_price
+        
+        # Calculate diamond price if applicable
+        diamond_price = Decimal('0.00')
+        if self.has_diamonds and diamond_type and self.diamond_size and self.diamond_carats > 0:
+            try:
+                diamond_pricing = DiamondPrice.objects.get(
+                    diamond_type=diamond_type,
+                    size_category=self.diamond_size
+                )
+                # Price per unit * carats
+                diamond_price = diamond_pricing.price_per_unit * self.diamond_carats
+            except DiamondPrice.DoesNotExist:
+                pass
+        
+        # Base price: gold + work + diamonds
+        base_price = gold_price + work_price + diamond_price
+        
+        # Apply size multiplier (default to 1.0 if not provided)
+        if size_multiplier is None:
+            size_multiplier = Decimal('1.0')
+        base_price = base_price * size_multiplier
         
         # Apply user level multiplier
         if user and hasattr(user, 'get_price_multiplier'):
             multiplier = user.get_price_multiplier()
-            return base_price * multiplier
+            base_price = base_price * multiplier
         
         return base_price
     
@@ -337,36 +386,50 @@ class Product(models.Model):
         """Backward compatibility - returns calculated price"""
         return self.display_price
 
-    def calculate_base_price(self, diamond_quantities=None, user=None):
+    def calculate_base_price(self, diamond_type=None, user=None, size_multiplier=None):
         """
-        Calculate total price: gold + diamonds + work
-        diamond_quantities: dict like {'under_5': 10, '5_to_7': 5, ...} - user enters quantities
-        user: User object to apply level multiplier
+        Calculate total price with breakdown: gold + diamonds + work
+        Formula: (gold_price + work_price + diamond_price) * size_multiplier * user_level_multiplier
+        
+        Args:
+            diamond_type: 'natural' or 'lab' - user chooses the type
+            user: User object to apply level multiplier
+            size_multiplier: Decimal for size-based price adjustment (default 1.0)
+        
+        Returns:
+            dict: Breakdown of prices and total
         """
-        # Gold price
+        # Calculate gold price (already includes 0.76 multiplier and markup)
         gold_price = self.calculate_gold_price()
         
-        # Diamond price - multiply total price by user's quantity
+        # Calculate diamond price - based on product's predefined size and carats
         diamond_price = Decimal('0.00')
-        if self.has_diamonds and diamond_quantities and self.diamond_type:
-            for size_cat, quantity in diamond_quantities.items():
-                if quantity > 0:
-                    try:
-                        diamond_pricing = DiamondPrice.objects.get(
-                            diamond_type=self.diamond_type,
-                            size_category=size_cat,
-                            is_active=True
-                        )
-                        # Each size category has a total_price, multiply by quantity
-                        diamond_price += diamond_pricing.calculate_price_for_quantity(quantity)
-                    except DiamondPrice.DoesNotExist:
-                        continue
+        if self.has_diamonds and diamond_type and self.diamond_size and self.diamond_carats > 0:
+            try:
+                diamond_pricing = DiamondPrice.objects.get(
+                    diamond_type=diamond_type,
+                    size_category=self.diamond_size
+                )
+                # Price per unit * carats
+                diamond_price = diamond_pricing.price_per_unit * self.diamond_carats
+            except DiamondPrice.DoesNotExist:
+                pass
         
         # Work price
         work_price = WorkPrice.get_current_price()
         
-        # Total before multiplier
-        total = gold_price + diamond_price + work_price
+        # Base total before multipliers
+        base_total = gold_price + diamond_price + work_price
+        
+        # Apply size multiplier (default to 1.0 if not provided)
+        if size_multiplier is None:
+            size_multiplier = Decimal('1.0')
+        
+        # Apply size multiplier to all components
+        gold_price = gold_price * size_multiplier
+        diamond_price = diamond_price * size_multiplier
+        work_price = work_price * size_multiplier
+        total = base_total * size_multiplier
         
         # Apply user level multiplier
         if user and hasattr(user, 'get_price_multiplier'):
@@ -400,6 +463,38 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - Image {self.sort_order}"
+
+
+class ProductSize(models.Model):
+    """Product size options with price multipliers"""
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='sizes')
+    size_label = models.CharField(max_length=50, help_text="Size label (e.g., 17mm, 19mm, 42mm, S, M, L, etc.)")
+    price_multiplier = models.DecimalField(
+        max_digits=5, 
+        decimal_places=2, 
+        default=1.00,
+        validators=[MinValueValidator(Decimal('0.01'))],
+        help_text="Price multiplier for this size (e.g., 1.0 = base price, 1.2 = 20% more)"
+    )
+    is_default = models.BooleanField(default=False, help_text="Is this the default size?")
+    sort_order = models.PositiveIntegerField(default=0, help_text="Display order")
+    is_available = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['product', 'sort_order']
+        verbose_name = 'Product Size'
+        verbose_name_plural = 'Product Sizes'
+        unique_together = ['product', 'size_label']
+
+    def __str__(self):
+        return f"{self.product.name} - {self.size_label} (×{self.price_multiplier})"
+
+    def save(self, *args, **kwargs):
+        # If this is set as default, remove default from other sizes for this product
+        if self.is_default:
+            ProductSize.objects.filter(product=self.product, is_default=True).exclude(pk=self.pk).update(is_default=False)
+        super().save(*args, **kwargs)
 
 
 class ProductDiamondOption(models.Model):
@@ -697,9 +792,36 @@ class CartItem(models.Model):
     def save(self, *args, **kwargs):
         # Store the current product price when adding to cart
         if not self.unit_price:
-            # Apply user level multiplier when saving price
             user = self.cart.user
-            self.unit_price = self.product.get_display_price(user)
+            
+            # Extract size multiplier and diamond type from customization data
+            size_multiplier = Decimal('1.0')
+            diamond_type = None
+            
+            if self.customization_data:
+                # Check for size selection
+                if 'size' in self.customization_data:
+                    size_label = self.customization_data['size']
+                    try:
+                        from .models import ProductSize
+                        product_size = ProductSize.objects.get(
+                            product=self.product,
+                            size_label=size_label
+                        )
+                        size_multiplier = product_size.price_multiplier
+                    except ProductSize.DoesNotExist:
+                        pass
+                
+                # Check for diamond type selection
+                if 'diamond_type' in self.customization_data:
+                    diamond_type = self.customization_data['diamond_type']
+            
+            # Calculate price with all multipliers
+            self.unit_price = self.product.get_display_price(
+                user=user,
+                size_multiplier=size_multiplier,
+                diamond_type=diamond_type
+            )
         super().save(*args, **kwargs)
 
     @property

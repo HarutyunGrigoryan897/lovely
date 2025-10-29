@@ -31,7 +31,7 @@ ALLOWED_HOSTS = ["*"]
 
 # CSRF settings for ngrok and other development tunnels
 CSRF_TRUSTED_ORIGINS = [
-    'https://746d9fa48735.ngrok-free.app',
+    'https://959ea1c85827.ngrok-free.app',
     'http://127.0.0.1:8000',
     'http://localhost:8000',
 ]
@@ -46,6 +46,7 @@ DEFAULT_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
 ]
 
 PROJECT_APPS = [

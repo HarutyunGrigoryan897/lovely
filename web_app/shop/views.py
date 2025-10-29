@@ -167,34 +167,36 @@ def product_detail(request, slug):
     gold_rate = None
     work_rate = None
     
+    # Get product sizes
+    product_sizes = product.sizes.filter(is_available=True).order_by('sort_order')
+    default_size = product.sizes.filter(is_default=True, is_available=True).first()
+    
+    # Get default size multiplier
+    default_size_multiplier = Decimal('1.0')
+    if default_size:
+        default_size_multiplier = default_size.price_multiplier
+    
     if product.gold_weight_grams or product.has_diamonds:
-        # Get default diamond quantities from diamond options
-        diamond_quantities = {}
-        for option in product.diamond_options.all():
-            diamond_quantities[option.size_category] = 0  # Start with 0 for user to configure
+        # Calculate initial pricing with natural diamonds as default and default size
+        diamond_type = 'natural' if product.has_diamonds else None
+        initial_pricing = product.calculate_base_price(
+            diamond_type=diamond_type, 
+            user=user,
+            size_multiplier=default_size_multiplier
+        )
         
-        # Calculate initial pricing (without diamonds, just gold + work)
-        initial_pricing = product.calculate_base_price(diamond_quantities, user=user)
-        
-        # Get rates for display (already includes user multiplier)
+        # Get rates for display
         if product.gold_weight_grams:
             from .models import GoldPrice
             base_gold_rate = GoldPrice.get_current_price()
-            # Apply user multiplier to the rate
-            if user and hasattr(user, 'get_price_multiplier'):
-                multiplier = user.get_price_multiplier()
-                gold_rate = float(base_gold_rate * multiplier)
-            else:
-                gold_rate = float(base_gold_rate * Decimal('1.8'))  # Default multiplier
+            # Display rate with 0.76 multiplier already applied (this is the base rate)
+            # The actual product price calculation applies user multiplier on top
+            gold_rate = float(base_gold_rate * Decimal('0.76'))
         
-        # Get work price with multiplier
+        # Get work price (base rate without multipliers for display)
         from .models import WorkPrice
         base_work_price = WorkPrice.get_current_price()
-        if user and hasattr(user, 'get_price_multiplier'):
-            multiplier = user.get_price_multiplier()
-            work_rate = float(base_work_price * multiplier)
-        else:
-            work_rate = float(base_work_price * Decimal('1.8'))  # Default multiplier
+        work_rate = float(base_work_price)
     
     # Get user's price multiplier for frontend
     user_multiplier = 1.8  # Default
@@ -212,7 +214,9 @@ def product_detail(request, slug):
         'gold_rate': gold_rate,
         'work_rate': work_rate,
         'user_multiplier': user_multiplier,
-        'user_price': product.get_display_price(user),  # Pre-calculated user-specific price
+        'user_price': product.get_display_price(user, size_multiplier=default_size_multiplier),  # Pre-calculated user-specific price with default size
+        'product_sizes': product_sizes,
+        'default_size': default_size,
     }
     return render(request, 'watch.html', context)
 
@@ -979,25 +983,32 @@ def set_default_address(request, address_id):
 @csrf_exempt
 @require_POST
 def calculate_product_price(request, product_slug):
-    """Calculate product price based on diamond quantities and type"""
+    """Calculate product price based on diamond type and size selection"""
     try:
         product = get_object_or_404(Product, slug=product_slug, is_active=True)
         
-        # Parse diamond quantities and type from request
+        # Parse request data
         data = json.loads(request.body)
-        diamond_quantities = data.get('diamond_quantities', {})
-        diamond_type = data.get('diamond_type', product.diamond_type or 'natural')
+        diamond_type = data.get('diamond_type', 'natural')
+        size_label = data.get('size', None)
         
-        # Temporarily override product's diamond type for calculation
-        original_type = product.diamond_type
-        product.diamond_type = diamond_type
+        # Get size multiplier if size is provided
+        size_multiplier = Decimal('1.0')
+        if size_label:
+            try:
+                from .models import ProductSize
+                product_size = ProductSize.objects.get(product=product, size_label=size_label)
+                size_multiplier = product_size.price_multiplier
+            except ProductSize.DoesNotExist:
+                pass
         
-        # Calculate price breakdown with user multiplier
+        # Calculate price breakdown with user multiplier and size multiplier
         user = request.user if request.user.is_authenticated else None
-        pricing = product.calculate_base_price(diamond_quantities, user=user)
-        
-        # Restore original type
-        product.diamond_type = original_type
+        pricing = product.calculate_base_price(
+            diamond_type=diamond_type, 
+            user=user,
+            size_multiplier=size_multiplier
+        )
         
         return JsonResponse({
             'success': True,
@@ -1012,7 +1023,11 @@ def calculate_product_price(request, product_slug):
                 'brand': product.brand.name,
                 'gold_weight_grams': float(product.gold_weight_grams),
                 'has_diamonds': product.has_diamonds,
+                'diamond_size': product.diamond_size,
+                'diamond_carats': float(product.diamond_carats) if product.diamond_carats else 0,
                 'diamond_type': diamond_type,
+                'size': size_label,
+                'size_multiplier': float(size_multiplier),
             },
         })
     except json.JSONDecodeError:
@@ -1026,23 +1041,24 @@ def get_product_details(request, product_slug):
     try:
         product = get_object_or_404(Product, slug=product_slug, is_active=True)
         
-        # Get default diamond quantities
-        diamond_quantities = {}
-        diamond_options = []
-        
-        for option in product.diamond_options.all():
-            diamond_quantities[option.size_category] = option.default_quantity
-            diamond_options.append({
-                'size_category': option.size_category,
-                'size_label': option.get_size_category_display(),
-                'default_quantity': option.default_quantity,
-                'min_quantity': option.min_quantity,
-                'max_quantity': option.max_quantity,
-            })
-        
-        # Calculate default price with user multiplier
+        # Calculate default price with natural diamonds and user multiplier (no size multiplier for default)
         user = request.user if request.user.is_authenticated else None
-        pricing = product.calculate_base_price(diamond_quantities, user=user) if product.has_diamonds else None
+        diamond_type = 'natural' if product.has_diamonds else None
+        pricing = product.calculate_base_price(
+            diamond_type=diamond_type, 
+            user=user,
+            size_multiplier=Decimal('1.0')
+        ) if (product.gold_weight_grams or product.has_diamonds) else None
+        
+        # Get available sizes
+        sizes = []
+        if product.sizes.exists():
+            for size in product.sizes.filter(is_available=True).order_by('sort_order'):
+                sizes.append({
+                    'label': size.size_label,
+                    'multiplier': float(size.price_multiplier),
+                    'is_default': size.is_default
+                })
         
         return JsonResponse({
             'success': True,
@@ -1054,10 +1070,12 @@ def get_product_details(request, product_slug):
                 'description': product.description,
                 'gold_weight_grams': float(product.gold_weight_grams) if product.gold_weight_grams else 0,
                 'has_diamonds': product.has_diamonds,
-                'diamond_type': product.diamond_type,
-                'diamond_type_display': product.get_diamond_type_display() if product.diamond_type else None,
+                'diamond_size': product.diamond_size,
+                'diamond_size_display': product.get_diamond_size_display() if product.diamond_size else None,
+                'diamond_carats': float(product.diamond_carats) if product.diamond_carats else 0,
+                'markup_percentage': float(product.markup_percentage),
+                'sizes': sizes,
             },
-            'diamond_options': diamond_options,
             'pricing': {
                 'gold_price': float(pricing['gold_price']) if pricing else 0,
                 'diamond_price': float(pricing['diamond_price']) if pricing else 0,
@@ -1067,6 +1085,7 @@ def get_product_details(request, product_slug):
         })
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
 
 
 # def get_diamond_prices(request):

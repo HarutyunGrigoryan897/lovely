@@ -1,5 +1,6 @@
 {% load static %}
 {% load custom_filters %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -169,7 +170,7 @@
                     <span class="text-sm text-luxury-gold font-medium">{{ product.brand.name }}</span>
                   </div>
                   <h3 class="font-semibold text-luxury-black mb-2 group-hover:text-luxury-gold transition-colors duration-200">{{ product.name }}</h3>
-                  <p class="text-xl font-bold text-luxury-black">${{ product|user_price_filter:request|floatformat:0 }}</p>
+                  <p class="text-xl font-bold text-luxury-black">${{ product|user_price_filter:request|floatformat:0|intcomma }}</p>
                   <button class="add-to-cart mt-4 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-4 py-2 bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-black font-semibold w-full"
                           data-id="{{ product.slug }}"
                           data-name="{{ product.name }}"
