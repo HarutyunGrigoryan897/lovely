@@ -145,7 +145,6 @@
                   <h2 class="text-2xl font-bold text-luxury-black mb-2">{{ product.name }}</h2>
                   {% if product.gold_weight_grams > 0 %}
                   <p class="text-3xl font-bold text-luxury-black" id="top-price">${{ user_price|floatformat:2|intcomma }}</p>
-                  <p class="text-sm text-luxury-gray-dark">Base price (Gold + Work). Add diamonds below to customize.</p>
                   {% else %}
                   <p class="text-3xl font-bold text-luxury-black">${{ user_price|floatformat:2|intcomma }}</p>
                   {% endif %}
@@ -259,9 +258,6 @@
                                 data-size-label="{{ size.size_label }}"
                                 data-multiplier="{{ size.price_multiplier }}">
                           <div class="text-sm font-semibold">{{ size.size_label }}</div>
-                          {% if size.price_multiplier != 1.0 %}
-                          <div class="text-xs text-luxury-gray-dark">×{{ size.price_multiplier }}</div>
-                          {% endif %}
                         </button>
                         {% endfor %}
                       </div>
@@ -275,7 +271,7 @@
                     <div class="border-t border-white/20 pt-2 mt-2">
                       <div class="flex justify-between items-center">
                         <span class="font-bold text-lg">Total Price:</span>
-                        <span id="total-price" class="font-bold text-2xl text-luxury-gold">{% if initial_pricing %}${{ initial_pricing.total_price|floatformat:2 }}{% else %}$0.00{% endif %}</span>
+                        <span id="total-price" class="font-bold text-2xl text-luxury-gold">{% if initial_pricing %}${{ initial_pricing.total_price|floatformat:2|intcomma }}{% else %}$0.00{% endif %}</span>
                       </div>
                     </div>
                   </div>

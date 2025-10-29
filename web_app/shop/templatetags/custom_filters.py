@@ -53,7 +53,7 @@ def user_price_filter(product, request):
     Usage: {{ product|user_price_filter:request }}
     """
     if request and request.user.is_authenticated:
-        return product.get_display_price(request.user)
+        return product.get_display_price(request.user, size_multiplier=None, diamond_type=None)
     return product.get_display_price()
 
 

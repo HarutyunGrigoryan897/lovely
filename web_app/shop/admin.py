@@ -136,12 +136,12 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('name', 'slug', 'brand', 'category', 'description', 'short_description', 'image', 'image_alt')
         }),
         ('Gold & Diamond Specifications', {
-            'fields': ('gold_weight_grams', 'has_diamonds', 'diamond_size', 'diamond_carats'),
+            'fields': ('gold_weight_grams', 'markup_percentage', 'has_diamonds', 'diamond_size', 'diamond_carats'),
             'description': 'Gold weight in grams. If product has diamonds, select the size category and enter total carats. Customers will choose natural or lab when ordering.'
         }),
         ('Pricing (Calculated)', {
             'fields': ('get_display_price',),
-            'description': 'Price is calculated from gold weight. Base formula: (gold_weight_grams × $75) + $7,000. Customers add diamonds on top of this.'
+            'description': 'Price is calculated from gold weight. Base formula: (gold weight by grams * price per gram * 0.76) + markup percentage + $7,000. Customers add diamonds on top of this.'
         }),
         ('Inventory', {
             'fields': ('stock_status', 'stock_quantity', 'low_stock_threshold')
@@ -149,10 +149,6 @@ class ProductAdmin(admin.ModelAdmin):
         ('Product Details', {
             'fields': ('sku', 'model_number', 'year_released'),
             'description': 'SKU can be set manually or will be auto-generated if left empty (Format: BRD-ID-NAME)'
-        }),
-        ('SEO', {
-            'fields': ('meta_title', 'meta_description', 'meta_keywords'),
-            'classes': ('collapse',)
         }),
         ('Status', {
             'fields': ('is_active', 'is_featured', 'show_on_homepage', 'is_limited_edition')

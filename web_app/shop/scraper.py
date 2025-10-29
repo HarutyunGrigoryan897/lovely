@@ -161,14 +161,14 @@ def update_gold_price_sync():
         
         if active_price:
             # Update existing price
-            active_price.price_per_gram = usd_price * 0.76
+            active_price.price_per_gram = usd_price * Decimal("0.76")
             active_price.save()
             logger.info(f"Updated gold price to ${usd_price}/gram")
             return True, ""
         else:
             # Create new active price
             GoldPrice.objects.create(
-                price_per_gram=usd_price * 0.76,
+                price_per_gram=usd_price * Decimal("0.76"),
                 is_active=True
             )
             logger.info(f"Created new gold price: ${usd_price}/gram")
