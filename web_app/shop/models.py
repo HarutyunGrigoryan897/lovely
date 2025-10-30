@@ -773,100 +773,96 @@ class CartItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
     
-    # Store customization details
-    customization_data = models.JSONField(blank=True, null=True, help_text="Store product customization options")
-    customization_price = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    # Store user selections - REQUIRED for dynamic price calculation
+    product_size = models.ForeignKey(
+        ProductSize, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        help_text="Selected size option"
+    )
+    diamond_type = models.CharField(
+        max_length=20, 
+        choices=[('natural', 'Natural Diamond'), ('lab', 'Lab Diamond')],
+        blank=True,
+        null=True,
+        help_text="Type of diamond selected by user"
+    )
     
-    # Store the price at the time of adding to cart
-    unit_price = models.DecimalField(max_digits=12, decimal_places=2)
+    # Store additional customization details (engraving, etc.)
+    customization_data = models.JSONField(blank=True, null=True, help_text="Store additional customization options")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ['cart', 'product', 'customization_data']
         verbose_name = 'Cart Item'
         verbose_name_plural = 'Cart Items'
         ordering = ['-created_at']
 
     def __str__(self):
-        customization_info = ""
-        if self.customization_data:
-            customization_info = f" (Customized)"
-        return f"{self.quantity}x {self.product.name}{customization_info}"
+        size_info = f" - Size: {self.product_size.size_label}" if self.product_size else ""
+        diamond_info = f" - {self.get_diamond_type_display()}" if self.diamond_type else ""
+        return f"{self.quantity}x {self.product.name}{size_info}{diamond_info}"
 
-    def save(self, *args, **kwargs):
-        # Store the current product price when adding to cart
-        if not self.unit_price:
-            user = self.cart.user
-            
-            # Extract size multiplier and diamond type from customization data
-            size_multiplier = Decimal('1.0')
-            diamond_type = None
-            
-            if self.customization_data:
-                # Check for size selection
-                if 'size' in self.customization_data:
-                    size_label = self.customization_data['size']
-                    try:
-                        from .models import ProductSize
-                        product_size = ProductSize.objects.get(
-                            product=self.product,
-                            size_label=size_label
-                        )
-                        size_multiplier = product_size.price_multiplier
-                    except ProductSize.DoesNotExist:
-                        pass
-                
-                # Check for diamond type selection
-                if 'diamond_type' in self.customization_data:
-                    diamond_type = self.customization_data['diamond_type']
-            
-            # Calculate price with all multipliers
-            self.unit_price = self.product.get_display_price(
-                user=user,
-                size_multiplier=size_multiplier,
-                diamond_type=diamond_type
-            )
-        super().save(*args, **kwargs)
+    @property
+    def unit_price(self):
+        """Calculate CURRENT unit price dynamically - ALWAYS FRESH"""
+        user = self.cart.user
+        
+        # Get size multiplier from selected ProductSize
+        size_multiplier = Decimal('1.0')
+        if self.product_size:
+            size_multiplier = self.product_size.price_multiplier
+        
+        # Calculate price using CURRENT gold/diamond/work prices
+        return self.product.get_display_price(
+            user=user,
+            size_multiplier=size_multiplier,
+            diamond_type=self.diamond_type
+        )
 
     @property
     def total_price(self):
-        """Total price for this cart item including customizations"""
-        # Unit price already includes user multiplier from save()
-        return (self.unit_price + self.customization_price) * self.quantity
+        """Total price for this cart item - ALWAYS CURRENT"""
+        return self.unit_price * self.quantity
+    
+    @property
+    def price_breakdown(self):
+        """Get detailed price breakdown for display"""
+        user = self.cart.user
+        size_multiplier = Decimal('1.0')
+        if self.product_size:
+            size_multiplier = self.product_size.price_multiplier
+            
+        return self.product.calculate_base_price(
+            diamond_type=self.diamond_type,
+            user=user,
+            size_multiplier=size_multiplier
+        )
 
     @property
     def customized_product_name(self):
         """Get product name with customization details"""
-        if not self.customization_data:
-            return self.product.name
-        
         name = self.product.name
         customizations = []
         
-        # Handle diamond specifications format
-        if isinstance(self.customization_data, dict):
-            if 'diamond_type' in self.customization_data:
-                # This is a diamond specification
-                diamond_type = self.customization_data.get('diamond_type', 'natural')
-                customizations.append(f"{diamond_type.capitalize()} Diamonds")
-                return f"{name} ({', '.join(customizations)})"
-            
-            # Handle other customization types
+        # Add size info
+        if self.product_size:
+            customizations.append(f"Size: {self.product_size.size_label}")
+        
+        # Add diamond type info
+        if self.diamond_type:
+            customizations.append(f"{self.diamond_type.capitalize()} Diamonds")
+        
+        # Add other customizations from JSON
+        if self.customization_data and isinstance(self.customization_data, dict):
             for key, value in self.customization_data.items():
-                if value and value != 'None' and not isinstance(value, (dict, list)):
-                    # Format customization display
-                    if key == 'band_color':
-                        customizations.append(f"{value} Band")
-                    elif key == 'dial_color':
-                        customizations.append(f"{value} Dial")
-                    elif key == 'engraving':
-                        customizations.append(f"with {value}")
-                    elif key == 'size':
-                        customizations.append(f"{value}")
-                    elif key not in ['diamond_quantities', 'gold_price', 'diamond_price', 'work_price']:
-                        customizations.append(str(value))
+                if value and value != 'None' and key not in ['size', 'diamond_type']:
+                    if key == 'engraving':
+                        customizations.append(f"Engraving: {value}")
+                    elif not isinstance(value, (dict, list)):
+                        customizations.append(f"{key}: {value}")
         
         if customizations:
             name += f" ({', '.join(customizations)})"

@@ -253,7 +253,7 @@
                       <label class="block text-sm font-medium text-luxury-black">Size:</label>
                       <div class="grid grid-cols-3 gap-2">
                         {% for size in product_sizes %}
-                        <button type="button" class="size-btn px-4 py-2 rounded-lg border-2 transition-all {% if size.is_default or forloop.first %}border-luxury-gold bg-luxury-gold/10{% else %}border-luxury-gray{% endif %}" 
+                        <button type="button" class="size-btn px-4 py-2 rounded-lg border-2 transition-all {% if size.id == default_size.id %}border-luxury-gold bg-luxury-gold/10{% else %}border-luxury-gray{% endif %}" 
                                 data-size-id="{{ size.id }}" 
                                 data-size-label="{{ size.size_label }}"
                                 data-multiplier="{{ size.price_multiplier }}">
@@ -362,573 +362,507 @@
     
     <!-- Image Gallery JavaScript -->
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('🎬 [WATCH.HTML] DOM Content Loaded');
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎬 [WATCH.HTML] DOM Content Loaded');
+    
+    // ========== QUANTITY CONTROLS (INLINE) ==========
+    console.log('🔢 [WATCH.HTML] Setting up quantity controls');
+    const quantityMinus = document.getElementById('quantity-minus');
+    const quantityPlus = document.getElementById('quantity-plus');
+    const quantityDisplay = document.getElementById('quantity-display');
+    
+    console.log('🔢 [WATCH.HTML] Elements found:', {
+        minus: !!quantityMinus,
+        plus: !!quantityPlus,
+        display: !!quantityDisplay
+    });
+    
+    if (quantityMinus && quantityPlus && quantityDisplay) {
+        let currentQuantity = 1;
+        console.log('✅ [WATCH.HTML] Initializing quantity with value:', currentQuantity);
         
-        // ========== QUANTITY CONTROLS (INLINE) ==========
-        console.log('🔢 [WATCH.HTML] Setting up quantity controls');
-        const quantityMinus = document.getElementById('quantity-minus');
-        const quantityPlus = document.getElementById('quantity-plus');
-        const quantityDisplay = document.getElementById('quantity-display');
-        
-        console.log('🔢 [WATCH.HTML] Elements found:', {
-            minus: !!quantityMinus,
-            plus: !!quantityPlus,
-            display: !!quantityDisplay
+        quantityMinus.addEventListener('click', function(e) {
+            console.log('➖ [WATCH.HTML] MINUS CLICKED! Current:', currentQuantity);
+            e.preventDefault();
+            e.stopPropagation();
+            if (currentQuantity > 1) {
+                currentQuantity--;
+                quantityDisplay.textContent = currentQuantity;
+                console.log('✅ [WATCH.HTML] Decreased to:', currentQuantity);
+            } else {
+                console.log('⚠️ [WATCH.HTML] Already at minimum (1)');
+            }
         });
         
-        if (quantityMinus && quantityPlus && quantityDisplay) {
-            let currentQuantity = 1;
-            console.log('✅ [WATCH.HTML] Initializing quantity with value:', currentQuantity);
-            
-            quantityMinus.addEventListener('click', function(e) {
-                console.log('➖ [WATCH.HTML] MINUS CLICKED! Current:', currentQuantity);
-                e.preventDefault();
-                e.stopPropagation();
-                if (currentQuantity > 1) {
-                    currentQuantity--;
-                    quantityDisplay.textContent = currentQuantity;
-                    console.log('✅ [WATCH.HTML] Decreased to:', currentQuantity);
-                } else {
-                    console.log('⚠️ [WATCH.HTML] Already at minimum (1)');
-                }
+        quantityPlus.addEventListener('click', function(e) {
+            console.log('➕ [WATCH.HTML] PLUS CLICKED! Current:', currentQuantity);
+            e.preventDefault();
+            e.stopPropagation();
+            if (currentQuantity < 99) {
+                currentQuantity++;
+                quantityDisplay.textContent = currentQuantity;
+                console.log('✅ [WATCH.HTML] Increased to:', currentQuantity);
+            } else {
+                console.log('⚠️ [WATCH.HTML] Already at maximum (99)');
+            }
+        });
+        
+        console.log('✅ [WATCH.HTML] Quantity controls initialized successfully!');
+    } else {
+        console.error('❌ [WATCH.HTML] Quantity control elements not found!');
+    }
+    
+    // ========== IMAGE GALLERY ==========
+    const mainImage = document.getElementById('main-image');
+    const prevButton = document.getElementById('prev-image');
+    const nextButton = document.getElementById('next-image');
+    const indicators = document.querySelectorAll('.image-indicator');
+    const thumbnails = document.querySelectorAll('.thumbnail-button');
+    
+    const images = [
+        {
+            url: '{% if product.image %}{{ product.image.url }}{% else %}{% static "watch-1-L_BZsghZ.jpg" %}{% endif %}',
+            alt: '{{ product.name }}'
+        }
+        {% for image in additional_images %},
+        {
+            url: '{{ image.image.url }}',
+            alt: '{{ image.alt_text|default:product.name }}'
+        }
+        {% endfor %}
+    ];
+    
+    let currentImageIndex = 0;
+    
+    if (images.length > 1) {
+        if (prevButton) {
+            prevButton.addEventListener('click', function() {
+                currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+                updateImage();
             });
-            
-            quantityPlus.addEventListener('click', function(e) {
-                console.log('➕ [WATCH.HTML] PLUS CLICKED! Current:', currentQuantity);
-                e.preventDefault();
-                e.stopPropagation();
-                if (currentQuantity < 99) {
-                    currentQuantity++;
-                    quantityDisplay.textContent = currentQuantity;
-                    console.log('✅ [WATCH.HTML] Increased to:', currentQuantity);
-                } else {
-                    console.log('⚠️ [WATCH.HTML] Already at maximum (99)');
-                }
-            });
-            
-            console.log('✅ [WATCH.HTML] Quantity controls initialized successfully!');
-        } else {
-            console.error('❌ [WATCH.HTML] Quantity control elements not found!');
         }
         
-        // ========== IMAGE GALLERY ==========
-        // Image gallery functionality
-        const mainImage = document.getElementById('main-image');
-        const prevButton = document.getElementById('prev-image');
-        const nextButton = document.getElementById('next-image');
-        const indicators = document.querySelectorAll('.image-indicator');
-        const thumbnails = document.querySelectorAll('.thumbnail-button');
+        if (nextButton) {
+            nextButton.addEventListener('click', function() {
+                currentImageIndex = (currentImageIndex + 1) % images.length;
+                updateImage();
+            });
+        }
         
-        // Create array of all images (main + additional)
-        const images = [
-            {
-                url: '{% if product.image %}{{ product.image.url }}{% else %}{% static "watch-1-L_BZsghZ.jpg" %}{% endif %}',
-                alt: '{{ product.name }}'
-            }
-            {% for image in additional_images %},
-            {
-                url: '{{ image.image.url }}',
-                alt: '{{ image.alt_text|default:product.name }}'
-            }
-            {% endfor %}
-        ];
+        indicators.forEach((indicator, index) => {
+            indicator.addEventListener('click', function() {
+                currentImageIndex = index;
+                updateImage();
+            });
+        });
         
-        let currentImageIndex = 0;
+        thumbnails.forEach((thumbnail, index) => {
+            thumbnail.addEventListener('click', function() {
+                currentImageIndex = index;
+                updateImage();
+            });
+        });
         
-        // Only initialize gallery if there are additional images
-        if (images.length > 1) {
-            // Previous image button
-            if (prevButton) {
-                prevButton.addEventListener('click', function() {
-                    currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
-                    updateImage();
-                });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft' && prevButton) {
+                prevButton.click();
+            } else if (e.key === 'ArrowRight' && nextButton) {
+                nextButton.click();
             }
-            
-            // Next image button
-            if (nextButton) {
-                nextButton.addEventListener('click', function() {
-                    currentImageIndex = (currentImageIndex + 1) % images.length;
-                    updateImage();
-                });
-            }
-            
-            // Image indicators
-            indicators.forEach((indicator, index) => {
-                indicator.addEventListener('click', function() {
-                    currentImageIndex = index;
-                    updateImage();
-                });
+        });
+        
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        const imageContainer = document.getElementById('main-image-container');
+        if (imageContainer) {
+            imageContainer.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
             });
             
-            // Thumbnail buttons
-            thumbnails.forEach((thumbnail, index) => {
-                thumbnail.addEventListener('click', function() {
-                    currentImageIndex = index;
-                    updateImage();
-                });
+            imageContainer.addEventListener('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
             });
+        }
+        
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const swipeDistance = touchEndX - touchStartX;
             
-            // Keyboard navigation
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'ArrowLeft' && prevButton) {
+            if (Math.abs(swipeDistance) > swipeThreshold) {
+                if (swipeDistance > 0 && prevButton) {
                     prevButton.click();
-                } else if (e.key === 'ArrowRight' && nextButton) {
+                } else if (swipeDistance < 0 && nextButton) {
                     nextButton.click();
                 }
-            });
-            
-            // Touch/swipe support for mobile
-            let touchStartX = 0;
-            let touchEndX = 0;
-            
-            const imageContainer = document.getElementById('main-image-container');
-            if (imageContainer) {
-                imageContainer.addEventListener('touchstart', function(e) {
-                    touchStartX = e.changedTouches[0].screenX;
-                });
-                
-                imageContainer.addEventListener('touchend', function(e) {
-                    touchEndX = e.changedTouches[0].screenX;
-                    handleSwipe();
-                });
             }
+        }
+    }
+    
+    function updateImage() {
+        if (mainImage && images[currentImageIndex]) {
+            mainImage.style.opacity = '0';
             
-            function handleSwipe() {
-                const swipeThreshold = 50;
-                const swipeDistance = touchEndX - touchStartX;
+            setTimeout(() => {
+                mainImage.src = images[currentImageIndex].url;
+                mainImage.alt = images[currentImageIndex].alt;
                 
-                if (Math.abs(swipeDistance) > swipeThreshold) {
-                    if (swipeDistance > 0 && prevButton) {
-                        // Swipe right - previous image
-                        prevButton.click();
-                    } else if (swipeDistance < 0 && nextButton) {
-                        // Swipe left - next image
-                        nextButton.click();
+                indicators.forEach((indicator, index) => {
+                    if (index === currentImageIndex) {
+                        indicator.classList.add('active');
+                        indicator.classList.remove('bg-white/50');
+                        indicator.classList.add('bg-white');
+                    } else {
+                        indicator.classList.remove('active');
+                        indicator.classList.remove('bg-white');
+                        indicator.classList.add('bg-white/50');
                     }
-                }
-            }
-        }
-        
-        function updateImage() {
-            if (mainImage && images[currentImageIndex]) {
-                // Fade out
-                mainImage.style.opacity = '0';
-                
-                setTimeout(() => {
-                    // Update image
-                    mainImage.src = images[currentImageIndex].url;
-                    mainImage.alt = images[currentImageIndex].alt;
-                    
-                    // Update indicators
-                    indicators.forEach((indicator, index) => {
-                        if (index === currentImageIndex) {
-                            indicator.classList.add('active');
-                            indicator.classList.remove('bg-white/50');
-                            indicator.classList.add('bg-white');
-                        } else {
-                            indicator.classList.remove('active');
-                            indicator.classList.remove('bg-white');
-                            indicator.classList.add('bg-white/50');
-                        }
-                    });
-                    
-                    // Update thumbnails
-                    thumbnails.forEach((thumbnail, index) => {
-                        if (index === currentImageIndex) {
-                            thumbnail.classList.add('border-luxury-gold');
-                            thumbnail.classList.remove('border-transparent');
-                        } else {
-                            thumbnail.classList.remove('border-luxury-gold');
-                            thumbnail.classList.add('border-transparent');
-                        }
-                    });
-                    
-                    // Fade in
-                    mainImage.style.opacity = '1';
-                }, 150);
-            }
-        }
-        
-        // Product Quantity Controls are initialized in script.js via initializeQuantityControls()
-        // Do not add duplicate event listeners here
-        
-        // Dynamic Pricing Calculator
-        {% if product.gold_weight_grams or product.has_diamonds %}
-        const productSlug = '{{ product.slug }}';
-        let selectedDiamondType = 'natural'; // Default
-        let selectedSizeMultiplier = {% if default_size %}{{ default_size.price_multiplier }}{% else %}1.0{% endif %}; // Default size multiplier
-        let selectedSizeLabel = '{% if default_size %}{{ default_size.size_label }}{% else %}Standard{% endif %}'; // Default size label
-        const userMultiplier = {{ user_multiplier|default:1.8 }}; // User's price multiplier
-        let currentPricing = { // Store current pricing for add to cart (initialized with server values)
-            gold_price: {% if initial_pricing %}{{ initial_pricing.gold_price }}{% else %}0{% endif %},
-            diamond_price: {% if initial_pricing %}{{ initial_pricing.diamond_price }}{% else %}0{% endif %},
-            work_price: {% if initial_pricing %}{{ initial_pricing.work_price }}{% else %}0{% endif %},
-            total_price: {% if initial_pricing %}{{ initial_pricing.total_price }}{% else %}0{% endif %}
-        };
-        
-
-        // Calculate price
-        async function calculatePrice() {
-            try {
-                const response = await fetch(`/api/product/${productSlug}/calculate-price/`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        diamond_type: selectedDiamondType
-                    })
                 });
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success) {
-                        // Apply size multiplier to all prices
-                        const sizeMultiplier = parseFloat(selectedSizeMultiplier);
-                        const adjustedPricing = {
-                            gold_price: data.pricing.gold_price * sizeMultiplier,
-                            diamond_price: data.pricing.diamond_price * sizeMultiplier,
-                            work_price: data.pricing.work_price * sizeMultiplier,
-                            total_price: data.pricing.total_price * sizeMultiplier
-                        };
-                        
-                        // Store current pricing for add to cart
-                        currentPricing = adjustedPricing;
-                        
-                        const fmt = (val) => '$' + val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                        if (document.getElementById('gold-price')) document.getElementById('gold-price').textContent = fmt(adjustedPricing.gold_price);
-                        if (document.getElementById('gold-price-display')) document.getElementById('gold-price-display').textContent = fmt(adjustedPricing.gold_price);
-                        if (document.getElementById('diamond-price')) document.getElementById('diamond-price').textContent = fmt(adjustedPricing.diamond_price);
-                        if (document.getElementById('work-price')) document.getElementById('work-price').textContent = fmt(adjustedPricing.work_price);
-                        document.getElementById('total-price').textContent = fmt(adjustedPricing.total_price);
-                        
-                        // Update top price display
-                        const topPrice = document.getElementById('top-price');
-                        if (topPrice) {
-                            topPrice.textContent = fmt(adjustedPricing.total_price);
-                        }
-                        
-                        // Update Add to Cart button text with calculated price
-                        const addToCartText = document.getElementById('add-to-cart-text');
-                        if (addToCartText) {
-                            addToCartText.textContent = `Add to Cart - ${fmt(adjustedPricing.total_price)}`;
-                        }
+                thumbnails.forEach((thumbnail, index) => {
+                    if (index === currentImageIndex) {
+                        thumbnail.classList.add('border-luxury-gold');
+                        thumbnail.classList.remove('border-transparent');
+                    } else {
+                        thumbnail.classList.remove('border-luxury-gold');
+                        thumbnail.classList.add('border-transparent');
                     }
-                }
-            } catch (error) {
-                console.error('Price calculation error:', error);
-            }
-        }
-        
-        // Attach event listeners for diamond type buttons
-        function attachDiamondEventListeners() {
-            // Diamond type selector
-            document.querySelectorAll('.diamond-type-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    console.log('Diamond type button clicked:', this.dataset.type);
-                    selectedDiamondType = this.dataset.type;
-                    document.querySelectorAll('.diamond-type-btn').forEach(b => {
-                        b.classList.remove('border-luxury-gold', 'bg-luxury-gold/10');
-                        b.classList.add('border-luxury-gray');
-                    });
-                    this.classList.add('border-luxury-gold', 'bg-luxury-gold/10');
-                    this.classList.remove('border-luxury-gray');
-                    calculatePrice();
                 });
+                
+                mainImage.style.opacity = '1';
+            }, 150);
+        }
+    }
+    
+    // ========== DYNAMIC PRICING CALCULATOR ==========
+    {% if product.gold_weight_grams or product.has_diamonds %}
+    const productSlug = '{{ product.slug }}';
+    let selectedDiamondType = 'natural'; // Default
+    let selectedSizeId = {% if default_size %}{{ default_size.id }}{% else %}null{% endif %}; // ProductSize ID
+    let selectedSizeMultiplier = {% if default_size %}{{ default_size.price_multiplier }}{% else %}1.0{% endif %};
+    let selectedSizeLabel = '{% if default_size %}{{ default_size.size_label }}{% else %}Standard{% endif %}';
+    const userMultiplier = {{ user_multiplier|default:1.8 }};
+    let currentPricing = {
+        gold_price: {% if initial_pricing %}{{ initial_pricing.gold_price }}{% else %}0{% endif %},
+        diamond_price: {% if initial_pricing %}{{ initial_pricing.diamond_price }}{% else %}0{% endif %},
+        work_price: {% if initial_pricing %}{{ initial_pricing.work_price }}{% else %}0{% endif %},
+        total_price: {% if initial_pricing %}{{ initial_pricing.total_price }}{% else %}0{% endif %}
+    };
+    
+    // Calculate price
+    async function calculatePrice() {
+        try {
+            const response = await fetch(`/api/product/${productSlug}/calculate-price/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    diamond_type: selectedDiamondType
+                })
             });
             
-            // Size selector
-            document.querySelectorAll('.size-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    console.log('Size button clicked:', this.dataset.sizeLabel);
-                    selectedSizeMultiplier = this.dataset.multiplier;
-                    selectedSizeLabel = this.dataset.sizeLabel;
-                    document.querySelectorAll('.size-btn').forEach(b => {
-                        b.classList.remove('border-luxury-gold', 'bg-luxury-gold/10');
-                        b.classList.add('border-luxury-gray');
-                    });
-                    this.classList.add('border-luxury-gold', 'bg-luxury-gold/10');
-                    this.classList.remove('border-luxury-gray');
-                    calculatePrice();
-                });
-            });
-        }
-        
-        // Initialize event listeners
-        attachDiamondEventListeners();
-        
-        // Calculate initial price
-        {% if product.has_diamonds %}
-        calculatePrice();
-        {% endif %}
-        {% endif %}
-        
-        // Custom add to cart handler for product detail page (outside the pricing block)
-        console.log('🎯 [WATCH.HTML] Setting up product detail add-to-cart handler');
-        const addToCartBtn = document.querySelector('.add-to-cart.product-detail-add-to-cart');
-        if (addToCartBtn) {
-            console.log('🎯 [WATCH.HTML] Found product-detail-add-to-cart button, cloning to remove old listeners');
-            // Remove default event listener
-            const newBtn = addToCartBtn.cloneNode(true);
-            addToCartBtn.parentNode.replaceChild(newBtn, addToCartBtn);
-            
-            console.log('🎯 [WATCH.HTML] Attaching new click handler');
-            newBtn.addEventListener('click', async function(e) {
-                console.log('🟡 [WATCH.HTML] Product detail add to cart clicked');
-                e.preventDefault();
-                e.stopPropagation();
-                
-                console.log('🟡 [WATCH.HTML] Processing product detail add to cart...');
-                
-                // Get product quantity from the quantity display
-                const quantityDisplay = document.getElementById('quantity-display');
-                const productQuantity = quantityDisplay ? parseInt(quantityDisplay.textContent) || 1 : 1;
-                
-                console.log('🟡 [WATCH.HTML] Product quantity:', productQuantity);
-                
-                // Check if product has dynamic pricing
-                const hasDynamicPricing = {{ product.gold_weight_grams|yesno:"true,false" }} || {{ product.has_diamonds|yesno:"true,false" }};
-                
-                let customizationData = {};
-                let unitPrice = {{ user_price }};
-                
-                if (hasDynamicPricing && typeof currentPricing !== 'undefined' && currentPricing.total_price) {
-                    // Get diamond quantities
-                    const diamondQuantities = {};
-                    document.querySelectorAll('.diamond-quantity').forEach(input => {
-                        const size = input.dataset.size;
-                        const qty = parseFloat(input.value) || 0;
-                        if (qty > 0) {
-                            diamondQuantities[size] = qty;
-                        }
-                    });
-                    
-                    // Prepare customization data
-                    customizationData = {
-                        diamond_type: typeof selectedDiamondType !== 'undefined' ? selectedDiamondType : 'natural',
-                        diamond_quantities: diamondQuantities,
-                        gold_weight: {{ product.gold_weight_grams|default:"0" }},
-                        gold_price: currentPricing.gold_price,
-                        diamond_price: currentPricing.diamond_price,
-                        work_price: currentPricing.work_price
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    const sizeMultiplier = parseFloat(selectedSizeMultiplier);
+                    const adjustedPricing = {
+                        gold_price: data.pricing.gold_price * sizeMultiplier,
+                        diamond_price: data.pricing.diamond_price * sizeMultiplier,
+                        work_price: data.pricing.work_price * sizeMultiplier,
+                        total_price: data.pricing.total_price * sizeMultiplier
                     };
                     
-                    unitPrice = currentPricing.total_price;
-                }
-                
-                console.log('🟡 [WATCH.HTML] Sending data:', {
-                    product_id: '{{ product.slug }}',
-                    quantity: productQuantity,
-                    customization: customizationData,
-                    unit_price: unitPrice
-                });
-                
-                try {
-                    console.log('🌐 [WATCH.HTML] Making API call to /api/add-to-cart/');
-                    const response = await fetch('/api/add-to-cart/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCookie('csrftoken'),
-                            'X-Request-Source': 'WATCH.HTML-PRODUCT-DETAIL'  // 🔍 DEBUG: Identify request source
-                        },
-                        body: JSON.stringify({
-                            product_id: '{{ product.slug }}',
-                            quantity: productQuantity,
-                            customization: customizationData,
-                            customization_price: 0,
-                            unit_price: unitPrice
-                        })
-                    });
+                    currentPricing = adjustedPricing;
                     
-                    console.log('✅ [WATCH.HTML] API response received:', response.status);
-                    const data = await response.json();
-                    console.log('✅ [WATCH.HTML] API data:', data);
+                    const fmt = (val) => '$' + val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    if (document.getElementById('gold-price')) document.getElementById('gold-price').textContent = fmt(adjustedPricing.gold_price);
+                    if (document.getElementById('gold-price-display')) document.getElementById('gold-price-display').textContent = fmt(adjustedPricing.gold_price);
+                    if (document.getElementById('diamond-price')) document.getElementById('diamond-price').textContent = fmt(adjustedPricing.diamond_price);
+                    if (document.getElementById('work-price')) document.getElementById('work-price').textContent = fmt(adjustedPricing.work_price);
+                    document.getElementById('total-price').textContent = fmt(adjustedPricing.total_price);
                     
-                    if (data.success) {
-                        // Show success message
-                        if (window.Telegram && window.Telegram.WebApp) {
-                            window.Telegram.WebApp.showPopup({
-                                title: 'Success',
-                                message: 'Product added to cart!',
-                                buttons: [{type: 'ok'}]
-                            });
-                        } else {
-                            alert('Product added to cart!');
-                        }
-                        
-                        // Update cart count
-                        updateCartCount();
-                    } else {
-                        throw new Error(data.error || 'Failed to add to cart');
+                    const topPrice = document.getElementById('top-price');
+                    if (topPrice) {
+                        topPrice.textContent = fmt(adjustedPricing.total_price);
                     }
-                } catch (error) {
-                    console.error('Error adding to cart:', error);
-                    if (window.Telegram && window.Telegram.WebApp) {
-                        window.Telegram.WebApp.showPopup({
-                            title: 'Error',
-                            message: error.message || 'Failed to add to cart',
-                            buttons: [{type: 'ok'}]
-                        });
-                    } else {
-                        alert(error.message || 'Failed to add to cart');
+                    
+                    const addToCartText = document.getElementById('add-to-cart-text');
+                    if (addToCartText) {
+                        addToCartText.textContent = `Add to Cart - ${fmt(adjustedPricing.total_price)}`;
                     }
                 }
+            }
+        } catch (error) {
+            console.error('Price calculation error:', error);
+        }
+    }
+    
+    // Diamond type selector
+    document.querySelectorAll('.diamond-type-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            console.log('💎 [WATCH.HTML] Diamond type selected:', this.dataset.type);
+            selectedDiamondType = this.dataset.type;
+            document.querySelectorAll('.diamond-type-btn').forEach(b => {
+                b.classList.remove('border-luxury-gold', 'bg-luxury-gold/10');
+                b.classList.add('border-luxury-gray');
             });
-        }
+            this.classList.add('border-luxury-gold', 'bg-luxury-gold/10');
+            this.classList.remove('border-luxury-gray');
+            calculatePrice();
+        });
+    });
+    
+    // Size selector
+    document.querySelectorAll('.size-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            console.log('📏 [WATCH.HTML] Size selected:', this.dataset.sizeLabel);
+            selectedSizeId = parseInt(this.dataset.sizeId); // Store ProductSize ID
+            selectedSizeMultiplier = this.dataset.multiplier;
+            selectedSizeLabel = this.dataset.sizeLabel;
+            document.querySelectorAll('.size-btn').forEach(b => {
+                b.classList.remove('border-luxury-gold', 'bg-luxury-gold/10');
+                b.classList.add('border-luxury-gray');
+            });
+            this.classList.add('border-luxury-gold', 'bg-luxury-gold/10');
+            this.classList.remove('border-luxury-gray');
+            calculatePrice();
+        });
+    });
+    
+    {% if product.has_diamonds %}
+    calculatePrice();
+    {% endif %}
+    {% endif %}
+    
+    // ========== ADD TO CART HANDLER ==========
+    console.log('🎯 [WATCH.HTML] Setting up product detail add-to-cart handler');
+    const addToCartBtn = document.querySelector('.add-to-cart.product-detail-add-to-cart');
+    if (addToCartBtn) {
+        console.log('🎯 [WATCH.HTML] Found product-detail-add-to-cart button, cloning to remove old listeners');
+        const newBtn = addToCartBtn.cloneNode(true);
+        addToCartBtn.parentNode.replaceChild(newBtn, addToCartBtn);
         
-        // Helper function to get cookie
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-        
-        // Helper function to update cart count
-        function updateCartCount() {
-            console.log('🔄 [WATCH.HTML] Updating cart count...');
-            fetch('/api/get-cart/')
-                .then(r => r.json())
-                .then(data => {
-                    console.log('🔄 [WATCH.HTML] Cart data received:', data);
-                    if (data.success) {
-                        const cartCountElements = document.querySelectorAll('.cart-item-count');
-                        console.log(`🔄 [WATCH.HTML] Found ${cartCountElements.length} cart count elements`);
-                        
-                        cartCountElements.forEach(element => {
-                            element.textContent = data.cart_item_count || 0;
-                            // Show badge if there are items
-                            if (data.cart_item_count > 0) {
-                                element.style.display = 'flex';
-                                element.style.visibility = 'visible';
-                                console.log(`✅ [WATCH.HTML] Updated cart count to: ${data.cart_item_count}`);
-                            } else {
-                                element.style.display = 'none';
-                                element.style.visibility = 'visible';
-                                console.log('✅ [WATCH.HTML] Cart is empty, hiding badge');
-                            }
-                        });
-                    }
-                })
-                .catch(err => console.error('❌ [WATCH.HTML] Failed to update cart count:', err));
-        }
-        
-        // ==================== FAVORITE BUTTON WITH CUSTOMIZATION ====================
-        const favoriteBtn = document.getElementById('favorite-btn-detail');
-        
-        // Update favorite button state
-        function updateFavoriteButton() {
-            const watchId = favoriteBtn.dataset.id;
-            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-            const isFavorited = favorites.some(item => item.id === watchId);
-            
-            const heartIcon = favoriteBtn.querySelector('svg');
-            if (isFavorited) {
-                heartIcon.setAttribute('fill', '#ef4444');
-                heartIcon.style.color = '#ef4444';
-                favoriteBtn.style.color = '#ef4444';
-                favoriteBtn.classList.add('text-red-500');
-                favoriteBtn.classList.remove('text-luxury-gray-dark');
-            } else {
-                heartIcon.setAttribute('fill', 'none');
-                heartIcon.style.color = '#6b7280';
-                favoriteBtn.style.color = '#6b7280';
-                favoriteBtn.classList.remove('text-red-500');
-                favoriteBtn.classList.add('text-luxury-gray-dark');
-            }
-        }
-        
-        // Handle favorite button click
-        favoriteBtn.addEventListener('click', function(e) {
+        console.log('🎯 [WATCH.HTML] Attaching new click handler');
+        newBtn.addEventListener('click', async function(e) {
+            console.log('🟡 [WATCH.HTML] Product detail add to cart clicked');
             e.preventDefault();
             e.stopPropagation();
             
-            console.log('💖 [WATCH.HTML] Favorite button clicked');
+            const quantityDisplay = document.getElementById('quantity-display');
+            const productQuantity = quantityDisplay ? parseInt(quantityDisplay.textContent) || 1 : 1;
             
-            const hasDynamicPricing = {{ product.gold_weight_grams|yesno:"true,false" }} || {{ product.has_diamonds|yesno:"true,false" }};
+            console.log('🟡 [WATCH.HTML] Product quantity:', productQuantity);
             
-            // Build watch data with customization
-            const watchData = {
-                id: favoriteBtn.dataset.id,
-                name: favoriteBtn.dataset.name,
-                price: hasDynamicPricing && typeof currentPricing !== 'undefined' && currentPricing.total_price 
-                    ? currentPricing.total_price 
-                    : parseFloat(favoriteBtn.dataset.price),
-                image: favoriteBtn.dataset.image,
-                brand: favoriteBtn.dataset.brand,
-                // Add customization data if available
-                customization: hasDynamicPricing && typeof currentPricing !== 'undefined' && currentPricing.total_price ? {
-                    diamond_type: typeof selectedDiamondType !== 'undefined' ? selectedDiamondType : 'natural',
-                    {% if product.has_diamonds %}
-                    diamond_size: '{{ product.diamond_size }}',
-                    diamond_carats: {{ product.diamond_carats|default:"0" }},
-                    {% endif %}
-                    {% if product_sizes %}
-                    size_label: typeof selectedSizeLabel !== 'undefined' ? selectedSizeLabel : '{% if default_size %}{{ default_size.size_label }}{% else %}Standard{% endif %}',
-                    size_multiplier: typeof selectedSizeMultiplier !== 'undefined' ? selectedSizeMultiplier : {% if default_size %}{{ default_size.price_multiplier }}{% else %}1.0{% endif %},
-                    {% endif %}
-                    gold_weight: {{ product.gold_weight_grams|default:"0" }},
-                    gold_price: currentPricing.gold_price,
-                    diamond_price: currentPricing.diamond_price,
-                    work_price: currentPricing.work_price
-                } : null
+            // Prepare customization data for additional options (engraving, etc.)
+            let customizationData = {};
+            
+            // Get other customization options if any
+            document.querySelectorAll('select[data-customization-type]').forEach(select => {
+                const custType = select.dataset.customizationType;
+                const selectedOption = select.options[select.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    customizationData[custType] = {
+                        value: selectedOption.value,
+                        price: parseFloat(selectedOption.dataset.price) || 0
+                    };
+                }
+            });
+            
+            // Build request payload with NEW structure
+            const requestData = {
+                product_id: '{{ product.slug }}',
+                quantity: productQuantity,
+                product_size_id: typeof selectedSizeId !== 'undefined' ? selectedSizeId : null, // ProductSize ID
+                diamond_type: typeof selectedDiamondType !== 'undefined' ? selectedDiamondType : null, // 'natural' or 'lab'
+                customization: Object.keys(customizationData).length > 0 ? customizationData : {}
             };
             
-            console.log('💖 [WATCH.HTML] Watch data to save:', watchData);
+            console.log('🟡 [WATCH.HTML] Sending data to API:', requestData);
             
-            // Get favorites from localStorage
-            let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-            const existingIndex = favorites.findIndex(item => item.id === watchData.id);
-            
-            if (existingIndex > -1) {
-                // Remove from favorites
-                favorites.splice(existingIndex, 1);
-                localStorage.setItem('favorites', JSON.stringify(favorites));
-                console.log('💔 [WATCH.HTML] Removed from favorites');
+            try {
+                console.log('🌐 [WATCH.HTML] Making API call to /api/add-to-cart/');
+                const response = await fetch('/api/add-to-cart/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'X-Request-Source': 'WATCH.HTML-PRODUCT-DETAIL'
+                    },
+                    body: JSON.stringify(requestData)
+                });
                 
-                // Show toast
-                if (typeof Toaster !== 'undefined') {
-                    Toaster.create({
-                        text: 'Removed from favorites',
-                        duration: 2000
-                    });
-                }
-            } else {
-                // Add to favorites
-                favorites.push(watchData);
-                localStorage.setItem('favorites', JSON.stringify(favorites));
-                console.log('💖 [WATCH.HTML] Added to favorites with customization');
+                console.log('✅ [WATCH.HTML] API response received:', response.status);
+                const data = await response.json();
+                console.log('✅ [WATCH.HTML] API data:', data);
                 
-                // Show toast
-                if (typeof Toaster !== 'undefined') {
-                    Toaster.create({
-                        text: 'Added to favorites!',
-                        duration: 2000
-                    });
+                if (data.success) {
+                    if (window.Telegram && window.Telegram.WebApp) {
+                        window.Telegram.WebApp.showPopup({
+                            title: 'Success',
+                            message: 'Product added to cart!',
+                            buttons: [{type: 'ok'}]
+                        });
+                    } else {
+                        alert('Product added to cart!');
+                    }
+                    
+                    updateCartCount();
+                } else {
+                    throw new Error(data.error || 'Failed to add to cart');
                 }
-            }
-            
-            // Update button state
-            updateFavoriteButton();
-            
-            // Update favorite count in navbar
-            if (typeof FavoritesManager !== 'undefined' && typeof FavoritesManager.updateFavoriteCount === 'function') {
-                FavoritesManager.updateFavoriteCount();
+            } catch (error) {
+                console.error('❌ [WATCH.HTML] Error adding to cart:', error);
+                if (window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.showPopup({
+                        title: 'Error',
+                        message: error.message || 'Failed to add to cart',
+                        buttons: [{type: 'ok'}]
+                    });
+                } else {
+                    alert(error.message || 'Failed to add to cart');
+                }
             }
         });
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    function updateCartCount() {
+        console.log('🔄 [WATCH.HTML] Updating cart count...');
+        fetch('/api/get-cart/')
+            .then(r => r.json())
+            .then(data => {
+                console.log('🔄 [WATCH.HTML] Cart data received:', data);
+                if (data.success) {
+                    const cartCountElements = document.querySelectorAll('.cart-item-count');
+                    console.log(`🔄 [WATCH.HTML] Found ${cartCountElements.length} cart count elements`);
+                    
+                    cartCountElements.forEach(element => {
+                        element.textContent = data.cart_item_count || 0;
+                        if (data.cart_item_count > 0) {
+                            element.style.display = 'flex';
+                            element.style.visibility = 'visible';
+                            console.log(`✅ [WATCH.HTML] Updated cart count to: ${data.cart_item_count}`);
+                        } else {
+                            element.style.display = 'none';
+                            element.style.visibility = 'visible';
+                            console.log('✅ [WATCH.HTML] Cart is empty, hiding badge');
+                        }
+                    });
+                }
+            })
+            .catch(err => console.error('❌ [WATCH.HTML] Failed to update cart count:', err));
+    }
+    
+    // ========== FAVORITE BUTTON ==========
+    const favoriteBtn = document.getElementById('favorite-btn-detail');
+    
+    function updateFavoriteButton() {
+        const watchId = favoriteBtn.dataset.id;
+        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        const isFavorited = favorites.some(item => item.id === watchId);
         
-        // Initial update of favorite button state
+        const heartIcon = favoriteBtn.querySelector('svg');
+        if (isFavorited) {
+            heartIcon.setAttribute('fill', '#ef4444');
+            heartIcon.style.color = '#ef4444';
+            favoriteBtn.style.color = '#ef4444';
+            favoriteBtn.classList.add('text-red-500');
+            favoriteBtn.classList.remove('text-luxury-gray-dark');
+        } else {
+            heartIcon.setAttribute('fill', 'none');
+            heartIcon.style.color = '#6b7280';
+            favoriteBtn.style.color = '#6b7280';
+            favoriteBtn.classList.remove('text-red-500');
+            favoriteBtn.classList.add('text-luxury-gray-dark');
+        }
+    }
+    
+    favoriteBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log('💖 [WATCH.HTML] Favorite button clicked');
+        
+        const hasDynamicPricing = {{ product.gold_weight_grams|yesno:"true,false" }} || {{ product.has_diamonds|yesno:"true,false" }};
+        
+        const watchData = {
+            id: favoriteBtn.dataset.id,
+            name: favoriteBtn.dataset.name,
+            price: hasDynamicPricing && typeof currentPricing !== 'undefined' && currentPricing.total_price 
+                ? currentPricing.total_price 
+                : parseFloat(favoriteBtn.dataset.price),
+            image: favoriteBtn.dataset.image,
+            brand: favoriteBtn.dataset.brand,
+            customization: hasDynamicPricing && typeof currentPricing !== 'undefined' && currentPricing.total_price ? {
+                diamond_type: typeof selectedDiamondType !== 'undefined' ? selectedDiamondType : 'natural',
+                {% if product.has_diamonds %}
+                diamond_size: '{{ product.diamond_size }}',
+                diamond_carats: {{ product.diamond_carats|default:"0" }},
+                {% endif %}
+                {% if product_sizes %}
+                size_id: typeof selectedSizeId !== 'undefined' ? selectedSizeId : null,
+                size_label: typeof selectedSizeLabel !== 'undefined' ? selectedSizeLabel : '{% if default_size %}{{ default_size.size_label }}{% else %}Standard{% endif %}',
+                size_multiplier: typeof selectedSizeMultiplier !== 'undefined' ? selectedSizeMultiplier : {% if default_size %}{{ default_size.price_multiplier }}{% else %}1.0{% endif %},
+                {% endif %}
+                gold_weight: {{ product.gold_weight_grams|default:"0" }},
+                gold_price: currentPricing.gold_price,
+                diamond_price: currentPricing.diamond_price,
+                work_price: currentPricing.work_price
+            } : null
+        };
+        
+        console.log('💖 [WATCH.HTML] Watch data to save:', watchData);
+        
+        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        const existingIndex = favorites.findIndex(item => item.id === watchData.id);
+        
+        if (existingIndex > -1) {
+            favorites.splice(existingIndex, 1);
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            console.log('💔 [WATCH.HTML] Removed from favorites');
+            
+            if (typeof Toaster !== 'undefined') {
+                Toaster.create({
+                    text: 'Removed from favorites',
+                    duration: 2000
+                });
+            }
+        } else {
+            favorites.push(watchData);
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            console.log('💖 [WATCH.HTML] Added to favorites with customization');
+            
+            if (typeof Toaster !== 'undefined') {
+                Toaster.create({
+                    text: 'Added to favorites!',
+                    duration: 2000
+                });
+            }
+        }
+        
         updateFavoriteButton();
+        
+        if (typeof FavoritesManager !== 'undefined' && typeof FavoritesManager.updateFavoriteCount === 'function') {
+            FavoritesManager.updateFavoriteCount();
+        }
     });
-    </script>
+    
+    updateFavoriteButton();
+});
+</script>
   </body>
 </html>

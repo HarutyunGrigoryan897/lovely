@@ -280,62 +280,52 @@ class ProductCustomizationAdmin(admin.ModelAdmin):
 class CartItemInline(admin.TabularInline):
     model = CartItem
     extra = 0
-    fields = ('product', 'quantity', 'unit_price', 'customization_price', 'total_price_display')
-    readonly_fields = ('total_price_display', 'created_at', 'updated_at')
+    readonly_fields = ('unit_price', 'total_price', 'created_at')
+    fields = ('product', 'product_size', 'diamond_type', 'quantity', 'unit_price', 'total_price', 'customization_data')
     
-    def total_price_display(self, obj):
-        if obj.pk:
-            return f"${obj.total_price:.2f}"
+    def unit_price(self, obj):
+        if obj.id:
+            return f"${obj.unit_price:,.2f}"
         return "-"
-    total_price_display.short_description = 'Total Price'
+    unit_price.short_description = "Unit Price (Dynamic)"
+    
+    def total_price(self, obj):
+        if obj.id:
+            return f"${obj.total_price:,.2f}"
+        return "-"
+    total_price.short_description = "Total Price"
 
 
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
-    list_display = ('user_display', 'total_items_display', 'total_price_display', 'item_count_display', 'created_at', 'updated_at')
-    list_filter = ('created_at', 'updated_at')
-    search_fields = ('user__username', 'user__telegram_id', 'user__first_name', 'user__last_name')
-    readonly_fields = ('total_items_display', 'total_price_display', 'item_count_display', 'created_at', 'updated_at')
+    list_display = ('user', 'total_items', 'total_price_display', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at', 'total_items', 'total_price_display')
     inlines = [CartItemInline]
     
-    def user_display(self, obj):
-        if obj.user.username:
-            return obj.user.username
-        elif hasattr(obj.user, 'telegram_id') and obj.user.telegram_id:
-            return f"TG: {obj.user.telegram_id}"
-        else:
-            return f"User #{obj.user.id}"
-    user_display.short_description = 'User'
-    
-    def total_items_display(self, obj):
-        return obj.total_items
-    total_items_display.short_description = 'Total Items'
-    
     def total_price_display(self, obj):
-        return f"${obj.total_price:.2f}"
-    total_price_display.short_description = 'Total Price'
-    
-    def item_count_display(self, obj):
-        return obj.item_count
-    item_count_display.short_description = 'Different Items'
+        return f"${obj.total_price:,.2f}"
+    total_price_display.short_description = "Total Price"
+
 
 
 @admin.register(CartItem)
 class CartItemAdmin(admin.ModelAdmin):
-    list_display = ('cart_user', 'product', 'quantity', 'unit_price', 'customization_price', 'total_price_display', 'created_at')
-    list_filter = ('created_at', 'updated_at')
-    search_fields = ('cart__user__username', 'cart__user__telegram_id', 'product__name')
-    readonly_fields = ('total_price_display', 'customized_product_name_display', 'created_at', 'updated_at')
+    list_display = ('id', 'cart', 'product', 'product_size', 'diamond_type', 'quantity', 'unit_price_display', 'total_price_display', 'created_at')
+    list_filter = ('created_at', 'diamond_type', 'product__brand')
+    search_fields = ('product__name', 'cart__user__username', 'cart__user__telegram_id')
+    readonly_fields = ('unit_price_display', 'total_price_display', 'price_breakdown_display', 'created_at', 'updated_at')
+    autocomplete_fields = ['product', 'product_size']
     
     fieldsets = (
-        (None, {
-            'fields': ('cart', 'product', 'quantity', 'unit_price')
+        ('Cart Information', {
+            'fields': ('cart', 'product', 'quantity')
         }),
-        ('Customization', {
-            'fields': ('customization_data', 'customization_price', 'customized_product_name_display')
+        ('User Selections', {
+            'fields': ('product_size', 'diamond_type', 'customization_data')
         }),
-        ('Totals', {
-            'fields': ('total_price_display',)
+        ('Price Information (Dynamic)', {
+            'fields': ('unit_price_display', 'total_price_display', 'price_breakdown_display'),
+            'classes': ('collapse',)
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
@@ -343,23 +333,24 @@ class CartItemAdmin(admin.ModelAdmin):
         }),
     )
     
-    def cart_user(self, obj):
-        if obj.cart.user.username:
-            return obj.cart.user.username
-        elif hasattr(obj.cart.user, 'telegram_id') and obj.cart.user.telegram_id:
-            return f"TG: {obj.cart.user.telegram_id}"
-        else:
-            return f"User #{obj.cart.user.id}"
-    cart_user.short_description = 'Cart User'
+    def unit_price_display(self, obj):
+        if obj.id:
+            return f"${obj.unit_price:,.2f}"
+        return "-"
+    unit_price_display.short_description = "Unit Price (Current)"
     
     def total_price_display(self, obj):
-        return f"${obj.total_price:.2f}"
-    total_price_display.short_description = 'Total Price'
+        if obj.id:
+            return f"${obj.total_price:,.2f}"
+        return "-"
+    total_price_display.short_description = "Total Price (Current)"
     
-    def customized_product_name_display(self, obj):
-        return obj.customized_product_name
-    customized_product_name_display.short_description = 'Product with Customizations'
-
+    def price_breakdown_display(self, obj):
+        if obj.id:
+            breakdown = obj.price_breakdown
+            return f"Gold: ${breakdown['gold_price']:,.2f} | Diamonds: ${breakdown['diamond_price']:,.2f} | Work: ${breakdown['work_price']:,.2f} | Total: ${breakdown['total_price']:,.2f}"
+        return "-"
+    price_breakdown_display.short_description = "Price Breakdown"
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem

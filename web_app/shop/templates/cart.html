@@ -64,6 +64,12 @@
     </div>
     
     <script>
+      // Price formatting function
+      function formatPrice(price) {
+        // Convert to number, round to integer, add commas
+        return Math.round(parseFloat(price) || 0).toLocaleString('en-US');
+      }
+
       // Initialize the cart system when page loads
       document.addEventListener('DOMContentLoaded', async function() {
         console.log('🚀 Cart page loading...');
@@ -230,13 +236,13 @@
               }
               
               if (customData.gold_price) {
-                specs += `<br>Gold: $${parseFloat(customData.gold_price).toFixed(0)}`;
+                specs += `<br>Gold: $${formatPrice(customData.gold_price)}`;
               }
               if (customData.diamond_price) {
-                specs += `  •  Diamonds: $${parseFloat(customData.diamond_price).toFixed(0)}`;
+                specs += `  •  Diamonds: $${formatPrice(customData.diamond_price)}`;
               }
               if (customData.work_price) {
-                specs += `  •  Work: $${parseFloat(customData.work_price).toFixed(0)}`;
+                specs += `  •  Work: $${formatPrice(customData.work_price)}`;
               }
               
               customizationHtml = `
@@ -267,7 +273,7 @@
                 <div class="flex-1 min-w-0">
                   <h3 class="font-semibold text-luxury-black text-sm leading-tight">${item.product.name}</h3>
                   <p class="text-xs text-luxury-gray-dark mt-1">${item.product.brand}</p>
-                  <div class="text-base font-bold text-luxury-gold mt-2">$${item.price}</div>
+                  <div class="text-base font-bold text-luxury-gold mt-2">$${formatPrice(item.unit_price)}</div>
                 </div>
                 <div class="flex items-center space-x-1 flex-shrink-0">
                   <button onclick="updateItemQuantity(${item.id}, ${item.quantity - 1})" 
@@ -300,11 +306,11 @@
             <div class="space-y-2 mb-4">
               <div class="flex justify-between">
                 <span>Items (${cartData.total_items}):</span>
-                <span>$${cartData.total_price}</span>
+                <span>$${formatPrice(cartData.total_price)}</span>
               </div>
               <div class="flex justify-between font-bold text-lg border-t pt-2">
                 <span>Total:</span>
-                <span class="text-luxury-gold">$${cartData.total_price}</span>
+                <span class="text-luxury-gold">$${formatPrice(cartData.total_price)}</span>
               </div>
             </div>
             <button onclick="clearCart()" 
@@ -388,10 +394,6 @@
         console.log(`Toast: ${message} (${type})`);
         alert(message); // Simple fallback, can be improved with a proper toast library
       }
-    </script>
-  </body>
-</html>
-```
     </script>
   </body>
 </html>

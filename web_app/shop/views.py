@@ -8,7 +8,10 @@ from django.contrib.auth.decorators import login_required
 from decimal import Decimal
 import json
 import logging
-from .models import Product, Category, Brand, WatchSpecification, JewelrySpecification, ProductCustomization, Cart, CartItem, Order, OrderItem, HeroSection, ShippingAddress
+from .models import (Product, Category, Brand, WatchSpecification,
+                     JewelrySpecification, ProductCustomization, 
+                     Cart, CartItem, Order, OrderItem, HeroSection, 
+                     ShippingAddress, ProductSize)
 from .scraper import should_update_gold_price, update_gold_price_sync
 
 logger = logging.getLogger(__name__)
@@ -396,10 +399,13 @@ def add_to_cart_api(request):
         product_slug = data.get('product_id')
         quantity = int(data.get('quantity', 1))
         customization_data = data.get('customization', {})
-        customization_price = Decimal(data.get('customization_price', '0.00'))
-        unit_price = data.get('unit_price')  # Get custom unit price if provided
         
-        print(f"📦 [DJANGO] Parsed: product_slug={product_slug}, quantity={quantity}, unit_price={unit_price}")
+        # Get user selections
+        product_size_id = data.get('product_size_id')  # ProductSize ID
+        diamond_type = data.get('diamond_type')  # 'natural' or 'lab'
+        
+        print(f"📦 [DJANGO] Parsed: product_slug={product_slug}, quantity={quantity}")
+        print(f"📦 [DJANGO] Selections: product_size_id={product_size_id}, diamond_type={diamond_type}")
         
         # Validate inputs
         if not product_slug:
@@ -420,12 +426,22 @@ def add_to_cart_api(request):
         if product.stock_status == 'out_of_stock':
             return JsonResponse({'success': False, 'error': 'Product is out of stock'}, status=400)
         
-        # Use provided unit price (calculated from frontend) or product's display price
-        if unit_price is None:
-            unit_price = product.display_price
+        # Get ProductSize object if provided
+        product_size = None
+        if product_size_id:
+            try:
+                product_size = ProductSize.objects.get(id=product_size_id, product=product, is_available=True)
+                print(f"✅ [DJANGO] Product size found: {product_size.size_label}")
+            except ProductSize.DoesNotExist:
+                print(f"❌ [DJANGO] Product size not found or not available: {product_size_id}")
+                return JsonResponse({'success': False, 'error': 'Invalid product size'}, status=400)
         else:
-            unit_price = Decimal(str(unit_price))
-        
+            product_size = ProductSize.objects.filter(product=product, is_default=True, is_available=True).first()
+        # Validate diamond_type
+        if diamond_type and diamond_type not in ['natural', 'lab']:
+            return JsonResponse({'success': False, 'error': 'Invalid diamond type'}, status=400)
+        elif not diamond_type and product.has_diamonds:
+            diamond_type = 'natural'  # Default to natural if not specified
         # Get or create cart
         cart = get_or_create_cart(request.user)
         print(f"🛒 [DJANGO] Cart ID: {cart.id}, Current items: {cart.total_items}")
@@ -435,35 +451,19 @@ def add_to_cart_api(request):
             customization_data = None
         
         print(f"🔍 [DJANGO] Checking for existing cart item...")
-        # Check if item with same customization already exists
-        existing_item = None
-        if customization_data:
-            # For items with customization, match exactly
-            existing_item = CartItem.objects.filter(
-                cart=cart,
-                product=product,
-                customization_data=customization_data
-            ).first()
-        else:
-            # For items without customization, find any without customization
-            existing_item = CartItem.objects.filter(
-                cart=cart,
-                product=product,
-                customization_data__isnull=True
-            ).first()
-            
-            # Also check for empty dict
-            if not existing_item:
-                existing_item = CartItem.objects.filter(
-                    cart=cart,
-                    product=product,
-                    customization_data={}
-                ).first()
+        # Check if item with same configuration already exists
+        existing_item = CartItem.objects.filter(
+            cart=cart,
+            product=product,
+            product_size=product_size,
+            diamond_type=diamond_type,
+        ).first()
         
         if existing_item:
             # Update quantity
             print(f"♻️ [DJANGO] Existing item found! Current qty: {existing_item.quantity}, adding: {quantity}")
             existing_item.quantity += quantity
+            existing_item.customization_data = customization_data  # Update customization if changed
             existing_item.save()
             cart_item = existing_item
             print(f"♻️ [DJANGO] Updated item quantity to: {existing_item.quantity}")
@@ -473,10 +473,10 @@ def add_to_cart_api(request):
             cart_item = CartItem.objects.create(
                 cart=cart,
                 product=product,
+                product_size=product_size,
+                diamond_type=diamond_type,
                 quantity=quantity,
-                customization_data=customization_data,
-                customization_price=customization_price,
-                unit_price=unit_price
+                customization_data=customization_data
             )
             print(f"➕ [DJANGO] New cart item created with ID: {cart_item.id}")
         
@@ -495,6 +495,7 @@ def add_to_cart_api(request):
     except ValueError as e:
         return JsonResponse({'success': False, 'error': f'Invalid data: {str(e)}'}, status=400)
     except Exception as e:
+        print(f"❌ [DJANGO] Error: {str(e)}")
         return JsonResponse({'success': False, 'error': f'Server error: {str(e)}'}, status=500)
 
 
@@ -583,7 +584,7 @@ def get_cart_data(request):
         cart = get_or_create_cart(request.user)
         cart_items = []
         
-        for item in cart.items.select_related('product', 'product__brand').all():
+        for item in cart.items.select_related('product', 'product__brand', 'product_size').all():
             cart_items.append({
                 'id': item.id,
                 'product': {
@@ -591,13 +592,20 @@ def get_cart_data(request):
                     'name': item.customized_product_name,
                     'brand': item.product.brand.name,
                     'image_url': item.product.image.url if item.product.image else None,
-                    'price': float(item.unit_price),
+                    'price': float(item.unit_price),  # Dynamic price
                 },
                 'quantity': item.quantity,
-                'price': float(item.total_price),
-                'customization_price': float(item.customization_price),
-                'total_price': float(item.total_price),
-                'customization_data': item.customization_data
+                'unit_price': float(item.unit_price),  # Dynamic unit price
+                'total_price': float(item.total_price),  # Dynamic total
+                'product_size': {
+                    'id': item.product_size.id,
+                    'label': item.product_size.size_label,
+                    'multiplier': float(item.product_size.price_multiplier)
+                } if item.product_size else None,
+                'diamond_type': item.diamond_type,
+                'diamond_type_display': item.get_diamond_type_display() if item.diamond_type else None,
+                'customization_data': item.customization_data,
+                'price_breakdown': item.price_breakdown  # Get breakdown for display
             })
         
         return JsonResponse({
@@ -840,7 +848,7 @@ def add_shipping_address(request):
         data = json.loads(request.body)
         
         # Validate required fields
-        required_fields = ['label', 'first_name', 'last_name', 'address', 'city', 'zip_code', 'country']
+        required_fields = ['label', 'first_name', 'last_name', 'address', 'city', 'country']
         for field in required_fields:
             if not data.get(field):
                 return JsonResponse({'success': False, 'error': f'{field.replace("_", " ").title()} is required'}, status=400)
