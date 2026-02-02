@@ -123,7 +123,7 @@ class ProductAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
     readonly_fields = ('created_at', 'updated_at', 'get_display_price')
     list_editable = ('stock_status', 'is_active', 'show_on_homepage')
-    inlines = [ProductImageInline, ProductSizeInline, ProductCustomizationInline, ProductDiamondOptionInline, WatchSpecificationInline, JewelrySpecificationInline]
+    inlines = [ProductImageInline, ProductSizeInline, ProductDiamondOptionInline, WatchSpecificationInline, JewelrySpecificationInline]
     
     def get_display_price(self, obj):
         """Show calculated price based on gold weight"""
@@ -250,28 +250,6 @@ class JewelrySpecificationAdmin(admin.ModelAdmin):
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-
-
-@admin.register(ProductCustomization)
-class ProductCustomizationAdmin(admin.ModelAdmin):
-    list_display = ('product', 'customization_type', 'name', 'value', 'price_modifier', 'is_available', 'sort_order', 'created_at')
-    list_filter = ('customization_type', 'is_available', 'created_at')
-    search_fields = ('product__name', 'name', 'value')
-    list_editable = ('price_modifier', 'is_available', 'sort_order')
-    readonly_fields = ('created_at',)
-    
-    fieldsets = (
-        (None, {
-            'fields': ('product', 'customization_type', 'name', 'value', 'description')
-        }),
-        ('Pricing & Availability', {
-            'fields': ('price_modifier', 'is_available', 'sort_order')
-        }),
-        ('Timestamps', {
-            'fields': ('created_at',),
             'classes': ('collapse',)
         }),
     )
