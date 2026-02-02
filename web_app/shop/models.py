@@ -330,7 +330,7 @@ class Product(models.Model):
         # Apply user level multiplier
         if user and hasattr(user, 'get_price_multiplier'):
             multiplier = user.get_price_multiplier()
-            return base_price * multiplier
+            return Decimal(base_price) * Decimal(multiplier)
         
         return base_price
     
